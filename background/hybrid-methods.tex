@@ -76,7 +76,8 @@ but the system uses a fixed gait schedule and the footstep planner
 is only evaluated once at the beginning of each cycle.
 
 A key challenge is moving beyond fixed gaits while maintaining
-stability. ContactNet \cite{bratta_contactnet_2024} uses a CNN to
+stability. A recent convolutional evaluator
+\cite{bratta_contactnet_2024} uses a CNN to
 produce non-gaited footstep sequences with greedy selection, though
 it is constrained to one-leg-at-a-time motion and coarse foothold
 discretization. Omar et al. \cite{omar_fast_2022} and Villarreal et
@@ -130,7 +131,7 @@ but rely on fixed gait patterns.
 
 It is worth noting that greedy elements are already incorporated into
 several learning-based methods discussed previously, such as
-ContactNet \cite{bratta_contactnet_2024}, DeepLoco
+recent ML planners \cite{bratta_contactnet_2024}, DeepLoco
 \cite{peng_deeploco_2017}, and Villarreal et al.
 \cite{villarreal_fast_2019}. While these works demonstrate the
 potential of greedy methods for efficiency, none explicitly support

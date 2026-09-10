@@ -3,7 +3,7 @@
 
 Quadruped locomotion in unstructured environments demands footstep
 planners that combine adaptability, computational efficiency, and
-physical consistency. This thesis addresses the challenge of
+physical consistency. This paper addresses the challenge of
 generating dynamic, acyclic contact sequences by exploring a hybrid
 control framework that integrates a greedy, neural network-based
 footstep planner\textemdash GaitNet\textemdash within a traditional
@@ -11,13 +11,15 @@ model-based controller. Building on insights from recent
 learning-driven approaches while maintaining the reliability of
 structured control, this work aims to close the gap between flexible
 footstep selection and stable trajectory execution. The following
-contributions summarize the central advances introduced in this thesis:
+contributions summarize the central advances introduced in this paper:
 
 \begin{itemize}
-  \item Development of a novel footstep planner utilizing greedy planning
-    with a neural network, for use in hybrid control of quadruped robots.
+  \item Development of a novel greedy footstep planner utilizing a single
+    neural network to evaluate and select continuous footsteps via
+    projected gradient ascent, eliminating discrete sampling stages.
   \item Demonstration that the proposed planner can generate dynamic,
     acyclic gaits in challenging environments.
-  \item Empirical evaluation showing that the planner achieves
-    comparable diverse expressiveness with fast inference times.
+  \item Empirical evaluation on physical robots, showcasing Real-World
+    locomotion capabilities on challenging terrain utilizing a Unitree Go1
+    quadruped mapped against contemporary state-of-the-art planners.
 \end{itemize}

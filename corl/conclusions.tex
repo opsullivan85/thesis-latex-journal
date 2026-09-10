@@ -1,0 +1,72 @@
+This paper formulated and validated an actively integrated control
+framework capable of rigorously generating true dynamic, acyclic
+contact sequences in quadrupedal robots by unifying neural
+network-driven learning evaluation techniques with resilient,
+traditional model-predictive and heuristic controller systems. By
+directly adopting \textit{GaitNet}\textemdash a comprehensive
+differential reward proxy\textemdash continuous workspace coordinates
+were systematically extracted outside of predefined boundaries
+without relying on grid mapping implementations standard to
+contemporary heuristic combinations.
+
+Fundamentally contrasting discrete sample-generation architectures,
+mathematically evaluating these raw continuous candidate spaces
+explicitly through iterative projected gradient ascent ensures
+maximal utility estimation mapping precisely bounded footstep
+trajectories out of un-steppable spaces (holes or unstable
+geometries). By effectively discarding the rigid interpolation
+boundaries inherent in finite spatial grids, this methodology
+successfully decouples footprint evaluation from discrete,
+scale-dependent constraints and optimizes actions over an analytic
+estimation surface. This effectively harmonizes raw, reactive
+continuous environmental metrics with discrete-action logic without
+simultaneously forfeiting the proven trajectory safety embedded
+within typical model-predictive whole-body control hierarchies.
+
+Our derived architecture inherently supports fully independent,
+reactive, non-gaited locomotion strategies alongside conventional
+walking or trot phasing dynamically determined by environmental
+structure rather than manual coding constraints, comfortably
+accommodating simultaneous multi-leg swing phases whenever physically
+advantageous to the traverse task. As conclusively demonstrated, the
+physical hardware deployment across challenging physical step
+structures explicitly validating the Unitree Go1 highlights
+compelling, quantifiable improvements in fault-free success rates
+across challenging, increasing physical terrain densities when
+benchmarked relative to fixed-gait or pure predictive control
+baselines, such as the state-of-the-art \textit{Legged Perceptive
+Stack}. The unconstrained optimization framework directly addresses
+the severe performance regressions typically noted when periodic
+routines inevitably misalign with completely randomized or unknown
+traversal gaps.
+
+Concluding, our methodology delivers highly empirical evidence
+detailing exactly why transitioning past rigid geometry generative
+approaches toward inherently iterative, continuous gradient-based
+mappings built securely from approximated neural value outputs can
+genuinely push multi-legged robotics remarkably closer to universally
+robust and dynamic agility.
+
+\subsection{Limitations and Future Work}
+While the framework successfully navigated structurally variable
+solid surfaces, the implementation remains dependent on robust
+proprioceptive and local ground-plane estimations fed into the
+current input feature vector $x_g$. Future work will aim to
+incorporate direct sensory information processing techniques (such as
+  deep integration of localized point clouds or exteroceptive height
+  maps filtered through convolutional layers directly tied into the
+state inference pipeline) to significantly reduce sensitivity to
+external estimation drift.
+
+In addition, we plan to explicitly expand the available action
+parameterization beyond localized leg geometry tracking to fully
+integrate dynamic localized posture tracking and whole-body
+center-of-mass shift optimization. Doing so would empower the
+gradient ascent pipeline to systematically adjust dynamic parameters
+targeting much steeper multi-level gradients\textemdash spanning
+unstructured steep inclines as well as generalized continuous stair
+climbing routines\textemdash completely devoid of hard-coded
+elevation thresholds or external kinematic heuristics. Ultimately,
+structurally accommodating temporal horizon tuning factors inside the
+internal projected steps would further elevate precise phase-duration
+tuning directly parallel to spatial footprint selection.

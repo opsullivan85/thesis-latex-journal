@@ -10,13 +10,15 @@ of generating dynamic, acyclic gaits in challenging environments. The
 framework employs a hierarchical architecture that processes robot
 state and terrain data to produce footstep commands for the robot controller.
 
-The first stage of the framework comprises a footstep evaluation
-network, similar to ContactNet from \cite{bratta_contactnet_2024},
-which estimates candidate footsteps $\mathbf{f_c}$. The second stage,
-a gait generation network (GaitNet), receives these candidates
-$\mathbf{f_c}$, ranks them, and outputs the optimal footstep action
-$\mathbf{f_a}$ to the robot controller. The robot controller is the
-MIT Mini-Cheetah Controller \cite{di_mini_cheetah_2020}, implemented
+The first stage of the framework involves the user input
+$\mathbf{v^{usr}}$ being supplied alongside the robot state to a gait
+generation network (\textit{GaitNet}). GaitNet acts as an evaluative
+surface, performing continuous optimization over the physical
+workspace utilizing projected gradient ascent. Unlike discrete
+sampling methods, GaitNet ranks these continuous outputs iteratively,
+producing the optimal footstep action $\mathbf{f_a}$, which is passed
+to the robot controller. The robot controller is the MIT Mini-Cheetah
+Controller \cite{di_mini_cheetah_2020}, implemented
 in python by \cite{zhuang_rl_mpc_locomotion_2025}.
 
 This hierarchical design enables strict control over the range of
@@ -35,18 +37,13 @@ movements are permitted.
   \includegraphics[width=1.0\linewidth]{images/diagrams/control-system.png}
   \caption{Block diagram of the proposed framework. Novel aspects
     shown in blue. The user defines an input direction
-    $\mathbf{v^{usr}}$, which the \textit{Footstep Evaluation
-    Network} (\autoref{sec:methodology-footstep-evaluation-network}), based on
-    \textit{ContactNet}
-    \cite{bratta_contactnet_2024}, uses along with the robot state
-    $\mathbf{x_c}$ and the current foot positions $\mathbf{p_f}$ to
-    generate a footstep cost map. The footstep cost map is then
-    processed
-    (\autoref{subsec:methodology-contactnet-post-processing}) to
-    produce a set of candidate footstep actions $\mathbf{f_c}$. These
-    candidates are passed to the \textit{GaitNet}
-    (\autoref{sec:methodology-gaitnet}), which selects
-    one\protect\footnotemark action $\mathbf{f_a}$ to send to the
+    $\mathbf{v^{usr}}$, which \textit{GaitNet}
+    (\autoref{sec:methodology-gaitnet}) uses along with the robot state
+    $\mathbf{x_g}$ and the current foot positions $\mathbf{p_f}$ to
+    evaluate candidate footsteps. Instead of discrete sampling, GaitNet
+    utilizes a continuous projected gradient ascent optimization
+    strategy, generating the optimal footstep action $\mathbf{f_a}$
+    to send to the
     robot controller. The \textit{MIT Mini-Cheetah Controller}
     \cite{di_mini_cheetah_2020} receives $\mathbf{f_a}$ and executes
   the corresponding actions.}

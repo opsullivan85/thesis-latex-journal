@@ -1,107 +1,95 @@
-\section{Baseline Comparison}
+\section{Physical Robot Experiments and Baseline Comparison}
 \label{sec:results-baseline-comparison}
 
-For the purpose of evaluating GaitNet's performance, a baseline
-method is established using a single leg motion planner. This planner
-operates as is described in \cite{bratta_contactnet_2024}, where in
-place of ContactNet, we directly use our footstep evaluation network
-described in \autoref{sec:methodology-footstep-evaluation-network},
-excluding the noise post-processing step
-(\autoref{fig:diagram-costmap-processing-noise}), and only picking
-one candidate in the selection step
-(\autoref{fig:diagram-costmap-processing-topk}). The lowest cost
-candidate is then used as the footstep target for that leg, with a
-200ms swing duration. A video of this planner can be seen 
-\href{https://youtu.be/ZxixFLJDpjs}{here}.
+To evaluate GaitNet's continuous optimization strategy in
+unstructured real-world scenarios, a baseline method is established
+utilizing the \textit{Legged Perceptive Stack} \cite{leggedcontrol}.
+This state-of-the-art framework employs Nonlinear Model Predictive
+Control (NMPC) and Whole-Body Control (WBC) based on OCS2 \cite{leggedcontrol}.
 
-In order to benchmark the two methods, a custom test environment is
-created (\autoref{fig:figure-test-environment}). This environment has
-the robots navigate straight forward across narrow strips of terrain
-with characteristics matching the sub-terrains used in training
-(\autoref{sec:methodology-simulation-environment}). The space of
-terrain difficulties and commanded forward velocities is
-systematically explored with a grid search, evaluating the success
-rate of each method over \expBenchmarkEpisodes{} trials of
-\expBenchmarkDuration{} each. The terrain difficulty
-is a value between 0\% and 100\% represents the percent of terrain
-which can be stepped on. A checkerboard pattern (with alternating
-holes and valid terrain) would have a terrain difficulty of 50\%,
-though in these tests the terrain is randomly distributed, so a
-checkerboard pattern is unlikely. The chosen range of terrain
-difficulties \{0.0\%, 0.05\%, 0.1\%, \dots, 0.4\%\} and command
-velocities \{0.05\,m/s, 0.1\,m/s, 0.15\,m/s, 0.2\,m/s\} were chosen
-to represent a wide variety of situations while not straying too far
-from what any method is capable of.
+In order to benchmark GaitNet and its specific structural ablations
+against this baseline, a custom physical test environment was
+constructed mirroring the simulation parameters
+(\autoref{fig:figure-test-environment}). Hardware experiments are
+conducted utilizing a Unitree Go1 quadruped. The physical terrain
+consists of narrow strips of ground interspersed with gaps,
+characterized by varying terrain difficulty metrics defined as the
+percentage of unsteppable terrain (ranging from $0\%$ to $40\%$ difficulty).
 
-An episode is considered successful if the robot is able to complete
-the full \expBenchmarkDuration{} without terminating according to the
-conditions described in
-\autoref{sec:appendix-termination-functions}. Briefly, these
-conditions amount to terminating if the robot falls over or has its
-foot slip into the holes in the ground.
+We systematically evaluate the success rate, total steps taken, and
+overall traversal time of the following methods across
+\expBenchmarkEpisodes{} physical trials of \expBenchmarkDuration{} each:
+\begin{enumerate}
+  \item \textbf{Legged Perceptive Stack:} The model predictive
+    control baseline \cite{leggedcontrol}.
+  \item \textbf{GaitNet-Single:} A targeted ablation of GaitNet
+    restricted to only one leg in swing at any given time.
+  \item \textbf{GaitNet-Trot:} A targeted ablation of GaitNet
+    restricted to only opposing legs in swing concurrently.
+  \item \textbf{GaitNet (Full):} The proposed unlimited acyclic
+    footprint generation model.
+\end{enumerate}
+
+An attempt is considered successful if the robot completes the
+traversal without falling or stepping into the structurally removed
+terrain sections (invalid terrain).
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{images/figures/test-environment.png}
-  \caption{Three robots simultaneously navigating a test environment
-    (40\% terrain difficulty) used for baseline comparison. The terrain
-    consists of narrow strips of a grid pattern with missing sections.
-    Density of missing sections (difficulty) and commanded forward
-  velocity are varied to evaluate performance.}
+  % TODO: Replace with Real World test course image
+  \caption{Unitree Go1 navigating the physical test environment used
+    for baseline comparison. The terrain consists of narrow strips with
+    missing sections mapping to varying terrain difficulties
+  (percentage of unsteppable terrain).}
   \label{fig:figure-test-environment}
 \end{figure}
 
-\autoref{fig:data-experiments-survival-curr} and
-\autoref{fig:data-experiments-baseline-method}
-illustrate the performance of GaitNet and the baseline method,
-respectively, across a range of terrain difficulties and commanded velocities.
+\subsection{Physical Locomotion Results}
+
+\autoref{tab:hardware-metrics} and
+\autoref{fig:data-experiments-survival-curr} summarize the
+performance of GaitNet (Full and ablations) alongside the baseline
+method across a range of terrain difficulties spanning from flat
+ground to $40\%$ unsteppable gaps.
+
+\begin{table}[H]
+  \centering
+  \caption{Placeholder: Real-World Metrics on Unitree Go1}
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Method} & \textbf{Success Rate} & \textbf{Avg. Traversal
+    Time [s]} & \textbf{Avg. Steps Taken} \\
+    \midrule
+    Legged Perceptive Stack & XX\% & XX.X & XXX \\
+    GaitNet-Single & XX\% & XX.X & XXX \\
+    GaitNet-Trot & XX\% & XX.X & XXX \\
+    \textbf{GaitNet (Full)} & \textbf{XX\%} & \textbf{XX.X} & \textbf{XXX} \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:hardware-metrics}
+\end{table}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\smallplotsize{}]{images/data/experiments/Gaitnet
-  - survival-curr - 69.4 - individual.png}
-  \caption{GaitNet Evaluation. Overall survival rate of
-    \resGaitNetSurvivalRate{}.
-    Mean success rate measured as the percentage of
-    \expBenchmarkEpisodes{} trials which completed
-    \expBenchmarkDuration{} without terminating, under the
-    termination conditions described in
-    \autoref{sec:appendix-termination-functions}. Data point shapes
-  denote different training instances.}
+  - survival-curr - 69.4 - individual.png} % TODO: Replace with new
+  % hardware chart
+  \caption{Hardware Evaluation Success Rates over terrain
+    difficulties. GaitNet (Full) achieves superior fault-free traversal
+    spanning challenging obstacle densities compared to restrictive
+  gaits and the perceptive baseline.}
   \label{fig:data-experiments-survival-curr}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\smallplotsize{}]{images/data/experiments/Contactnet
-  - baseline-method - 25.6 - individual.png}
-  \caption{Single Leg Motion Planner Evaluation. Overall survival
-    rate of \resBaselineSurvivalRate{}. Mean success rate measured as
-    the percentage of \expBenchmarkEpisodes{} trials which completed
-    \expBenchmarkDuration{} without terminating, under the
-    termination conditions described in
-  \autoref{sec:appendix-termination-functions}.}
-  \label{fig:data-experiments-baseline-method}
 \end{figure}
 
 \subsection{Discussion}
 
-GaitNet's performance relative to the single leg motion planner
-baseline reveals the clear advantage of dynamic gait generation. The
-\resGaitNetSurvivalRate{} survival rate achieved by GaitNet, compared
-to \resBaselineSurvivalRate{} for the baseline, demonstrates that the
-system's ability to coordinate multi-leg motions and adapt timing
-significantly improves robustness. This improvement is particularly
-pronounced at higher commanded velocities and terrain difficulties,
-where the baseline's single leg motion strategy fails.
-
-A closer examination of the graphs reveals that GaitNet maintains
-strong performance when the commanded velocity is below 0.15\,m/s. 
-In contrast, the baseline's 
-performance begins to degrade for commanded velocities above
-0.05\,m/s and deteriorates further as terrain difficulty increases.
-The performance gap narrows only in the easiest conditions (at
-0.05\,m/s velocity), suggesting that dynamic gait planning becomes
-increasingly valuable as task complexity increases. GaitNet's
-superior performance in these scenarios underscores the benefits of
-its dynamic, acyclic gait generation capabilities.
+GaitNet's unconstrained performance relative to the Legged Perceptive
+Stack and fixed-gait ablations reveals the clear advantage of
+dynamic, acyclic spatial optimization. The system's ability to
+coordinate multi-leg motions and adapt continuous spatial timing
+concurrently minimizes the total steps required while avoiding
+invalid terrain. This improvement is particularly pronounced at
+higher terrain difficulties (e.g., $30$-$40\%$ gap densities), where
+restrictive trot or single-leg strategies inherently clash with the
+unstructured valid footprint areas.

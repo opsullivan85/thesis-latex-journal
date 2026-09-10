@@ -1,0 +1,199 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Legged robots hold significant promise for enabling mobility in
+environments that are inaccessible to wheeled and tracked systems.
+Their ability to traverse uneven, unstructured, and unpredictable
+terrains\textemdash such as disaster zones, staircases, dense
+vegetation, and rocky landscapes\textemdash positions them as key
+enablers for future exploration, inspection, and rescue missions.
+Unlike wheeled rovers, which are fundamentally limited by the continuous
+support surface required for traction, quadrupedal systems can effectively
+decouple their path of motion from the continuous topology of the ground,
+selecting only the most viable, discrete footholds across otherwise
+impassable terrain.
+
+Realizing this potential requires a robot to continuously and
+intelligently decide where and when to place its feet\textemdash a
+process known as \textit{contact planning}. Unlike periodic gait
+patterns suitable for flat or predictable surfaces, real-world
+locomotion often demands dynamic, acyclic, and adaptive footstep
+sequences. Even minor errors in contact selection can lead to
+instability, joint torque limit violations, or catastrophic failure,
+whereas well-chosen footholds enable
+efficient, agile, and robust movement.
+
+The generation of such contact plans in real time remains a
+formidable challenge. It requires the system to perceive its
+surroundings, anticipate the dynamic and kinematic outcomes of
+possible actions, and select
+feasible contact points within tight temporal constraints (typically
+  matching real-time
+control frequencies of 50-500 Hz). Existing
+methods often fall into one of three categories, fully using
+traditional control\textemdash model predictive controllers, PD
+controllers, optimization\textemdash using neural networks, or a mix
+of the two: hybrid methods. These three methods offer different
+trade-offs between deliberative, computationally intensive planning and
+fast, reactive control that lacks stability or generalization.
+
+The vision of this research is to develop a hybrid control
+architecture that mitigates the trade-offs inherent in these existing
+schemas. Specifically, this work
+aims to design a system capable of producing non-gaited, dynamic
+footstep plans that retain both the rapid responsiveness of learning-based
+approaches and the proven reliability of model-based control. The objective
+is to provide quadruped robots with the decision-making agility
+necessary for navigating complex terrains while maintaining the
+stability and robustness demanded by real-world operation on physical hardware.
+
+\subsection{Related Work}
+
+\subsubsection{Traditional Control Approaches}
+Traditional implementations for quadruped locomotion commonly rely on explicit
+optimization of footstep positions, contact sequences, and timing,
+heavily utilizing
+Model Predictive Control (MPC) frameworks
+\cite{Kim2019highly-dynamic}. Many variables
+like joint torques and ground reaction forces map well to continuous
+optimization \cite{Wensing2022Nov}.
+However, introducing discrete contact states into these frameworks
+generates highly complex Mixed-Integer Quadratic Programs (MIQP)
+\cite{Geisert2019contact-planning}.
+
+Deits and Tedrake \cite{deits_footstep_2014} addressed this by
+formulating footstep
+placement as an MIQP over convex terrain regions, yet their
+formulation did not optimize
+contact timing and restricted motion to sequential placements.
+Subsequent frameworks
+incorporated contact scheduling directly. Winkler et al.
+\cite{winkler_gait_2018}
+optimized both contact duration and ordering, and Aceituno-Cabezas et
+al. \cite{aceituno_simultaneous_2019}
+integrated footstep positions and timings into a mixed-integer convex
+program via
+centroidal dynamics. While these methods allow multiple steps to be planned
+simultaneously, the computational burden precludes reactive real-time control.
+Search-based methods, such as Monte Carlo Tree Search (MCTS), have also been
+explored by Taouil et al. \cite{taouil_non-gaited_2024} to generate non-gaited
+sequences, and later refined by Akizhanov et al. \cite{akizhanov_learning_2024}
+using learned classifiers for pruning. However, high branching factors keep
+the computational intensity too steep for high-frequency dynamic correction.
+
+\subsubsection{End-to-End Neural Networks}
+End-to-end learning methods bypass explicit dynamics modeling,
+mapping sensor data
+directly to joint targets. Zhang et al. \cite{zhang_learning_2023} utilized Deep
+Reinforcement Learning (DRL) to achieve highly robust locomotion
+generalized across
+terrains through curiosity rewards. A
+follow-up approach by
+Zhang et al. \cite{zhang_novel_2024} implemented heuristically
+defined tables to handle
+multi-gait transitions. While end-to-end models inherently solve the
+mixed-integer
+contact problem, they typically lack formal stability guarantees,
+require extensive
+data to train, and struggle to generalize reliably outside their
+curriculum distribution.
+
+\subsubsection{Hybrid Methods and Learned Gait Policies}
+Hybrid architectures merge learning components with model-based
+execution to balance
+tractability and guaranteed stability. Several methods focus on
+high-level gait modulation.
+Shi et al. \cite{shi_terrain-aware_2023} modulate trajectory
+parameters for efficiency,
+while Xie et al. \cite{xie_glide_2023} train RL policies on
+centroidal dynamics given
+fixed gait heuristics. Blind proprioceptive approaches further push
+robust traversal,
+as seen in Duan et al. \cite{duan_sim--real_2022} and Siekmann et al.
+\cite{siekmann_blind_2021}
+for stair climbing, while Lee et al. \cite{lee_learning_2020} extract
+terrain features
+solely via proprioceptive histories. Other systems explicitly select
+gaits via Deep
+Q-Networks (DQN) \cite{da_learning_2020}, neural phase integrators
+\cite{yang_fast_2021},
+and offline gait libraries integrated into high-frequency MPC
+\cite{sun_online_2024}.
+Although these models generate agile locomotion, they rely strongly
+on periodic gaits
+and struggle mapping truly acyclic footprint geometry over severely
+unstructured gaps.
+
+\subsubsection{Learning-Based Footstep Planners}
+Contrasting pure gait modulation, explicit data-driven footstep
+planners couple foothold
+decision-making with MPC solvers. Early architectures like
+FootstepNet \cite{gaspard_footstepnet_2024},
+DeepLoco \cite{peng_deeploco_2017}, and DeepGait
+\cite{tsounis_deepgait_2020} laid the groundwork
+but frequently localized to bipeds or relied on fixed cyclic stepping
+patterns. Frameworks like
+RLOC \cite{gangapurwala_rloc_2022}, Omar et al.
+\cite{omar_fast_2022}, and Villarreal et al.
+\cite{villarreal_fast_2019} leverage convolutional terrain inputs
+combined with fixed or periodic routines.
+
+Recent expansions into multi-contact reasoning have evaluated terrain
+curvature for foot positioning \cite{tolomei_learning_2025}, hexapod
+stepping policies \cite{chen_gait_2024}, and learned 3D foothold cost
+maps \cite{meduri_deepq_2021}, yet invariably
+operate under predefined gait periods. Greedy and heuristic-based
+implementations, such as GH-QP \cite{gao_global_2024}, Dubins car
+heuristics \cite{zucker_optimization_2011}, and cost-search
+algorithms \cite{kalakrishnan_learning_2011}, present efficiency
+improvements but similarly falter outside static cyclic motions.
+Learned steppability terrain maps
+\cite{asselmeier_steppability-informed_2024, omar_safesteps_2023}
+inform explicit foothold placements but do not intrinsically yield
+sequential dynamic paths.
+
+Consequently, while convolutional evaluators
+\cite{bratta_contactnet_2024} successfully extract non-gaited maps
+via greedy grid selection, they suffer heavily from coarse spatial
+resolutions and constrain execution to sequential, one-leg-at-a-time
+motions, severely restricting the robot's kinetic envelope.
+
+\subsection{Motivation and Contributions}
+Despite this progress, a clear gap remains in achieving real-time,
+non-gaited contact planning.
+By depending heavily on highly discretized grid approximations for
+sampling \cite{bratta_contactnet_2024}
+or rigid cyclic timing constraints,
+current hybrid methods trade spatial
+accuracy and continuous tempo variation for computational tractability.
+
+This motivates our core inquiry: \textit{Can a continuous
+  optimization pipeline utilizing gradient
+  ascent across an approximated neural value surface generate true
+  acyclic, reactive gaits without
+relying on discrete spatial sampling or rigid contact schedules?}
+
+Our proposed approach bypasses discrete spatial sampling entirely. We
+introduce a novel
+actor-critic architecture, \textit{GaitNet}, to synthesize value
+estimations mapped across the
+continuous physical workspace. Operating exclusively over the
+projected continuous space rather
+than a discretized grid, GaitNet iteratively applies projected
+gradient ascent to shift
+target footsteps radially toward local reward maxima, naturally
+repelling footprints out of
+dangerous regions (e.g. gaps or holes).
+
+Our primary contributions are:
+\begin{enumerate}
+  \item A greedy neural footstep planner explicitly driven by
+    continuous projected gradient ascent on theoretical reward
+    limits, functionally omitting spatial evaluation grid constraints.
+  \item The simultaneous generation of true dynamic, acyclic gaits
+    capable of multi-leg concurrent swing phases governed exclusively
+    by environmental necessity rather than hard-coded sequences.
+  \item Extensive quantitative real-world validation of continuous
+    footprint optimization utilizing a physical Unitree Go1 platform,
+    benchmarked directly against leading heuristic trajectory planners (OCS2).
+\end{enumerate}

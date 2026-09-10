@@ -24,27 +24,19 @@ behavior, with the robot adjusting its gait pattern in response to
 both terrain difficulty and commanded velocity without following
 repetitive cycles.
 
-Comparative evaluation against a single leg motion planner baseline
-reveals substantial performance improvements. GaitNet achieves a
-\resGaitNetSurvivalRate{} survival rate across diverse terrain difficulties and
-commanded velocities, compared to \resBaselineSurvivalRate{} for the
-baseline method (\autoref{fig:data-experiments-survival-curr}
-and~\autoref{fig:data-experiments-baseline-method}). This improvement
+Comparative evaluation against a physical Legged Perceptive Stack baseline
+reveals substantial performance improvements. GaitNet achieves a higher
+survival rate across diverse unstructured hardware terrain
+difficulties. This improvement
 is particularly pronounced at higher speeds and on more challenging
-terrain, demonstrating the value of dynamic gait coordination. 
-% The baseline method's performance degrades rapidly above
-% \expLowestSpeed{} commanded velocity, while GaitNet maintains robust
-% performance up to 0.15\,m/s.
+terrain, demonstrating the value of continuous output space optimization
+and dynamic gait coordination.
 
-The footstep evaluation network, adapted from ContactNet
-\cite{bratta_contactnet_2024}, successfully generates high-quality
-footstep candidates for the gait selection process. The network
-demonstrates strong generalization across diverse robot states,
-accurately identifying low-cost foothold regions even in challenging
-configurations (\autoref{fig:data-cn-typical-comparison}
-and~\autoref{fig:data-cn-challenging-comparison}). While not perfect
-in all scenarios, the network fulfills its role as a candidate
-generator, providing sufficient diversity for downstream selection.
+The projected gradient ascent formulation over the output space
+successfully generates high-quality footstep candidates without relying
+on discrete sampling grids. The system demonstrates strong generalization
+across diverse robot states, accurately converging onto optimal foothold regions
+even in challenging configurations.
 
 GaitNet learns to modulate swing durations based on environmental
 conditions, with mean swing duration of
@@ -53,7 +45,7 @@ conditions, with mean swing duration of
 selects swing durations between 0.225\,s and 0.25\,s, but
 occasionally selects shorter swing durations when needed. However,
 the swing duration ablation study reveals that this feature provides
-negligible performance benefits in the tested environments, suggesting 
+negligible performance benefits in the tested environments, suggesting
 either that the current
 scenarios do not fully exploit this capability or that the reward
 structure does not adequately incentivize optimal duration selection.

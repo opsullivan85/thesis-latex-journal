@@ -1,0 +1,192 @@
+\subsection{System Architecture}
+\label{subsec:methodology-system-overview}
+
+This work presents a control framework for quadruped robots capable
+of generating dynamic, acyclic gaits in challenging environments without
+requiring a predefined periodic schedule. The framework employs a
+hierarchical architecture
+that separates the high-level strategic reasoning of foot placement
+from the low-level
+kinematic tracking problems. This processes robot state and local
+terrain features
+to produce optimal continuous footstep commands for the rigid robot controller.
+
+The first stage of the framework receives a user command velocity vector
+$\mathbf{v^{usr}}$ alongside the current internal robot state $\mathbf{x_g}$
+into the gait generation network (\textit{GaitNet}). GaitNet acts as
+an evaluative reward surface over the spatial domain $\mathbb{R}^3$, performing
+continuous optimization over the physical workspace utilizing
+projected gradient ascent. Rather than
+extracting optimal values from a finely discretized sample grid
+(which scales poorly
+in higher dimensions), GaitNet directly exploits the
+differentiability of its own
+layers. It iteratively ranks these continuous spatial variables along
+projected coordinate
+gradients to yield an optimal footstep action $\mathbf{f_a}$. This
+optimal action is
+then passed downstream to a traditional MIT Mini-Cheetah Controller
+\cite{di_mini_cheetah_2020}, structured
+in python by \cite{zhuang_rl_mpc_locomotion_2025} for execution via
+model predictive
+control and whole-body feedback.
+
+This hierarchical design guarantees strict control over the range of
+possible actions the robot can physically execute. Between the two stages,
+extrapolated candidate actions are mechanically filtered and clipped
+to ensure that only
+valid, achievable movements within the robot's torque and reach capabilities are
+permitted into the MPC pipeline.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.7\linewidth]{images/diagrams/control-system.png}
+  \caption{System architecture of the proposed control framework. The
+    high-level pipeline accepts a user target velocity
+    $\mathbf{v^{usr}}$. Combining this with the measured robot state
+    $\mathbf{x_g}$ and current spatial foot positions $\mathbf{p_f}$,
+    GaitNet serves as a differentiable value function. Rather than
+    drawing from a discrete grid mapping, GaitNet applies a continuous
+    projected gradient ascent optimization strategy over the
+    environment, generating optimal continuous step actions
+  $\mathbf{f_a}$ to guide the tracking controller.}
+  \label{fig:diagram-control-system}
+\end{figure*}
+
+\subsection{GaitNet Mathematical Formulation}
+\label{subsec:methodology-gaitnet-architecture}
+
+GaitNet operates as a unified single-network architecture comprised
+of a state encoder,
+a dedicated action (footstep) encoder, a merged shared trunk, and two
+distinct task-specific
+output heads. The first head predicts a scalar reward proxy (a logit)
+assessing the quality
+of the position, while the second predicts the optimal swing duration
+for executing that step.
+GaitNet evaluates candidates conditional to the one-hot encoded leg index
+$\mathbf{f_c}^{\prime}$ (designating which of the four legs is
+currently being evaluated for swing)
+and the full tracking state $\mathbf{x_g}$:
+
+\begin{equation}
+  \mathbf{x_g} =
+  \begin{bmatrix}
+    \mathbf p_{b,xy} &
+    \mathbf r_{w,z} &
+    \mathbf v_b &
+    \mathbf \omega_b &
+    \mathbf u &
+    \mathbf g &
+    \mathbf c
+  \end{bmatrix}^T
+  \label{eq:gaitnet-x}
+\end{equation}
+
+The first five parameters denote the primary dynamic state of the
+robot system. Specifically,
+we track the current base coordinates $\mathbf{p}_{b,xy}$ and
+structural rotation $\mathbf{r}_{w,z}$
+relative to the global world frame, the base linear velocity
+$\mathbf{v}_b \in \mathbb{R}^3$
+and angular velocity $\mathbf{\omega}_b \in \mathbb{R}^3$, and the
+localized current foot
+positions $\mathbf u \in \mathbb{R}^{12}$. The final dynamic terms
+include the direction of
+gravity $\mathbf g$ in the body frame and the boolean contact state
+$\mathbf c \in \{0, 1\}^4$
+denoting the stance of each foot.
+
+The network architecture implements a middle-fusion style feature combinator.
+\begin{itemize}
+  \item \textbf{Robot State Encoder}: The 26-dimensional robot state
+    vector is processed sequence-wise by a three-layer Multi-Layer
+    Perceptron (MLP) with a hidden dimension of 128 and ReLU
+    activations, outputting a fixed-dimensional latent state representation.
+  \item \textbf{Footstep Encoder}: The continuous spatial coordinates
+    mapping the candidate footstep are embedded by a two-layer
+    feedforward network with a hidden size of 64 and ReLU
+    activations. Notably, an unconditional "no-action" step is mapped
+    strictly to a learned fixed embedding rather than spatial
+    coordinates, representing the decision to maintain the current
+    stance geometry.
+  \item \textbf{Shared Trunk}: The latent state and the chosen latent
+    action are concatenated and passed into a three-layer shared
+    trunk. Layer normalization is applied after each linear mapping
+    to stabilize gradient norms during ascent.
+  \item \textbf{Output Logit and Duration Heads}: A two-pronged
+    linear layer outputs the unnormalized expected reward proxy
+    $\hat{V}$ alongside the optimized duration $t_{\text{swing}}$
+    constrained via a sigmoid.
+\end{itemize}
+
+\subsection{Projected Gradient Ascent Workflow}
+\label{subsec:methodology-gaitnet-gradient-ascent}
+
+The core novelty of GaitNet lies in treating the action selection
+fundamentally as a continuous optimization problem layered over the
+neural network's own approximated dynamics model. Because the entire
+network architecture described above is differentiable with respect
+to the continuous spatial input $\mathbf{f}_k$, the scalar output
+$\hat{V}$ directly supports analytic backpropagation to the input parameters.
+
+For each individual leg, $N=4$ initial spatial samples are drawn
+uniformly randomly from within the conservatively bounded, reachable
+kinodynamic workspace. Across all selected samples, their spatial
+coordinates $\mathbf{f}$ are updated simultaneously using a bounded
+projected gradient ascent step:
+\begin{equation}
+  \mathbf{f}_{k+1} = \Pi_{\mathcal{C}} \left( \mathbf{f}_k + \alpha
+  \nabla_{\mathbf{f}} \hat{V}(\mathbf{x}_g, \mathbf{f}_k; \theta) \right)
+\end{equation}
+where $\alpha$ is the ascent step size, $\theta$ represents the fixed
+frozen network weights, and $\Pi_{\mathcal{C}}$ is the projection
+operator ensuring the coordinates map back into the closest valid
+continuous space manifold $\mathcal{C}$ dictated by the terrain mesh.
+
+This update loop $\mathbf{f}_{k} \rightarrow \mathbf{f}_{k+1}$
+iterates $k=4$ times per control frequency tick. After these four
+refinement steps, each original seed candidate has theoretically
+climbed to a local reward maxima. This projection sequence operates
+as a mathematical hard-constraint handling process; it mechanically
+forces step hypotheses to slide away from untraversable anomalies
+(like sudden gaps or steep cliffs) without sacrificing the optimal
+forwarding reward.
+
+Simultaneous to this spatial refinement, the fixed "no-action"
+embedding is processed through the shared trunk. Following the ascent
+cycles, the algorithm checks the maximum predicted value
+$\hat{V}_{\text{max}}$ across all $4 \times 4$ (4 tracks $\times$ 4
+legs) refined options against the $\hat{V}_{\text{no-action}}$
+generated. The maximum overall argument is deployed downstream.
+
+\subsection{Reinforcement Learning Framework}
+\label{subsec:methodology-gaitnet-training}
+
+Because identifying optimal footsteps relies heavily on temporal
+horizons containing discrete mixed-integer transitions (e.g., changes
+in the contact array $\mathbf{c}$), generating stable, labeled
+ground-truth datasets for supervised regression was deemed
+prohibitively chaotic. Thus,
+GaitNet was trained using reinforcement techniques, explicitly the
+Proximal Policy Optimization (PPO) algorithm.
+
+In this framework, the actor network consists of the exact GaitNet
+architecture. The critic network mimics the trunk design but omits
+the duration prediction head. Instead, the critic logit is funneled
+through a standard 2-layer MLP (hidden dimension 64) to generate the
+expected global value estimate $V_{\pi}(\mathbf{s})$.
+
+Because the optimal action selection constitutes parsing dual
+outputs, the total action distribution fuses continuous and discrete
+domains. The discrete leg selection equates to a softmax categorical
+distribution spanning the candidate index paths, whereas the
+continuous swing duration output maps to a normal distribution
+parametrized with a stationary standard deviation set exactly at
+$0.01\text{s}$. This forces the exploration to be predominantly
+spatial. The loss algorithm penalizes non-forward actions and torque
+limit violations. The model was trained within a customized PyBullet
+simulation. We span 700 iterative environment steps containing 100
+vectorized hardware simulations, utilizing a static curriculum
+learning pipeline to gradually escalate the gap proportions within
+the terrain to stabilize the initial uncoordinated policies.

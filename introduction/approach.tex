@@ -1,11 +1,13 @@
 \section{Approach}
 \label{sec:introduction-approach}
 
-The proposed approach employs a modified implementation of
-ContactNet's architecture, adapted specifically to generate footstep
-candidates. These candidates will be evaluated and ranked by our
-novel planner, \textit{GaitNet}, which selects the most appropriate
-action at each time step. By integrating this planner within a
-traditional control framework, we aim to harness the advantages of
-both learning-based and model-based methods, yielding a robust and
-adaptable quadruped locomotion system.
+The proposed approach bypasses traditional discrete sampling or
+candidate generation networks entirely. Instead, a novel
+single-network architecture, \textit{GaitNet}, is used to evaluate
+and select the most appropriate action at each time step. By directly
+exploring the output space through projected gradient ascent, GaitNet
+optimizes spatial footstep coordinates directly over its own reward
+surface. By integrating this continuous optimization planner within a
+traditional model-based control framework, we harness the advantages
+of rapid learning-based evaluation and robust model-based
+stabilization, yielding an adaptable quadruped locomotion system.

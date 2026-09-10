@@ -1,14 +1,18 @@
 \section{GaitNet}
 \label{sec:methodology-gaitnet}
 
-GaitNet is designed to select the optimal footstep action from a
-discrete set of candidates. By restricting selection to a predefined
-set of continuous actions, the algorithm enforces constraints on the
-robot's motion, strictly preventing invalid foot placements and
-limiting the range of possible gaits. The inclusion of a no-action
-candidate, combined with continuous re-evaluation, distinguishes this
-approach: it enables the greedy generation of acyclic gaits in which
-multiple feet can be in the swing phase simultaneously.
+GaitNet is designed to isolate the optimal footstep action from a
+continuous configuration space using gradient-based optimization.
+Instead of selecting from a discrete grid populated by a prior evaluation
+network, GaitNet serves as the primary reward estimator, enabling direct
+optimization in the continuous output space.
+
+Specifically, GaitNet optimizes the one-hot encoded leg index
+$\mathbf{f_c}^{\prime}$
+and the spatial coordinates via projected gradient ascent. The inclusion of a
+no-action candidate, evaluated directly alongside the optimized paths,
+allows the greedy generation of acyclic gaits in which multiple feet
+can be in the swing phase simultaneously.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Architecture}
@@ -32,13 +36,18 @@ input $\mathbf{x_g}$:
   \label{eq:gaitnet-x}
 \end{equation}
 
-Descriptions of the first five terms can be found in
-\autoref{subsec:methodology-contactnet-architecture}. The additional
-terms, compared to the footstep evaluation network input
-(\ref{eq:contactnet-x}), are $\mathbf g$ and $\mathbf c$, being the
-gravity vector and contact state respectively. Using $\mathbf{x_g}$
-and $\mathbf{f_c}^{\prime}$, GaitNet outputs a logit associated with
-each footstep and the desired swing duration if that step is selected.
+Descriptions of the first five terms dictate the primary robot state,
+tracking current
+base position $p_{b,xy}$ and rotation $r_{w,z}$ in world coordinates,
+body linear
+$\mathbf v_b$ and angular $\mathbf \omega_b$ velocities, and current
+foot positions $\mathbf u$.
+The additional terms are $\mathbf g$ and $\mathbf c$, being the
+gravity vector and contact state
+respectively. Using $\mathbf{x_g}$ and $\mathbf{f_c}^{\prime}$,
+GaitNet outputs a logit associated with
+each evaluated spatial coordinate and the desired swing duration if
+that step is selected.
 
 \begin{figure}[H]
   \centering
@@ -78,10 +87,40 @@ consists of two encoders, a shared trunk, and two task-specific output heads:
     \end{itemize}
 \end{itemize}
 
-This design allows the network to sequentially evaluate multiple
-footstep candidates, assigning each an expected value and a feasible
-swing duration, while explicitly supporting a no-action option via a
-dedicated embedding.
+This design allows the network to assign an expected value and a feasible
+swing duration to any given spatial coordinate, while explicitly supporting a
+no-action option via a dedicated embedding.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Projected Gradient Ascent Optimization}
+\label{subsec:methodology-gaitnet-gradient-ascent}
+
+Instead of sampling from a discrete pool of generated candidates, we formulate
+the footstep selection as a continuous optimization problem over the spatial
+coordinates of the footstep action. GaitNet's reward prediction logit is treated
+as a differentiable objective function maximized via projected gradient ascent.
+
+For each foot, $N=4$ random initial spatial samples are drawn uniformly from the
+reachable kinoynamic workspace. For each sample, the spatial
+coordinates are updated
+in parallel for 4 steps to maximize the expected value output logit
+computed by GaitNet.
+After each gradient update step, the new spatial coordinates are
+projected back to the
+nearest valid configuration within the reachable stepping continuous
+space (cspace)
+to ensure physical validity. This forces the generated footsteps to
+avoid un-steppable
+terrain like holes while preserving maximum reward.
+
+Let the fixed "no-action" embedding be evaluated alongside the spatial updates.
+After the 4 projection and ascent steps, the candidate with the highest reward
+logit across all $4 \times 4$ options (4 tracks, 4 legs) is compared to the
+predicted value of the "no-action" candidate. The best resulting footstep or
+no-action command is then deployed to the inner controller. This
+optimization runs
+at control frequencies, tightly integrating flexible learning-driven evaluation
+with robust multi-leg acyclic gait coordination.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Training}
