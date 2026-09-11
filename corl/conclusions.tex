@@ -1,16 +1,17 @@
 This paper presented GaitNet, a footstep planner that generates
 dynamic, acyclic quadruped gaits without representing multi-leg
-coordination anywhere in its architecture. At each 40\,ms control
-tick, GaitNet commits at most one footstep, drawn from a small set of
-terrain-filtered candidates and locally refined against its own
+coordination anywhere in its architecture. At each \corlControlTickMs\,ms
+control tick, GaitNet commits at most one footstep, drawn from a small
+set of terrain-filtered candidates and locally refined against its own
 learned value function; because a swing outlasts several such ticks,
 multi-leg concurrency emerges from high-rate re-decision rather than
 from an explicit schedule. On physical hardware, GaitNet (Full)
 outperforms both the Legged Perceptive Stack, a state-of-the-art
 perceptive NMPC baseline, and concurrency-restricted ablations of
-itself (GaitNet-Single, GaitNet-Trot), achieving \textbf{XX\%} versus
-\textbf{XX\%} mean success rate across matched terrain difficulties,
-with the gap widening at the highest difficulties tested. Simulation
+itself (GaitNet-Single, GaitNet-Trot), achieving
+\textbf{\corlHwFullSuccess\%} versus \textbf{\corlHwLPSSuccess\%} mean
+success rate across matched terrain difficulties, with the gap
+widening at the highest difficulties tested. Simulation
 results and a swing-schedule analysis corroborate the mechanism
 directly: the same policy moves one foot at a time under easy
 commands and produces overlapping, non-alternating swings under
@@ -19,17 +20,19 @@ behavior.
 
 \subsection{Limitations and Future Work}
 
-GaitNet's concurrency is capped at two simultaneous swing legs by an
-explicit feasibility constraint requiring at least three legs in
-ground contact; this was a deliberate design choice for stability
-margin, but its effect on performance at the extremes of terrain
-difficulty is untested and worth ablating directly. The policy is
-also trained on a candidate distribution, sixteen randomly sampled
-positions per leg, that differs from the distribution it is deployed
-against, eight candidates locally refined by gradient ascent; we
-treat this as intentional but have not yet characterized how much
-the refinement step contributes beyond what random sampling alone
-would achieve. Both simulation and hardware deployments depend on an
+GaitNet's concurrency is capped at
+\numberstringnum{\corlMaxConcurrentSwingLegs} simultaneous swing legs
+by an explicit feasibility constraint requiring at least
+\numberstringnum{\corlMinContactLegs} legs in ground contact; this was
+a deliberate design choice for stability margin, but its effect on
+performance at the extremes of terrain difficulty is untested and
+worth ablating directly. The policy is also trained on a candidate
+distribution, \numberstringnum{\corlTrainCandidatesPerLeg} randomly
+sampled positions per leg, that differs from the distribution it is
+deployed against, \numberstringnum{\corlCandidatesPerLeg} candidates
+locally refined by gradient ascent; we treat this as intentional but
+have not yet characterized how much the refinement step contributes
+beyond what random sampling alone would achieve. Both simulation and hardware deployments depend on an
 external height scan to build the terrain validity mask, and the two
 platforms currently source that scan differently (a raycast height
 field in simulation, the Legged Perceptive Stack's heightmap on

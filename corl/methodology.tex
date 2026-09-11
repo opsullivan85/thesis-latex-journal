@@ -29,12 +29,14 @@ Two constraints are enforced directly in the candidate mask, before
 GaitNet ever sees a candidate. First, a leg already in its swing
 phase is excluded from candidate generation, since it cannot be
 redirected mid-swing. Second, a new step is permitted only while at
-least three legs remain in ground contact, which caps concurrent
-swing at two legs; this is a deliberate feasibility constraint, not
-an incidental limitation, and every result in
-\autoref{sec:results} operates under it. The validity mask itself is
-computed from a thresholded height scan, dilated by two rounds of
-max-pooling to conservatively approximate the robot's foot c-space.
+least \numberstringnum{\corlMinContactLegs} legs remain in ground
+contact, which caps concurrent swing at
+\numberstringnum{\corlMaxConcurrentSwingLegs} legs; this is a
+deliberate feasibility constraint, not an incidental limitation, and
+every result in \autoref{sec:results} operates under it. The validity
+mask itself is computed from a thresholded height scan, dilated by
+\numberstringnum{\corlMaskDilationRounds} rounds of max-pooling to
+conservatively approximate the robot's foot c-space.
 
 \begin{figure*}[t]
   \centering
@@ -52,12 +54,15 @@ max-pooling to conservatively approximate the robot's foot c-space.
 \subsection{High-Rate Action Selection}
 \label{subsec:methodology-high-rate-selection}
 
-GaitNet is evaluated at 25\,Hz, a 40\,ms control tick, and never
-represents multi-leg coordination directly: at most one footstep is
-committed per tick, for one leg, and the rest of the robot is left
-untouched until its own turn. A selected swing lasts between 0.1\,s
-and 0.3\,s, so three to eight further decision ticks elapse while
-that leg is still airborne. GaitNet may therefore commit a second leg
+GaitNet is evaluated at \corlControlHz\,Hz, a \corlControlTickMs\,ms
+control tick, and never represents multi-leg coordination directly:
+at most one footstep is committed per tick, for one leg, and the rest
+of the robot is left untouched until its own turn. A selected swing
+lasts between \corlSwingDurationMin\,s and \corlSwingDurationMax\,s,
+so \numberstringnum{\corlMinTicksPerSwing} to
+\numberstringnum{\corlMaxTicksPerSwing} further decision ticks elapse
+while that leg is still airborne. GaitNet may therefore commit a
+second leg
 mid-swing of the first, subject only to the contact-count constraint
 above. Multi-leg concurrency is an emergent consequence of
 re-deciding faster than a swing completes, not a behavior the
@@ -94,35 +99,42 @@ no-action option) and the current tracking state $\mathbf{x_g}$:
   \label{eq:gaitnet-x}
 \end{equation}
 
-Here $\mathbf p_{b,xy} \in \mathbb{R}^8$ is the $xy$ position of all
-four end-effectors in the base frame, and $\mathbf r_{w,z}$ is the
-height of the robot's center of mass in the world frame.
-$\mathbf v_b \in \mathbb{R}^3$ and $\mathbf \omega_b \in \mathbb{R}^3$
-are the robot's linear and angular velocity in the root frame.
+Here $\mathbf p_{b,xy} \in \mathbb{R}^{\corlFootPosDim}$ is the $xy$
+position of all four end-effectors in the base frame, and
+$\mathbf r_{w,z}$ is the height of the robot's center of mass in the
+world frame. $\mathbf v_b \in \mathbb{R}^{\corlVelDim}$ and
+$\mathbf \omega_b \in \mathbb{R}^{\corlAngVelDim}$ are the robot's
+linear and angular velocity in the root frame.
 $\mathbf u = [v_x, v_y, \omega_z]$ is the commanded velocity.
-$\mathbf g \in \mathbb{R}^3$ is the direction of gravity in the body
-frame, and $\mathbf c \in \{0,1\}^4$ is the per-foot contact state.
-Together these total 25 dimensions.
+$\mathbf g \in \mathbb{R}^{\corlGravityDim}$ is the direction of
+gravity in the body frame, and
+$\mathbf c \in \{0,1\}^{\corlContactDim}$ is the per-foot contact
+state. Together these total \corlStateDim{} dimensions.
 
 The network implements a middle-fusion style feature combinator
 \cite{feng2021deep}.
 \begin{itemize}
-  \item \textbf{Robot State Encoder}: The 25-dimensional state vector
-    is processed by a three-layer Multi-Layer Perceptron (MLP) with a
-    hidden dimension of 128 and ReLU activations, producing a
+  \item \textbf{Robot State Encoder}: The \corlStateDim-dimensional
+    state vector is processed by a
+    \numberstringnum{\corlStateEncoderLayers}-layer Multi-Layer
+    Perceptron (MLP) with a hidden dimension of
+    \corlStateEncoderHidden{} and ReLU activations, producing a
     fixed-dimensional latent state representation.
   \item \textbf{Footstep Encoder}: Each candidate's spatial
-    coordinates are embedded by a two-layer feedforward network with
-    a hidden size of 64 and ReLU activations. The no-action option is
-    not spatial at all; it is routed to a separate, learned embedding
-    vector rather than through this encoder.
+    coordinates are embedded by a
+    \numberstringnum{\corlFootstepEncoderLayers}-layer feedforward
+    network with a hidden size of \corlFootstepEncoderHidden{} and
+    ReLU activations. The no-action option is not spatial at all; it
+    is routed to a separate, learned embedding vector rather than
+    through this encoder.
   \item \textbf{Shared Trunk}: The latent state and the candidate
-    embedding are concatenated and passed into a three-layer shared
-    trunk, with layer normalization applied after each linear
-    mapping.
+    embedding are concatenated and passed into a
+    \numberstringnum{\corlTrunkLayers}-layer shared trunk, with layer
+    normalization applied after each linear mapping.
   \item \textbf{Output Heads}: A value head outputs the unnormalized
     logit $\hat{V}$ used for ranking; a duration head outputs
-    $t_{\text{swing}}$, scaled by a sigmoid into $(0.1, 0.3)$\,s.
+    $t_{\text{swing}}$, scaled by a sigmoid into
+    $(\corlSwingDurationMin, \corlSwingDurationMax)$\,s.
 \end{itemize}
 
 In the configuration evaluated in this paper, candidates carry no
@@ -138,34 +150,38 @@ constrained exploration rather than accelerating it.
 \subsection{Candidate Generation and Refinement}
 \label{subsec:methodology-gaitnet-gradient-ascent}
 
-For each leg, eight candidate positions are drawn from a Gaussian
-distribution ($\sigma = 0.1$\,m) centered on the leg's nominal
+For each leg, \numberstringnum{\corlCandidatesPerLeg} candidate
+positions are drawn from a Gaussian distribution
+($\sigma = \corlCandidateStd$\,m) centered on the leg's nominal
 footstep offset, then projected onto the nearest valid cell of that
 leg's terrain mask via a precomputed Euclidean distance transform.
 Because GaitNet's value head is differentiable with respect to a
-candidate's spatial coordinates, each of the eight samples is then
-refined for four iterations of gradient ascent on $\hat V$ at a
-learning rate of $10^{-3}$, with the candidate re-projected onto the
-valid mask after every step:
+candidate's spatial coordinates, each of the
+\numberstringnum{\corlCandidatesPerLeg} samples is then refined for
+\numberstringnum{\corlGradientAscentIters} iterations of gradient
+ascent on $\hat V$ at a learning rate of $\corlGradientAscentLR$, with
+the candidate re-projected onto the valid mask after every step:
 \begin{equation}
   \mathbf{f}_{k+1} = \Pi_{\mathcal{C}} \left( \mathbf{f}_k + \alpha
   \nabla_{\mathbf{f}} \hat{V}(\mathbf{x}_g, \mathbf{f}_k; \theta) \right)
 \end{equation}
 where $\Pi_{\mathcal{C}}$ projects onto the nearest valid cell of the
 mask $\mathcal{C}$, rather than onto a continuous manifold; the mask
-resolution is 1.5\,cm, so this step is best understood as a local
-search over nearby cells rather than continuous optimization over the
-workspace. This refinement is a comparatively minor part of the
-pipeline: its purpose is to nudge a candidate toward better-supported
-footing within its neighborhood, and the terrain mask, not the
-gradient step, is what excludes voids and unsteppable regions from
-consideration in the first place.
+resolution is \corlMaskResolutionCm\,cm, so this step is best
+understood as a local search over nearby cells rather than continuous
+optimization over the workspace. This refinement is a comparatively
+minor part of the pipeline: its purpose is to nudge a candidate toward
+better-supported footing within its neighborhood, and the terrain
+mask, not the gradient step, is what excludes voids and unsteppable
+regions from consideration in the first place.
 
 After refinement, GaitNet evaluates the fixed no-action embedding
-alongside the $8 \times 4 = 32$ refined candidates (eight per leg,
-four legs) and selects the single highest-valued option. If no-action
-wins, or if a leg's mask has no valid candidates, no footstep is
-issued that tick.
+alongside the
+$\corlCandidatesPerLeg \times \corlNumLegs = \corlTotalCandidatesDeploy$
+refined candidates (\numberstringnum{\corlCandidatesPerLeg} per leg,
+\numberstringnum{\corlNumLegs} legs) and selects the single
+highest-valued option. If no-action wins, or if a leg's mask has no
+valid candidates, no footstep is issued that tick.
 
 \subsection{Reinforcement Learning Framework}
 \label{subsec:methodology-gaitnet-training}
@@ -184,9 +200,10 @@ per-option scores across all sixteen options with a small combining
 MLP to produce a single state-value estimate; it does not share
 weights with the actor and omits the duration head. Training uses a
 fixed candidate set rather than the refinement procedure above: for
-each leg, sixteen candidates are sampled uniformly at random from the
-valid terrain mask (plus one no-action option, 65 candidates total),
-and the actor's logits over this set define a categorical
+each leg, \numberstringnum{\corlTrainCandidatesPerLeg} candidates are
+sampled uniformly at random from the valid terrain mask (plus one
+no-action option, \corlTrainTotalCandidates{} candidates total), and
+the actor's logits over this set define a categorical
 distribution. Gradient-based refinement is used only at deployment
 time, applied to this same trained value head; training and
 deployment therefore draw candidates from different distributions,
@@ -195,19 +212,20 @@ oversight, since it lets the value head be learned as a general
 scorer rather than overfit to the refinement trajectory.
 
 The duration output for the selected candidate is treated as a
-Normal distribution with a fixed standard deviation of 0.01\,s,
-concentrating exploration on the discrete action choice rather than
-timing. The total log probability of an action is the sum of the
-categorical log probability of the selected candidate and the normal
-log probability of its sampled duration. Reward terms balance
-velocity tracking against stability and a small per-step action
-penalty ($-0.1$) that discourages unnecessary stepping; termination
-on falling or on stepping into invalid terrain carries a $-200$
-penalty. Full reward and termination tables, command sampling ranges,
-and PPO hyperparameters are given in the appendix. The model is
-trained in NVIDIA Isaac Lab \cite{mittal_orbit_2023}, with the
-physics simulation and policy running on GPU and the per-robot MPC
-controllers running in parallel on CPU, for 700 iterations across 100
-parallel environments, with a terrain-difficulty curriculum that
-gradually increases the proportion of unsteppable terrain as training
-progresses.
+Normal distribution with a fixed standard deviation of
+\corlDurationExploreStd\,s, concentrating exploration on the discrete
+action choice rather than timing. The total log probability of an
+action is the sum of the categorical log probability of the selected
+candidate and the normal log probability of its sampled duration.
+Reward terms balance velocity tracking against stability and a small
+per-step action penalty ($\corlActionPenalty$) that discourages
+unnecessary stepping; termination on falling or on stepping into
+invalid terrain carries a $\corlTerminationPenalty$ penalty. Full
+reward and termination tables, command sampling ranges, and PPO
+hyperparameters are given in the appendix. The model is trained in
+NVIDIA Isaac Lab \cite{mittal_orbit_2023}, with the physics simulation
+and policy running on GPU and the per-robot MPC controllers running in
+parallel on CPU, for \corlTrainingIterations{} iterations across
+\corlParallelEnvs{} parallel environments, with a terrain-difficulty
+curriculum that gradually increases the proportion of unsteppable
+terrain as training progresses.

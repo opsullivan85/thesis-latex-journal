@@ -23,8 +23,11 @@
 \usepackage{import}
 \usepackage{adjustbox}
 \usepackage{xcolor}
+\usepackage{fmtcount}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
 T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\input{corl/constants}
+
 \begin{document}
 
 \title{GaitNet: Greedy High-Rate Footstep Selection for Acyclic
@@ -57,22 +60,24 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
   swing together constrain a robot's ability to react to unplanned
   terrain. We introduce GaitNet, a greedy footstep planner that
   never reasons about multi-leg coordination directly: at each
-  40\,ms control tick it selects at most one footstep from a set of
-  terrain-filtered candidates, or elects to take no action. Because
-  a selected swing lasts 0.1--0.3\,s, several further decisions occur
-  while a leg is still airborne, and the planner may commit a second
-  leg mid-swing. Multi-leg concurrency is therefore emergent rather
-  than scheduled: nothing in the action space represents a phase
-  offset or a gait primitive. Candidates are drawn from a
-  terrain-validity mask and locally refined against GaitNet's own
-  learned value function via a short projected gradient step before
-  the final selection. We train GaitNet with reinforcement learning
-  in NVIDIA Isaac Lab and evaluate it in simulation across a range of
-  terrain difficulties and commanded velocities, and on a physical
-  Unitree Go1 against the Legged Perceptive Stack, a state-of-the-art
-  perceptive NMPC baseline, where GaitNet achieves a
-  \textbf{XX\%} mean success rate versus \textbf{XX\%} for the
-  baseline across matched terrain difficulties.
+  \corlControlTickMs\,ms control tick it selects at most one footstep
+  from a set of terrain-filtered candidates, or elects to take no
+  action. Because a selected swing lasts
+  \corlSwingDurationMin--\corlSwingDurationMax\,s, several further
+  decisions occur while a leg is still airborne, and the planner may
+  commit a second leg mid-swing. Multi-leg concurrency is therefore
+  emergent rather than scheduled: nothing in the action space
+  represents a phase offset or a gait primitive. Candidates are drawn
+  from a terrain-validity mask and locally refined against GaitNet's
+  own learned value function via a short projected gradient step
+  before the final selection. We train GaitNet with reinforcement
+  learning in NVIDIA Isaac Lab and evaluate it in simulation across a
+  range of terrain difficulties and commanded velocities, and on a
+  physical Unitree Go1 against the Legged Perceptive Stack, a
+  state-of-the-art perceptive NMPC baseline, where GaitNet achieves a
+  \textbf{\corlHwFullSuccess\%} mean success rate versus
+  \textbf{\corlHwLPSSuccess\%} for the baseline across matched terrain
+  difficulties.
 \end{abstract}
 
 \begin{IEEEkeywords}

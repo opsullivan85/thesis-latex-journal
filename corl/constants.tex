@@ -1,0 +1,99 @@
+% Constants for the CoRL paper (corl.tex and corl/*.tex).
+% This is intentionally separate from the top-level constants.tex, which
+% belongs to the full thesis (main.tex) and may diverge from these values.
+%
+% Convention: every macro below holds a bare value (a number, or a short
+% math expression like 10^{-3}) with NO unit, %, or $ baked in. Units,
+% percent signs, and math-mode delimiters are added at the call site,
+% exactly as in the original prose, so a macro can be dropped into either
+% running text or an equation unchanged.
+
+% --- Control loop / action timing ---
+\newcommand{\corlControlHz}{25}
+\newcommand{\corlControlTickMs}{40}
+\newcommand{\corlSwingDurationMin}{0.1}
+\newcommand{\corlSwingDurationMax}{0.3}
+\newcommand{\corlMinTicksPerSwing}{3}
+\newcommand{\corlMaxTicksPerSwing}{8}
+\newcommand{\corlMaxConcurrentSwingLegs}{2}
+\newcommand{\corlMinContactLegs}{3}
+\newcommand{\corlMaskDilationRounds}{2}
+\newcommand{\corlMaskResolutionCm}{1.5}
+
+% --- Tracking state vector (x_g) dimensions ---
+\newcommand{\corlStateDim}{25}
+\newcommand{\corlFootPosDim}{8}
+\newcommand{\corlVelDim}{3}
+\newcommand{\corlAngVelDim}{3}
+\newcommand{\corlGravityDim}{3}
+\newcommand{\corlContactDim}{4}
+
+% --- Network architecture ---
+\newcommand{\corlStateEncoderLayers}{3}
+\newcommand{\corlStateEncoderHidden}{128}
+\newcommand{\corlFootstepEncoderLayers}{2}
+\newcommand{\corlFootstepEncoderHidden}{64}
+\newcommand{\corlTrunkLayers}{3}
+
+% --- Candidate generation and refinement (deployment) ---
+\newcommand{\corlNumLegs}{4}
+\newcommand{\corlCandidatesPerLeg}{8}
+\newcommand{\corlTotalCandidatesDeploy}{32}
+\newcommand{\corlCandidateStd}{0.1}
+\newcommand{\corlGradientAscentIters}{4}
+\newcommand{\corlGradientAscentLR}{10^{-3}}
+
+% --- Training candidate distribution and RL setup ---
+\newcommand{\corlTrainCandidatesPerLeg}{16}
+\newcommand{\corlTrainTotalCandidates}{65}
+\newcommand{\corlDurationExploreStd}{0.01}
+\newcommand{\corlActionPenalty}{-0.1}
+\newcommand{\corlTerminationPenalty}{-200}
+\newcommand{\corlTrainingIterations}{700}
+\newcommand{\corlParallelEnvs}{100}
+
+% --- Hardware evaluation protocol ---
+\newcommand{\corlHwTrialsPerCell}{25}
+\newcommand{\corlDifficultyMin}{0}
+\newcommand{\corlDifficultyMax}{40}
+\newcommand{\corlHighDifficultyRangeLow}{30}
+
+% --- Simulation evaluation protocol ---
+\newcommand{\corlDifficultyStep}{5}
+\newcommand{\corlVelocityMin}{0.05}
+\newcommand{\corlVelocityMax}{0.2}
+\newcommand{\corlSimTrialsPerCell}{50}
+\newcommand{\corlSimEpisodeDuration}{20}
+\newcommand{\corlStrongPerfVelocityThreshold}{0.15}
+\newcommand{\corlBaselineSwingDurationMs}{200}
+
+% --- Simulation results (cost-ablated pipeline, shared protocol with \cite{Sullivan2025}) ---
+\newcommand{\corlResGaitNetSurvivalRate}{69.4}
+\newcommand{\corlResBaselineSurvivalRate}{25.6}
+\newcommand{\corlResCostAblatedSurvivalRate}{77.7}
+\newcommand{\corlResDurationAblatedSurvivalRate}{67.2}
+\newcommand{\corlResMeanSwingDuration}{0.24}
+\newcommand{\corlResStdSwingDuration}{0.034}
+\newcommand{\corlResDurationAblationFixedDuration}{0.247}
+
+% --- Swing duration histogram ---
+\newcommand{\corlSwingHistPeakMin}{0.225}
+\newcommand{\corlSwingHistPeakMax}{0.25}
+\newcommand{\corlSwingHistSecondaryMode}{0.125}
+
+% --- Swing schedule example figure ---
+\newcommand{\corlSwingScheduleTransitionMark}{7.5}
+
+% --- Hardware results (TODO: fill in once trial collection completes) ---
+\newcommand{\corlHwLPSSuccess}{XX}
+\newcommand{\corlHwLPSTime}{XX.X}
+\newcommand{\corlHwLPSSteps}{XXX}
+\newcommand{\corlHwSingleSuccess}{XX}
+\newcommand{\corlHwSingleTime}{XX.X}
+\newcommand{\corlHwSingleSteps}{XXX}
+\newcommand{\corlHwTrotSuccess}{XX}
+\newcommand{\corlHwTrotTime}{XX.X}
+\newcommand{\corlHwTrotSteps}{XXX}
+\newcommand{\corlHwFullSuccess}{XX}
+\newcommand{\corlHwFullTime}{XX.X}
+\newcommand{\corlHwFullSteps}{XXX}
