@@ -5,18 +5,18 @@ This work presents a control framework for quadruped robots capable
 of generating dynamic, acyclic gaits in challenging environments
 without requiring a predefined periodic schedule. The framework uses
 a hierarchical architecture that separates high-level footstep
-decision-making from low-level kinematic tracking. At each control
+decisions from low-level kinematic tracking. At each control
 tick, a terrain height scan is thresholded and dilated into a
 per-leg validity mask, a small set of candidate footsteps is drawn
 within that mask and locally refined against GaitNet's learned value
-function, and the single best candidate\textemdash or a no-action
-option\textemdash is selected for the entire robot and passed to a
+function, and the single best candidate, or a no-action
+option, is selected for the entire robot and passed to a
 low-level tracking controller for execution via model predictive
 control and whole-body feedback. GaitNet's footstep action is
-consumed identically regardless of which controller executes it:
-in simulation, the tracking controller is the MIT Mini-Cheetah
+consumed identically regardless of which controller executes it.
+In simulation, the tracking controller is the MIT Mini-Cheetah
 Controller \cite{di_mini_cheetah_2020}, structured in python by
-\cite{zhuang_rl_mpc_locomotion_2025}; on hardware, GaitNet instead
+\cite{zhuang_rl_mpc_locomotion_2025}. On hardware, GaitNet instead
 supplies footstep targets directly to the Legged Perceptive Stack's
 own NMPC/Whole-Body Control (WBC) pipeline
 \cite{leggedperceptive}, in place of that framework's
@@ -28,7 +28,7 @@ phase is excluded from candidate generation, since it cannot be
 redirected mid-swing. Second, a new step is permitted only while at
 least \numberstringnum{\corlMinContactLegs} legs remain in ground
 contact, which caps concurrent swing at
-\numberstringnum{\corlMaxConcurrentSwingLegs} legs; this is a
+\numberstringnum{\corlMaxConcurrentSwingLegs} legs. This is a
 deliberate feasibility constraint, not an incidental limitation, and
 every result in \autoref{sec:results} operates under it. The validity
 mask itself is computed from a thresholded height scan, dilated by
@@ -52,32 +52,31 @@ conservatively account for the physical extent of the robot's foot.
 \label{subsec:methodology-high-rate-selection}
 
 GaitNet is evaluated at \corlControlHz\,Hz, a \corlControlTickMs\,ms
-control tick, and never represents multi-leg coordination directly:
-at most one footstep is committed per tick, for one leg, and the rest
-of the robot is left untouched until its own turn. A selected swing
-lasts between \corlSwingDurationMin\,s and \corlSwingDurationMax\,s,
-so \numberstringnum{\corlMinTicksPerSwing} to
-\numberstringnum{\corlMaxTicksPerSwing} further decision ticks elapse
-while that leg is still airborne. GaitNet may therefore commit a
-second leg
-mid-swing of the first, subject only to the contact-count constraint
-above. Multi-leg concurrency is an emergent consequence of
-re-deciding faster than a swing completes, not a behavior the
-architecture was given machinery to plan; whether the policy learns
-to anticipate future ticks and implicitly coordinate legs through
-this repeated re-selection is a question of what reinforcement
-learning discovers, not something encoded in the action space itself.
-This is the central mechanism of the system: the simplicity of a
-single-leg, single-tick action space is what makes acyclic, dynamic
-gait generation tractable at control-loop rates.
+control tick, and never represents coordination between legs
+directly. At most one footstep is committed per tick, for one leg,
+and the rest of the robot is left untouched until its own turn. A
+selected swing lasts between \corlSwingDurationMin\,s and
+\corlSwingDurationMax\,s, so \numberstringnum{\corlMinTicksPerSwing}
+to \numberstringnum{\corlMaxTicksPerSwing} further decision ticks
+elapse while that leg is still airborne. GaitNet may therefore commit
+a second leg mid-swing of the first, subject only to the
+contact-count constraint above. Concurrency between legs is an
+emergent consequence of re-deciding faster than a swing completes,
+not a behavior the architecture was given machinery to plan. Whether
+the policy learns to anticipate future ticks and implicitly
+coordinate legs through this repeated re-selection is a question of
+what reinforcement learning discovers, not something encoded in the
+action space itself. The simplicity of a single-leg, single-tick
+action space is what makes acyclic, dynamic gait generation tractable
+at the rates of the control loop.
 
 \subsection{GaitNet Formulation}
 \label{subsec:methodology-gaitnet-architecture}
 
-GaitNet is a single-network architecture comprised of a robot-state
-encoder, a footstep encoder, a shared trunk, and two task-specific
-output heads. The first head predicts a scalar value
-logit used to rank a candidate; the second predicts the swing
+GaitNet is a single-network architecture comprised of a robot state
+encoder, a footstep encoder, a shared trunk, and two output heads
+specific to each task. The first head predicts a scalar value
+logit used to rank a candidate. The second predicts the swing
 duration to use if that candidate is selected. GaitNet evaluates
 candidates conditioned on a one-hot leg encoding (including a
 no-action option) and the current tracking state $\mathbf{x_g}$:
@@ -109,7 +108,7 @@ $\mathbf c \in \{0,1\}^{\corlContactDim}$ is the per-foot contact
 state. Together these total \corlStateDim{} dimensions. Notably, the
 inclusion of $\mathbf \omega_b$ distinguishes this formulation from
 that of ContactNet \cite{bratta_contactnet_2024}, which omits angular
-velocity from its state representation; we add it to improve
+velocity from its state representation. We add it to improve
 performance in situations with high rotational velocities.
 
 The network implements a middle-fusion style feature combinator
@@ -120,12 +119,12 @@ The network implements a middle-fusion style feature combinator
     \numberstringnum{\corlStateEncoderLayers}-layer Multi-Layer
     Perceptron (MLP) with a hidden dimension of
     \corlStateEncoderHidden{} and ReLU activations, producing a
-    fixed-dimensional latent state representation.
+    latent state representation of fixed dimension.
   \item \textbf{Footstep Encoder}: Each candidate's spatial
     coordinates are embedded by a
     \numberstringnum{\corlFootstepEncoderLayers}-layer feedforward
     network with a hidden size of \corlFootstepEncoderHidden{} and
-    ReLU activations. The no-action option is not spatial at all; it
+    ReLU activations. The no-action option is not spatial at all. It
     is routed to a separate, learned embedding vector rather than
     through this encoder.
   \item \textbf{Shared Trunk}: The latent state and the candidate
@@ -133,19 +132,20 @@ The network implements a middle-fusion style feature combinator
     \numberstringnum{\corlTrunkLayers}-layer shared trunk, with layer
     normalization applied after each linear mapping.
   \item \textbf{Output Heads}: A value head outputs the unnormalized
-    logit $\hat{V}$ used for ranking; a duration head outputs
+    logit $\hat{V}$ used for ranking. A duration head outputs
     $t_{\text{swing}}$, scaled by a sigmoid into
     $(\corlSwingDurationMin, \corlSwingDurationMax)$\,s.
 \end{itemize}
 
 In the configuration evaluated in this paper, candidates carry no
-learned cost input: the footstep evaluation network used in prior
-work \cite{Sullivan2025} to pre-score candidates has been removed
-entirely, and GaitNet's own value head is the only source of ranking
-information. This choice is motivated directly by an ablation in
-\cite{Sullivan2025} in which zeroing that cost input \emph{improved}
-survival rate over supplying it, suggesting the pre-computed heuristic
-constrained exploration rather than accelerating it.
+learned cost input. The footstep evaluation network used in prior
+work \cite{Sullivan2025} to score candidates in advance has been
+removed entirely, and GaitNet's own value head is the only source of
+ranking information. This choice is motivated directly by an
+ablation in \cite{Sullivan2025} in which zeroing that cost input
+\emph{improved} survival rate over supplying it, suggesting the
+precomputed heuristic constrained exploration rather than
+accelerating it.
 
 \subsection{Candidate Generation and Refinement}
 \label{subsec:methodology-gaitnet-gradient-ascent}
@@ -155,7 +155,7 @@ positions are drawn from a Gaussian distribution
 ($\sigma = \corlCandidateStd$\,m) centered on the leg's nominal
 footstep offset. A sample that already lands in a valid, steppable
 cell of that leg's terrain mask is kept at its continuous, unsnapped
-coordinates; a sample that lands outside the valid region is instead
+coordinates. A sample that lands outside the valid region is instead
 projected onto the nearest valid cell via a precomputed Euclidean
 distance transform. Because GaitNet's value head is differentiable
 with respect to a candidate's spatial coordinates, each of the
@@ -170,20 +170,21 @@ where $\Pi_{\mathcal{C}}$ is the identity whenever its argument already
 lies in a valid cell of the mask $\mathcal{C}$, and otherwise projects
 it onto the nearest valid cell using the same precomputed distance
 transform used for initialization. Gradient ascent therefore proceeds
-over continuous candidate coordinates; the discrete mask, at a
+over continuous candidate coordinates. The discrete mask, at a
 resolution of \corlMaskResolutionCm\,cm, is consulted only to catch a
-step that would land in a void or unsteppable region. This refinement is a
-comparatively minor part of the pipeline: its purpose is to nudge a
-candidate toward better-supported footing within its neighborhood, and
-the terrain mask, not the gradient step, is what excludes voids and
-unsteppable regions from consideration in the first place.
+step that would land in a void or unsteppable region. This refinement
+is a comparatively minor part of the pipeline. Its purpose is to nudge
+a candidate toward footing that is better supported within its
+neighborhood, and the terrain mask, not the gradient step, is what
+excludes voids and unsteppable regions from consideration in the
+first place.
 
 After refinement, GaitNet evaluates the fixed no-action embedding
 alongside the
 $\corlCandidatesPerLeg \times \corlNumLegs = \corlTotalCandidatesDeploy$
 refined candidates (\numberstringnum{\corlCandidatesPerLeg} per leg,
-\numberstringnum{\corlNumLegs} legs) and selects the single
-highest-valued option. If no-action wins, or if a leg's mask has no
+\numberstringnum{\corlNumLegs} legs) and selects the single option
+with the highest value. If no-action wins, or if a leg's mask has no
 valid candidates, no footstep is issued that tick.
 
 \subsection{Reinforcement Learning Framework}
@@ -197,22 +198,22 @@ with reinforcement learning, using Proximal Policy Optimization (PPO)
 \cite{Schulman_proximal_2017}.
 
 The actor network is GaitNet itself. The critic is a smaller,
-separately-sized network that scores each candidate through its own
+separately sized network that scores each candidate through its own
 state encoder, footstep encoder, and trunk, then combines the
-per-option scores across all sixteen options with a small combining
-MLP to produce a single state-value estimate; it does not share
+scores for each option across all sixteen options with a small combining
+MLP to produce a single estimate of state value. It does not share
 weights with the actor and omits the duration head. Training uses a
-fixed candidate set rather than the refinement procedure above: for
+fixed candidate set rather than the refinement procedure above. For
 each leg, \numberstringnum{\corlTrainCandidatesPerLeg} candidates are
 sampled uniformly at random from the valid terrain mask (plus one
 no-action option, \corlTrainTotalCandidates{} candidates total), and
 the actor's logits over this set define a categorical
-distribution. Gradient-based refinement is used only at deployment
-time, applied to this same trained value head; training and
-deployment therefore draw candidates from different distributions,
-which we treat as an intentional design choice rather than an
-oversight, since it lets the value head be learned as a general
-scorer rather than overfit to the refinement trajectory.
+distribution. Refinement based on gradients is used only at
+deployment time, applied to this same trained value head. Training
+and deployment therefore draw candidates from different
+distributions, which we treat as an intentional design choice rather
+than an oversight, since it lets the value head be learned as a
+general scorer rather than overfit to the refinement trajectory.
 
 The duration output for the selected candidate is treated as a
 Normal distribution with a fixed standard deviation of
@@ -222,14 +223,14 @@ action is the sum of the categorical log probability of the selected
 candidate and the normal log probability of its sampled duration.
 Reward terms balance velocity tracking against stability and a small
 per-step action penalty ($\corlActionPenalty$) that discourages
-unnecessary stepping; termination on falling or on stepping into
+unnecessary stepping. Termination on falling or on stepping into
 invalid terrain carries a $\corlTerminationPenalty$ penalty. Full
 reward and termination tables, command sampling ranges, and PPO
 hyperparameters follow the same setup detailed in \cite{Sullivan2025}.
 The model is trained in
 NVIDIA Isaac Lab \cite{mittal_orbit_2023}, with the physics simulation
-and policy running on GPU and the per-robot MPC controllers running in
-parallel on CPU, for \corlTrainingIterations{} iterations across
-\corlParallelEnvs{} parallel environments, with a terrain-difficulty
-curriculum that gradually increases the proportion of unsteppable
-terrain as training progresses.
+and policy running on GPU and the MPC controllers for each robot
+running in parallel on CPU, for \corlTrainingIterations{} iterations
+across \corlParallelEnvs{} parallel environments, with a curriculum
+over terrain difficulty that gradually increases the proportion of
+unsteppable terrain as training progresses.

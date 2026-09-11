@@ -56,26 +56,26 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \begin{abstract}
   Quadruped locomotion on unstructured terrain is fundamentally a
-  contact planning problem, and gait schedules that fix which legs
-  swing together constrain a robot's ability to react to unplanned
-  terrain. We introduce GaitNet, a greedy footstep planner that
-  never reasons about multi-leg coordination directly: at each
-  \corlControlTickMs\,ms control tick it selects at most one footstep
-  from a set of terrain-filtered candidates, or elects to take no
-  action. Because a selected swing lasts
-  \corlSwingDurationMin--\corlSwingDurationMax\,s, several further
-  decisions occur while a leg is still airborne, and the planner may
-  commit a second leg mid-swing. Multi-leg concurrency is therefore
-  emergent rather than scheduled: nothing in the action space
-  represents a phase offset or a gait primitive. Candidates are drawn
-  from a terrain-validity mask and locally refined against GaitNet's
-  own learned value function via a short projected gradient step
-  before the final selection. We train GaitNet with reinforcement
-  learning in NVIDIA Isaac Lab, building on simulation results from
-  our preliminary framework, and evaluate the resulting system for the
-  first time on a physical Unitree Go1 against the Legged Perceptive
-  Stack, a state-of-the-art perceptive NMPC baseline, where GaitNet
-  achieves a \textbf{\corlHwFullSuccess\%} mean success rate versus
+  contact planning problem. Gait schedules that fix which legs swing
+  together constrain a robot's ability to react to unplanned terrain.
+  We introduce GaitNet, a greedy footstep planner that never plans
+  coordination between legs. At each \corlControlTickMs\,ms control
+  tick it selects at most one footstep from a set of candidates
+  filtered by terrain, or elects to take no action. Because a selected
+  swing lasts \corlSwingDurationMin--\corlSwingDurationMax\,s, several
+  further decisions occur while a leg is still airborne, and the
+  planner may commit a second leg partway through the first leg's
+  swing. Concurrency between legs is therefore emergent rather than
+  scheduled. Nothing in the action space represents a phase offset or
+  a gait primitive. Candidates are drawn from a terrain validity mask
+  and locally refined against GaitNet's own learned value function
+  through a short projected gradient step before the final selection.
+  We train GaitNet with reinforcement learning in NVIDIA Isaac Lab,
+  building on simulation results from our preliminary framework, and
+  evaluate the resulting system for the first time on a physical
+  Unitree Go1 against the Legged Perceptive Stack, a leading
+  perceptive NMPC baseline. GaitNet achieves a
+  \textbf{\corlHwFullSuccess\%} mean success rate versus
   \textbf{\corlHwLPSSuccess\%} for the baseline across matched terrain
   difficulties.
 \end{abstract}
