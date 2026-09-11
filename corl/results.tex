@@ -8,20 +8,25 @@ We evaluate GaitNet on a physical Unitree Go1 against the
 \textit{Legged Perceptive Stack} \cite{leggedcontrol}, a
 state-of-the-art open-source framework combining Nonlinear Model
 Predictive Control (NMPC) and Whole-Body Control (WBC) atop the OCS2
-solver, using rigidly scheduled phase-optimized trajectories.
+solver, using rigidly scheduled phase-optimized trajectories. On
+hardware, GaitNet supplies footstep targets directly to this same
+NMPC/WBC pipeline in place of its native gait scheduler
+(\autoref{subsec:methodology-system-overview}), so the comparison
+below holds the low-level tracking controller fixed and isolates the
+contribution of the planning layer alone.
 
 A physical test track (\autoref{fig:figure-test-environment}) mirrors
 the terrain used in simulation: narrow strips of rigid wooden ground
 interspersed with gaps of varying, pseudo-randomly distributed width.
 We characterize a track's difficulty as the percentage of its area
 that \emph{cannot} be stepped on, ranging from $0\%$ (flat ground) to
-$40\%$ (dense gaps). Because tracking error can be skewed by
-controller calibration differences between GaitNet and the baseline,
-we instead measure mission-level autonomy directly: success rate
-(completing the traversal without the robot's base contacting the
-ground or drifting off the track), total steps taken, and traversal
-time, each over 25 independent physical trials per method and
-difficulty level.
+$40\%$ (dense gaps). Because both conditions share a controller,
+tracking error would mostly reflect the shared low-level pipeline
+rather than the planner; we instead measure mission-level autonomy
+directly: success rate (completing the traversal without the robot's
+base contacting the ground or drifting off the track), total steps
+taken, and traversal time, each over 25 independent physical trials
+per method and difficulty level.
 
 We compare four conditions, isolating the contribution of emergent
 concurrency directly:
