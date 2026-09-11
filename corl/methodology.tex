@@ -152,8 +152,8 @@ accelerating it.
 
 For each leg, \numberstringnum{\corlCandidatesPerLeg} candidate
 positions are drawn from a Gaussian distribution
-($\sigma = \corlCandidateStd$\,m) centered on the leg's nominal
-footstep offset. A sample that already lands in a valid, steppable
+($\sigma = \corlCandidateStd$\,m) centered on the foot's nominal
+position. A sample that already lands in a valid, steppable
 cell of that leg's terrain mask is kept at its continuous, unsnapped
 coordinates. A sample that lands outside the valid region is instead
 projected onto the nearest valid cell via a precomputed Euclidean
@@ -171,13 +171,9 @@ lies in a valid cell of the mask $\mathcal{C}$, and otherwise projects
 it onto the nearest valid cell using the same precomputed distance
 transform used for initialization. Gradient ascent therefore proceeds
 over continuous candidate coordinates. The discrete mask, at a
-resolution of \corlMaskResolutionCm\,cm, is consulted only to catch a
-step that would land in a void or unsteppable region. This refinement
-is a comparatively minor part of the pipeline. Its purpose is to nudge
-a candidate toward footing that is better supported within its
-neighborhood, and the terrain mask, not the gradient step, is what
-excludes voids and unsteppable regions from consideration in the
-first place.
+resolution of \corlMaskResolutionCm\,cm, projects the Candidates
+into a valid cell only when they would otherwise land in a void or
+unsteppable region.
 
 After refinement, GaitNet evaluates the fixed no-action embedding
 alongside the
@@ -233,4 +229,4 @@ and policy running on GPU and the MPC controllers for each robot
 running in parallel on CPU, for \corlTrainingIterations{} iterations
 across \corlParallelEnvs{} parallel environments, with a curriculum
 over terrain difficulty that gradually increases the proportion of
-unsteppable terrain as training progresses.
+unsteppable terrain as training progresses \cite{Sullivan2025}.
