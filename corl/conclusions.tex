@@ -11,12 +11,14 @@ perceptive NMPC baseline, and concurrency-restricted ablations of
 itself (GaitNet-Single, GaitNet-Trot), achieving
 \textbf{\corlHwFullSuccess\%} versus \textbf{\corlHwLPSSuccess\%} mean
 success rate across matched terrain difficulties, with the gap
-widening at the highest difficulties tested. Simulation
-results and a swing-schedule analysis corroborate the mechanism
-directly: the same policy moves one foot at a time under easy
-commands and produces overlapping, non-alternating swings under
-harder ones, with no change to the decision rule that produces either
-behavior.
+widening at the highest difficulties tested. Simulation results and a
+swing-schedule analysis from our preliminary framework
+\cite{Sullivan2025} first demonstrated this mechanism: the same policy
+moves one foot at a time under easy commands and produces overlapping,
+non-alternating swings under harder ones, with no change to the
+decision rule that produces either behavior. The hardware results
+above confirm that the same mechanism transfers to physical
+deployment.
 
 \subsection{Limitations and Future Work}
 

@@ -101,58 +101,67 @@ GaitNet (Full) is uniformly best.
   \label{fig:data-hardware-survival}
 \end{figure}
 
-\subsection{Simulation Results}
+\subsection{Simulation Results (Preliminary Framework)}
 \label{subsec:results-simulation}
 
-Prior to hardware deployment, we evaluate the same four conditions in
-NVIDIA Isaac Lab across a grid of terrain difficulties
-($\corlDifficultyMin\%$ to $\corlDifficultyMax\%$, in
+Before developing the hardware-validated system described in
+\autoref{sec:methodology}, our preliminary framework \cite{Sullivan2025}
+evaluated cost-ablated GaitNet against an independent single-leg
+baseline planner in NVIDIA Isaac Lab, across a grid of terrain
+difficulties ($\corlDifficultyMin\%$ to $\corlDifficultyMax\%$, in
 $\corlDifficultyStep\%$ increments) and commanded forward velocities
 ($\corlVelocityMin$ to $\corlVelocityMax$\,m/s), over
 \corlSimTrialsPerCell{} trials of \corlSimEpisodeDuration\,s each per
-cell, following the protocol of our prior simulation study
-\cite{Sullivan2025}. The simulation results reported here were
-collected under the candidate-sampling scheme described in
+cell. These results were collected under the discrete,
+randomly-sampled candidate distribution described in
 \autoref{subsec:methodology-gaitnet-training}
-(\corlTrainCandidatesPerLeg{} randomly sampled candidates per leg,
-cost-ablated); we are re-collecting the same grid under the deployed
-refinement procedure
-(\autoref{subsec:methodology-gaitnet-gradient-ascent}) to confirm the
-numbers carry over, and note this explicitly rather than presenting
-figures from one pipeline as validation of the other.
+(\corlTrainCandidatesPerLeg{} candidates per leg, cost-ablated) rather
+than the continuous, gradient-refined candidates used at deployment in
+this paper (\autoref{subsec:methodology-gaitnet-gradient-ascent}). We
+report them here for context; we have not re-run this grid under the
+refinement procedure introduced in this paper, so they should not be
+read as validating the system described here.
 
-Under this configuration, GaitNet (Full) achieves a
+In that configuration, GaitNet (Full) achieved a
 $\corlResCostAblatedSurvivalRate\%$ mean survival rate, compared to
-$\corlResBaselineSurvivalRate\%$ for an independent single-leg
-baseline planner: a lowest-cost footstep selector operating one leg
-at a time with a fixed $\corlBaselineSwingDurationMs$\,ms swing
-duration, structurally identical to the GaitNet-Single ablation but
-without a learned value function. GaitNet maintains strong
+$\corlResBaselineSurvivalRate\%$ for the independent single-leg
+baseline: a lowest-cost footstep selector operating one leg at a time
+with a fixed $\corlBaselineSwingDurationMs$\,ms swing duration,
+structurally similar to the GaitNet-Single ablation introduced above
+but without a learned value function. GaitNet maintained strong
 performance for commanded velocities below
 $\corlStrongPerfVelocityThreshold$\,m/s, while the single-leg
-baseline's performance degrades once commanded velocity exceeds
-$\corlVelocityMin$\,m/s and degrades further as terrain difficulty
-increases. The performance gap narrows only in the easiest condition
+baseline's performance degraded once commanded velocity exceeded
+$\corlVelocityMin$\,m/s and degraded further as terrain difficulty
+increased. The performance gap narrowed only in the easiest condition
 ($\corlVelocityMin$\,m/s, flat ground), consistent with concurrent,
 high-rate footstep selection becoming more valuable as task difficulty
 increases.
 
-\subsection{Emergent Concurrency Analysis}
+\subsection{Emergent Concurrency Analysis (Preliminary Framework)}
 \label{subsec:results-concurrency}
 
 The central claim of this paper is that multi-leg coordination
 emerges from high-rate single-action selection rather than being
-planned. \autoref{fig:data-swing-schedule} shows a representative
-swing schedule: below a $\corlSwingScheduleTransitionMark$\,s mark, at
-a low commanded velocity,
-the robot moves one foot at a time with no overlap between swings;
-after the commanded velocity increases, the robot begins committing
-a second leg while the first is still airborne, without a strict
-alternating pattern of any kind. This transition is not triggered by
-any explicit mode switch in GaitNet; the same value function and the
-same per-tick decision rule govern both regimes, and the increased
-concurrency emerges purely from more candidates crossing the
-no-action threshold more often as commanded velocity rises.
+planned. Our preliminary framework \cite{Sullivan2025} first
+demonstrated this mechanism in simulation, under the same discrete
+candidate distribution described in
+\autoref{subsec:results-simulation}; \autoref{fig:data-swing-schedule}
+reproduces a representative swing schedule from that study: below a
+$\corlSwingScheduleTransitionMark$\,s mark, at a low commanded
+velocity, the robot moves one foot at a time with no overlap between
+swings; after the commanded velocity increases, the robot begins
+committing a second leg while the first is still airborne, without a
+strict alternating pattern of any kind. This transition is not
+triggered by any explicit mode switch in GaitNet; the same value
+function and the same per-tick decision rule govern both regimes, and
+the increased concurrency emerges purely from more candidates crossing
+the no-action threshold more often as commanded velocity rises.
+Because this decision rule is unchanged by the continuous refinement
+procedure introduced in this paper (\autoref{sec:methodology}), we
+expect the same emergent behavior to hold at deployment; the hardware
+comparison in \autoref{subsec:results-hardware-comparison} tests this
+directly.
 
 \begin{figure*}[t]
   \centering
@@ -166,10 +175,11 @@ no-action threshold more often as commanded velocity rises.
   \label{fig:data-swing-schedule}
 \end{figure*}
 
-Swing durations are similarly non-uniform rather than fixed by a
-schedule: \autoref{fig:data-swing-duration-histogram} shows a peak
-between $\corlSwingHistPeakMin$\,s and $\corlSwingHistPeakMax$\,s for
-typical forward motion, with a secondary mode down to
+In the same preliminary-framework study, swing durations are similarly
+non-uniform rather than fixed by a schedule:
+\autoref{fig:data-swing-duration-histogram} shows a peak between
+$\corlSwingHistPeakMin$\,s and $\corlSwingHistPeakMax$\,s for typical
+forward motion, with a secondary mode down to
 $\corlSwingHistSecondaryMode$\,s used for situational, faster steps
 such as recovering a marginal foothold. The mean swing duration
 across training settles to $\corlResMeanSwingDuration$\,s with a
@@ -184,26 +194,24 @@ duration head is in active use rather than collapsing to a constant.
   \label{fig:data-swing-duration-histogram}
 \end{figure}
 
-\subsection{Swing Duration Ablation}
+\subsection{Swing Duration Ablation (Preliminary Framework)}
 \label{subsec:results-duration-ablation}
 
-To assess whether this dynamic duration output is load-bearing, we
-revisit an ablation from our prior simulation study
-\cite{Sullivan2025}, comparing standard GaitNet against a
-Duration-Ablated-GaitNet trained identically but constrained to a
-fixed swing duration of $\corlResDurationAblationFixedDuration$\,s,
+To assess whether this dynamic duration output is load-bearing, our
+preliminary framework \cite{Sullivan2025} compared standard GaitNet
+against a Duration-Ablated-GaitNet trained identically but constrained
+to a fixed swing duration of $\corlResDurationAblationFixedDuration$\,s,
 the approximate mean of the standard model's learned distribution. The
-result is a null finding: the duration-ablated model achieves a
+result was a null finding: the duration-ablated model achieved a
 $\corlResDurationAblatedSurvivalRate\%$ survival rate, statistically
 indistinguishable from the $\corlResGaitNetSurvivalRate\%$ achieved by
 the corresponding standard GaitNet variant under matched conditions. We
-do not read this as evidence that dynamic
-duration is unimportant in general; more plausibly, the tested
-terrain and velocity ranges are not demanding enough to expose a
-difference, and the reward function does not explicitly incentivize
-using the full duration range beyond what is needed to avoid
-termination. We report this honestly as a limitation of the present
-evaluation rather than removing the duration head from the
-architecture, since its cost is negligible and it may prove useful
-at higher commanded velocities or on more aggressive terrain than
-tested here.
+do not read this as evidence that dynamic duration is unimportant in
+general; more plausibly, the tested terrain and velocity ranges were
+not demanding enough to expose a difference, and the reward function
+does not explicitly incentivize using the full duration range beyond
+what is needed to avoid termination. We report this honestly as a
+limitation of that evaluation rather than removing the duration head
+from the architecture used in this paper, since its cost is negligible
+and it may prove useful at higher commanded velocities or on more
+aggressive terrain than tested there.

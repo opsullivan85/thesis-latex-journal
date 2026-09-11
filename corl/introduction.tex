@@ -157,3 +157,15 @@ Our primary contributions are:
     concurrency-restricted ablations of GaitNet itself that isolate
     the contribution of emergent multi-leg swing.
 \end{enumerate}
+
+This paper builds on our preliminary framework, GaitNet, introduced in
+\cite{Sullivan2025}, which established the single-footstep,
+single-tick action space and reported promising results in simulation
+under a discrete, randomly-sampled candidate distribution. Here we
+extend that formulation with a continuous, gradient-refined candidate
+search in place of discrete resampling, add angular velocity to the
+tracking state to better handle turning commands, and provide the
+first hardware validation of the resulting system. Simulation results
+attributed to the preliminary framework are reported for context in
+\autoref{sec:results}; we have not re-run those experiments under the
+system described here, and label such results accordingly throughout.
