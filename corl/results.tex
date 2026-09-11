@@ -105,9 +105,10 @@ GaitNet (Full) is uniformly best.
 Prior to hardware deployment, we evaluate the same four conditions in
 NVIDIA Isaac Lab across a grid of terrain difficulties ($0\%$ to
 $40\%$, in $5\%$ increments) and commanded forward velocities
-($0.05$ to $0.2$\,m/s), over 50 trials of 20\,s each per cell. The
-simulation results reported here were collected under the
-candidate-sampling scheme described in
+($0.05$ to $0.2$\,m/s), over 50 trials of 20\,s each per cell,
+following the protocol of our prior simulation study
+\cite{Sullivan2025}. The simulation results reported here were
+collected under the candidate-sampling scheme described in
 \autoref{subsec:methodology-gaitnet-training} (16 randomly sampled
 candidates per leg, cost-ablated); we are re-collecting the same grid
 under the deployed refinement procedure
@@ -177,13 +178,15 @@ collapsing to a constant.
 \label{subsec:results-duration-ablation}
 
 To assess whether this dynamic duration output is load-bearing, we
-compare standard GaitNet against a Duration-Ablated-GaitNet trained
-identically but constrained to a fixed swing duration of $0.247$\,s,
-the approximate mean of the standard model's learned distribution.
-The result is a null finding: the duration-ablated model achieves a
-$67.2\%$ survival rate, statistically indistinguishable from the
-$69.4\%$ achieved by the corresponding standard GaitNet variant under
-matched conditions. We do not read this as evidence that dynamic
+revisit an ablation from our prior simulation study
+\cite{Sullivan2025}, comparing standard GaitNet against a
+Duration-Ablated-GaitNet trained identically but constrained to a
+fixed swing duration of $0.247$\,s, the approximate mean of the
+standard model's learned distribution. The result is a null finding:
+the duration-ablated model achieves a $67.2\%$ survival rate,
+statistically indistinguishable from the $69.4\%$ achieved by the
+corresponding standard GaitNet variant under matched conditions. We
+do not read this as evidence that dynamic
 duration is unimportant in general; more plausibly, the tested
 terrain and velocity ranges are not demanding enough to expose a
 difference, and the reward function does not explicitly incentivize
