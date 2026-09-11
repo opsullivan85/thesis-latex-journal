@@ -37,11 +37,7 @@ external height scan to build the terrain validity mask, and the two
 platforms currently source that scan differently (a raycast height
 field in simulation, the Legged Perceptive Stack's heightmap on
 hardware), which is a source of sim-to-real gap we have not yet
-quantified. Finally, candidate refinement operates on a discretized
-terrain mask rather than a continuous representation of the
-workspace, so the gains attributable to gradient-based refinement
-specifically, as opposed to the terrain mask and re-sampling alone,
-remain to be isolated.
+quantified.
 
 Future work will extend the state representation with direct
 exteroceptive input, such as point clouds or height maps processed
