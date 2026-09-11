@@ -27,66 +27,52 @@
 T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Conference Paper Title*\\
-  {\footnotesize \textsuperscript{*}Note: Sub-titles are not captured
-    for https://ieeexplore.ieee.org  and
-  should not be used}
-  \thanks{Identify applicable funding agency here. If none, delete this.}
-}
-% \title{Continuous Footstep Optimization for Quadruped Robots via
-% Projected Gradient Ascent}
+\title{GaitNet: Greedy High-Rate Footstep Selection for Acyclic
+  Quadruped Locomotion}
 
-\author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
-  \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-    \textit{name of organization (of Aff.)}\\
-    City, Country \\
+\author{\IEEEauthorblockN{Owen Sullivan}
+  \IEEEauthorblockA{\textit{Robotics Engineering} \\
+    \textit{Worcester Polytechnic Institute}\\
+    Worcester, MA, USA \\
   email address or ORCID}
   \and
-  \IEEEauthorblockN{2\textsuperscript{nd} Given Name Surname}
-  \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-    \textit{name of organization (of Aff.)}\\
-    City, Country \\
+  \IEEEauthorblockN{Sourav Selvaraj}
+  \IEEEauthorblockA{\textit{Robotics Engineering} \\
+    \textit{Worcester Polytechnic Institute}\\
+    Worcester, MA, USA \\
   email address or ORCID}
   \and
-  \IEEEauthorblockN{3\textsuperscript{rd} Given Name Surname}
-  \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-    \textit{name of organization (of Aff.)}\\
-    City, Country \\
-  email address or ORCID}
-  \and
-  \IEEEauthorblockN{4\textsuperscript{th} Given Name Surname}
-  \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-    \textit{name of organization (of Aff.)}\\
-    City, Country \\
-  email address or ORCID}
-  \and
-  \IEEEauthorblockN{5\textsuperscript{th} Given Name Surname}
-  \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-    \textit{name of organization (of Aff.)}\\
-    City, Country \\
-  email address or ORCID}
-  \and
-  \IEEEauthorblockN{6\textsuperscript{th} Given Name Surname}
-  \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-    \textit{name of organization (of Aff.)}\\
-    City, Country \\
+  \IEEEauthorblockN{Mahdi Agheli}
+  \IEEEauthorblockA{\textit{Robotics Engineering} \\
+    \textit{Worcester Polytechnic Institute}\\
+    Worcester, MA, USA \\
   email address or ORCID}
 }
 
 \maketitle
 
 \begin{abstract}
-  Quadruped locomotion in unstructured environments remains a
-  significant challenge. This paper proposes a novel method for
-  generating non-gaited, dynamic footstep plans using GaitNet, which
-  evaluates and selects the most appropriate actions. By directly
-  exploring the output space through projected gradient ascent,
-  GaitNet optimizes spatial footstep coordinates over its own reward
-  surface. We formulate the problem with 4 parallel tracks and 4
-  steps of projected gradient ascent per foot. Our system is
-  evaluated on a physical Unitree Go1 robot navigating complex
-  terrain, demonstrating improvements over state-of-the-art model
-  predictive control baselines.
+  Quadruped locomotion on unstructured terrain is fundamentally a
+  contact planning problem, and gait schedules that fix which legs
+  swing together constrain a robot's ability to react to unplanned
+  terrain. We introduce GaitNet, a greedy footstep planner that
+  never reasons about multi-leg coordination directly: at each
+  40\,ms control tick it selects at most one footstep from a set of
+  terrain-filtered candidates, or elects to take no action. Because
+  a selected swing lasts 0.1--0.3\,s, several further decisions occur
+  while a leg is still airborne, and the planner may commit a second
+  leg mid-swing. Multi-leg concurrency is therefore emergent rather
+  than scheduled: nothing in the action space represents a phase
+  offset or a gait primitive. Candidates are drawn from a
+  terrain-validity mask and locally refined against GaitNet's own
+  learned value function via a short projected gradient step before
+  the final selection. We train GaitNet with reinforcement learning
+  in NVIDIA Isaac Lab and evaluate it in simulation across a range of
+  terrain difficulties and commanded velocities, and on a physical
+  Unitree Go1 against the Legged Perceptive Stack, a state-of-the-art
+  perceptive NMPC baseline, where GaitNet achieves a
+  \textbf{XX\%} mean success rate versus \textbf{XX\%} for the
+  baseline across matched terrain difficulties.
 \end{abstract}
 
 \begin{IEEEkeywords}
