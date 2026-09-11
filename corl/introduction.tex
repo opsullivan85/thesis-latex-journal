@@ -146,13 +146,14 @@ Our primary contributions are:
   \item A greedy footstep planner that emits at most one action per
     control tick, from which multi-leg swing emerges without any
     scheduled phase representation, together with a simplified action
-    space that removes the need for the two-stage cost-map network
-    used in prior work.
+    space that removes the need for the two-stage footstep evaluation
+    network used in prior work.
   \item A single-network formulation in which a trained value
     function is reused at deployment time as a local refinement
     objective over a small set of terrain-filtered candidates.
   \item Validation on a Unitree Go1 quadruped against the Legged
-    Perceptive Stack, a state-of-the-art perceptive NMPC baseline,
-    together with concurrency-restricted ablations of GaitNet itself
-    that isolate the contribution of emergent multi-leg swing.
+    Perceptive Stack, a state-of-the-art perceptive Nonlinear Model
+    Predictive Control (NMPC) baseline, together with
+    concurrency-restricted ablations of GaitNet itself that isolate
+    the contribution of emergent multi-leg swing.
 \end{enumerate}

@@ -6,11 +6,10 @@
 
 We evaluate GaitNet on a physical Unitree Go1 against the
 \textit{Legged Perceptive Stack} \cite{leggedcontrol}, a
-state-of-the-art open-source framework combining Nonlinear Model
-Predictive Control (NMPC) and Whole-Body Control (WBC) atop the OCS2
-solver, using rigidly scheduled phase-optimized trajectories. On
-hardware, GaitNet supplies footstep targets directly to this same
-NMPC/WBC pipeline in place of its native gait scheduler
+state-of-the-art open-source framework combining NMPC and WBC atop
+the OCS2 solver, using rigidly scheduled phase-optimized
+trajectories. On hardware, GaitNet supplies footstep targets directly
+to this same NMPC/WBC pipeline in place of its native gait scheduler
 (\autoref{subsec:methodology-system-overview}), so the comparison
 below holds the low-level tracking controller fixed and isolates the
 contribution of the planning layer alone.

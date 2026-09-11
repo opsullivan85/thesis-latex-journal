@@ -18,14 +18,10 @@ in simulation, the tracking controller is the MIT Mini-Cheetah
 Controller \cite{di_mini_cheetah_2020}, structured in python by
 \cite{zhuang_rl_mpc_locomotion_2025}; on hardware, GaitNet instead
 supplies footstep targets directly to the Legged Perceptive Stack's
-own NMPC/WBC pipeline \cite{leggedcontrol}, in place of that
-framework's native gait scheduler. This means the hardware comparison
-in \autoref{sec:results} isolates the contribution of the planning
-layer specifically: GaitNet and the Legged Perceptive Stack baseline
-share the same low-level tracking controller, and differ only in
-what decides where and when each foot steps.
+own NMPC/Whole-Body Control (WBC) pipeline \cite{leggedcontrol}, in
+place of that framework's native gait scheduler.
 
-Two constraints are enforced directly in the candidate mask, before
+Two constraints are enforced directly in the validity mask, before
 GaitNet ever sees a candidate. First, a leg already in its swing
 phase is excluded from candidate generation, since it cannot be
 redirected mid-swing. Second, a new step is permitted only while at
@@ -36,7 +32,7 @@ deliberate feasibility constraint, not an incidental limitation, and
 every result in \autoref{sec:results} operates under it. The validity
 mask itself is computed from a thresholded height scan, dilated by
 \numberstringnum{\corlMaskDilationRounds} rounds of max-pooling to
-conservatively approximate the robot's foot c-space.
+conservatively account for the physical extent of the robot's foot.
 
 \begin{figure*}[t]
   \centering
@@ -78,8 +74,8 @@ gait generation tractable at control-loop rates.
 \label{subsec:methodology-gaitnet-architecture}
 
 GaitNet is a single-network architecture comprised of a robot-state
-encoder, a footstep-candidate encoder, a shared trunk, and two
-task-specific output heads. The first head predicts a scalar value
+encoder, a footstep encoder, a shared trunk, and two task-specific
+output heads. The first head predicts a scalar value
 logit used to rank a candidate; the second predicts the swing
 duration to use if that candidate is selected. GaitNet evaluates
 candidates conditioned on a one-hot leg encoding (including a
