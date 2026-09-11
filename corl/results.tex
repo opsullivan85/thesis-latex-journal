@@ -5,7 +5,7 @@
 \label{subsec:results-hardware-comparison}
 
 We evaluate GaitNet on a physical Unitree Go1 against the
-\textit{Legged Perceptive Stack} \cite{leggedcontrol}, a
+\textit{Legged Perceptive Stack} \cite{leggedperceptive}, a
 state-of-the-art open-source framework combining NMPC and WBC atop
 the OCS2 solver, using rigidly scheduled phase-optimized
 trajectories. On hardware, GaitNet supplies footstep targets directly
@@ -32,7 +32,7 @@ We compare four conditions, isolating the contribution of emergent
 concurrency directly:
 \begin{enumerate}
   \item \textbf{Legged Perceptive Stack:} the NMPC/WBC baseline
-    described above \cite{leggedcontrol}.
+    described above \cite{leggedperceptive}.
   \item \textbf{GaitNet-Single:} GaitNet with the contact-count
     constraint tightened to permit only one leg in swing at a time,
     otherwise identical to the full model.
@@ -64,7 +64,7 @@ without falling or placing a foot in a removed terrain section.
     \toprule
     \textbf{Method} & \textbf{Success} & \textbf{Time [s]} & \textbf{Steps} \\
     \midrule
-    Legged Perceptive Stack \cite{leggedcontrol} & \corlHwLPSSuccess\% & \corlHwLPSTime{} & \corlHwLPSSteps{} \\
+    Legged Perceptive Stack \cite{leggedperceptive} & \corlHwLPSSuccess\% & \corlHwLPSTime{} & \corlHwLPSSteps{} \\
     GaitNet-Single & \corlHwSingleSuccess\% & \corlHwSingleTime{} & \corlHwSingleSteps{} \\
     GaitNet-Trot & \corlHwTrotSuccess\% & \corlHwTrotTime{} & \corlHwTrotSteps{} \\
     \textbf{GaitNet (Full)} & \textbf{\corlHwFullSuccess\%} & \textbf{\corlHwFullTime{}} & \textbf{\corlHwFullSteps{}} \\

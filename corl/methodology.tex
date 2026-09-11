@@ -18,8 +18,9 @@ in simulation, the tracking controller is the MIT Mini-Cheetah
 Controller \cite{di_mini_cheetah_2020}, structured in python by
 \cite{zhuang_rl_mpc_locomotion_2025}; on hardware, GaitNet instead
 supplies footstep targets directly to the Legged Perceptive Stack's
-own NMPC/Whole-Body Control (WBC) pipeline \cite{leggedcontrol}, in
-place of that framework's native gait scheduler.
+own NMPC/Whole-Body Control (WBC) pipeline
+\cite{leggedperceptive}, in place of that framework's
+native gait scheduler.
 
 Two constraints are enforced directly in the validity mask, before
 GaitNet ever sees a candidate. First, a leg already in its swing
