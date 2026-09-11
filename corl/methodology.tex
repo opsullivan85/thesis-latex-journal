@@ -225,7 +225,8 @@ per-step action penalty ($\corlActionPenalty$) that discourages
 unnecessary stepping; termination on falling or on stepping into
 invalid terrain carries a $\corlTerminationPenalty$ penalty. Full
 reward and termination tables, command sampling ranges, and PPO
-hyperparameters are given in the appendix. The model is trained in
+hyperparameters follow the same setup detailed in \cite{Sullivan2025}.
+The model is trained in
 NVIDIA Isaac Lab \cite{mittal_orbit_2023}, with the physics simulation
 and policy running on GPU and the per-robot MPC controllers running in
 parallel on CPU, for \corlTrainingIterations{} iterations across
