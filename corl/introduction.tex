@@ -1,7 +1,7 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Legged robots hold significant promise for enabling mobility in
+Legged robots enable mobility in
 environments that are inaccessible to wheeled and tracked systems.
 Their ability to traverse uneven, unstructured, and unpredictable
 terrains\textemdash such as disaster zones, staircases, dense
@@ -27,15 +27,11 @@ The generation of such contact plans in real time remains a
 formidable challenge. It requires the system to perceive its
 surroundings, anticipate the dynamic and kinematic outcomes of
 possible actions, and select
-feasible contact points within tight temporal constraints (typically
-  matching real-time
-control frequencies of 50-500 Hz). Existing
-methods often fall into one of three categories, fully using
-traditional control\textemdash model predictive controllers, PD
-controllers, optimization\textemdash using neural networks, or a mix
-of the two: hybrid methods. These three methods offer different
-trade-offs between deliberative, computationally intensive planning and
-fast, reactive control that lacks stability or generalization.
+feasible contact points within tight temporal constraints. Existing
+methods often fall into one of three categories,
+traditional control (model predictive control,
+optimization, etc), machine learning, or a mix
+of the two: hybrid methods.
 
 The vision of this research is to develop a hybrid control
 architecture that mitigates the trade-offs inherent in these existing
@@ -78,8 +74,8 @@ simultaneously, the computational burden precludes reactive real-time control.
 Search-based methods, such as Monte Carlo Tree Search (MCTS), have also been
 explored by Taouil et al. \cite{taouil_non-gaited_2024} to generate non-gaited
 sequences, and later refined by Akizhanov et al. \cite{akizhanov_learning_2024}
-using learned classifiers for pruning. However, high branching factors keep
-the computational intensity too steep for high-frequency dynamic correction.
+using learned classifiers for pruning. However, high branching factors 
+create significant computational burden.
 
 \subsubsection{End-to-End Neural Networks}
 End-to-end learning methods bypass explicit dynamics modeling,
@@ -119,10 +115,8 @@ Q-Networks (DQN) \cite{da_learning_2020}, neural phase integrators
 \cite{yang_fast_2021},
 and offline gait libraries integrated into high-frequency MPC
 \cite{sun_online_2024}.
-Although these models generate agile locomotion, they rely strongly
-on periodic gaits
-and struggle mapping truly acyclic footprint geometry over severely
-unstructured gaps.
+Although these models generate agile locomotion, they do not allow for 
+fully dynamic acyclic gait generation.
 
 \subsubsection{Learning-Based Footstep Planners}
 Contrasting pure gait modulation, explicit data-driven footstep
@@ -131,7 +125,7 @@ decision-making with MPC solvers. Early architectures like
 FootstepNet \cite{gaspard_footstepnet_2024},
 DeepLoco \cite{peng_deeploco_2017}, and DeepGait
 \cite{tsounis_deepgait_2020} laid the groundwork
-but frequently localized to bipeds or relied on fixed cyclic stepping
+but only extended to bipeds or relied on fixed cyclic stepping
 patterns. Frameworks like
 RLOC \cite{gangapurwala_rloc_2022}, Omar et al.
 \cite{omar_fast_2022}, and Villarreal et al.
