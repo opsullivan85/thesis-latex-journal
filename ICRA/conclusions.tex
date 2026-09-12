@@ -1,0 +1,53 @@
+This paper presented GaitNet, a greedy footstep planner for acyclic
+quadruped locomotion. GaitNet makes one decision every
+\corlControlTickMs\,ms. It can select one terrain-valid footstep for
+one leg, choose the swing duration, or take no action.
+\changed{At deployment, the selected footstep is the exact maximizer
+of GaitNet's learned value function over every valid candidate cell
+and the learned no-action option.} Each swing lasts longer than one
+planning tick. As a result, overlapping swings can emerge from
+repeated decisions. The planner does not represent a gait phase, leg
+pair, or contact sequence.
+
+\pending{Hardware trials on a Unitree Go1 show that GaitNet (Full)
+outperforms the Legged Perceptive Stack baseline. It also outperforms
+the concurrency-restricted GaitNet-Single and GaitNet-Trot ablations.
+GaitNet (Full) achieves a \textbf{\corlHwFullSuccess\%} mean success
+rate, compared with \textbf{\corlHwLPSSuccess\%} for the scheduled
+NMPC baseline. The advantage is largest at the highest tested terrain
+difficulties.} Preliminary simulation results from our earlier
+framework \cite{Sullivan2025} show the same qualitative mechanism.
+The policy steps one foot at a time under easy commands. Under harder
+commands, it produces overlapping, non-periodic swings with no change
+in the decision rule. \pending{The hardware results indicate that
+this high-rate re-decision mechanism transfers to physical
+deployment.}
+
+\subsection{Limitations and Future Work}
+
+GaitNet's concurrency is still limited by an explicit feasibility
+constraint. At least \numberstringnum{\corlMinContactLegs} legs must
+remain in ground contact, so at most
+\numberstringnum{\corlMaxConcurrentSwingLegs} legs may swing at once.
+This constraint gives the robot stability margin. Its effect at the
+easiest and hardest terrain settings has not yet been ablated.
+\changed{The actor is also trained on
+\numberstringnum{\corlTrainCandidatesPerLeg} randomly sampled
+candidates per leg. At deployment, it is evaluated on an exhaustive
+enumeration of the same discrete terrain grid. The deployed candidate
+set is a denser version of the training set, not a different action
+type. Still, we have not measured performance as a function of
+candidate-set size. That study would separate the benefit of dense
+selection from the benefit of the learned value function itself.}
+
+Both simulation and hardware rely on an external terrain scan to build
+the validity mask. Simulation uses a raycast height field. The
+hardware system uses the Legged Perceptive Stack's height map. This
+difference may create sim-to-real error, but we have not quantified
+it. Future work will add direct exteroceptive input, such as point
+clouds or height maps processed by convolutional layers. This should
+make the planner less dependent on hand-tuned terrain thresholding. We
+also plan to expand the action beyond foothold and timing. For
+example, the planner could choose body posture or center-of-mass
+targets. This would let the same high-rate re-decision idea address
+steeper terrain and stairs without hand-coded elevation heuristics.

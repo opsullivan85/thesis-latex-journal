@@ -28,7 +28,9 @@ dynamics, achieving simultaneous contact and motion planning. Taouil
 et al. \cite{taouil_non-gaited_2024} further explore non-gaited
 footstep planning via MCTS, generating dynamic multi-step sequences
 in real time, though computation remains high due to the branching
-factor. Akizhanov et al.
+factor. \textcolor{red}{\textbf{SS:} I would add that Taouil et al.
+also use a learned cost-to-go model to score candidates.}
+Akizhanov et al.
 \cite{akizhanov_learning_2024} improve MCTS efficiency using a
 learned classifier to prune contact configurations and a target
 adjustment network to compensate for low-level control errors, but

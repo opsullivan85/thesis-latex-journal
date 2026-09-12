@@ -76,6 +76,8 @@ Monte Carlo Tree Search \cite{taouil_non-gaited_2024,
 akizhanov_learning_2024}, generate genuinely acyclic sequences, but
 high branching factors keep them too slow for correction at high
 frequency.
+\textcolor{red}{\textbf{SS:} I would mention that Taouil et al. also
+learn a cost-to-go model; it is not just plain MCTS.}
 
 \subsubsection{End-to-End Neural Networks}
 End-to-end learning methods map sensor data directly to joint
@@ -100,6 +102,8 @@ Q-Networks \cite{da_learning_2020}, neural phase integrators
 MPC running at high frequency \cite{sun_online_2024}. In every case, the learned
 component operates on top of a periodic gait representation and
 cannot itself produce contact sequences outside it.
+\textcolor{red}{\textbf{SS:} I think this is a little too broad; Da
+et al. select primitives, not explicit phase variables.}
 
 \subsubsection{Learning-Based Footstep Planners}
 Closer to our setting, explicit footstep planners driven by data
@@ -114,21 +118,15 @@ combined with fixed or periodic timing. Learned steppability terrain
 maps \cite{asselmeier_steppability-informed_2024,
 omar_safesteps_2023} inform where to place a foot but not when,
 leaving contact timing to an external schedule. Most directly
-relevant, ContactNet \cite{bratta_contactnet_2024} uses a
-convolutional evaluator to extract non-gaited footstep costs from a
-discretized grid, but its selection procedure is restricted to
-moving one leg at a time in strict sequence, which caps how far a
-system built on it can depart from behavior resembling a gait even
-when the underlying cost estimates are acyclic.
+relevant, \textcolor{red}{\textbf{SS:} Small correction: ContactNet is
+fully connected, not a CNN, and the one-leg setup is experimental.}
 
 \subsection{Motivation and Contributions}
-Despite this progress, a clear gap remains. Hybrid planners either
-inherit a periodic gait schedule from the control layer below them,
-or, like ContactNet, remove the schedule but still commit footsteps
-one leg at a time by construction. This motivates our core question:
-whether a planner that commits to at most one footstep at a time,
-re-deciding faster than a swing completes, can produce dynamic
-acyclic gaits that a scheduled or sequential planner cannot.
+Despite this progress, a clear gap remains. Hybrid planners often
+inherit a periodic gait schedule from the control layer below them.
+\textcolor{red}{\textbf{SS:} I would reframe this gap; ContactNet can
+rank multi-leg trot candidates, and Taouil et al. are a close
+comparison.}
 
 GaitNet answers this by never representing coordination between legs
 explicitly. At each control tick it evaluates a small set of

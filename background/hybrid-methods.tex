@@ -45,6 +45,8 @@ al. \cite{sun_online_2024} integrate offline gait optimization with
 contact-implicit trajectory optimization and high-frequency MPC,
 achieving dynamic control but limiting adaptability to a set of
 discrete, speed-dependent gaits.
+\textcolor{red}{\textbf{SS:} I would be more careful here: Da et al.
+select primitives, not explicit phase variables.}
 
 Although effective at generating robust body motions, these methods
 primarily rely on fixed or implicit gait patterns and largely lack
@@ -76,11 +78,9 @@ but the system uses a fixed gait schedule and the footstep planner
 is only evaluated once at the beginning of each cycle.
 
 A key challenge is moving beyond fixed gaits while maintaining
-stability. A recent convolutional evaluator
-\cite{bratta_contactnet_2024} uses a CNN to
-produce non-gaited footstep sequences with greedy selection, though
-it is constrained to one-leg-at-a-time motion and coarse foothold
-discretization. Omar et al. \cite{omar_fast_2022} and Villarreal et
+stability. \textcolor{red}{\textbf{SS:} Small correction: ContactNet
+is fully connected, and the one-leg setup is experimental.} Omar et
+al. \cite{omar_fast_2022} and Villarreal et
 al. \cite{villarreal_fast_2019} use CNNs for terrain classification
 to inform MPC or heuristic-free selection, but both depend on fixed
 gait sequences.
@@ -105,6 +105,8 @@ non-gaited footstep planning and computational efficiency. CNN-based
 and RL methods improve terrain generalization, but fixed gaits or
 sequential leg motions remain common constraints for achieving
 real-time performance and maintaining stability.
+\textcolor{red}{\textbf{SS:} I would account for Taouil et al.'s
+learned evaluator here, since it is close to GaitNet's role.}
 
 \subsection{Greedy Planning and Learned Foothold Classification}
 \label{sec:hybrid-greedy-classification}

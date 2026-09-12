@@ -1,0 +1,115 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first
+% footnote. If that is unneeded, please comment it out.
+%Template version as of 6/27/2024
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{subfiles}
+\usepackage{import}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{fmtcount}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\input{constants}
+
+% ---- revision markup ---------------------------------------------------
+% \changed{...} / \begin{changedblock}  RED: text that differs from the
+%   CoRL version in ../corl/*.tex. Use \changed for an inline span and
+%   changedblock when the edit spans a paragraph break.
+% \pending{...}                       ORANGE: a claim, number, or figure
+%   that depends on hardware trial results not yet collected.
+% Both are revision aids only. Set \revmarkupfalse below to render the
+% whole paper in plain black for submission.
+\newif\ifrevmarkup
+\revmarkuptrue
+\newcommand{\changed}[1]{\ifrevmarkup\textcolor{red}{#1}\else#1\fi}
+\newenvironment{changedblock}{\ifrevmarkup\color{red}\fi}{}
+\newcommand{\pending}[1]{\ifrevmarkup\textcolor{orange}{#1}\else#1\fi}
+
+\begin{document}
+
+\title{GaitNet: Greedy High-Rate Footstep Selection for Acyclic
+  Quadruped Locomotion}
+
+\author{\IEEEauthorblockN{Owen Sullivan}
+  \IEEEauthorblockA{\textit{Robotics Engineering} \\
+    \textit{Worcester Polytechnic Institute}\\
+    Worcester, MA, USA \\
+  email address or ORCID}
+  \and
+  \IEEEauthorblockN{Sourav Selvaraj}
+  \IEEEauthorblockA{\textit{Robotics Engineering} \\
+    \textit{Worcester Polytechnic Institute}\\
+    Worcester, MA, USA \\
+  email address or ORCID}
+  \and
+  \IEEEauthorblockN{Mahdi Agheli}
+  \IEEEauthorblockA{\textit{Robotics Engineering} \\
+    \textit{Worcester Polytechnic Institute}\\
+    Worcester, MA, USA \\
+  email address or ORCID}
+}
+
+\maketitle
+
+\begin{abstract}
+  Quadruped robots must decide where to step and which leg to move.
+  Fixed gait schedules make this problem easier. They also make the
+  robot less reactive when safe footholds appear in irregular places.
+  We present GaitNet, a greedy footstep planner for this setting. At
+  each \corlControlTickMs\,ms control tick, it makes one small
+  decision: move one leg to one foothold for a chosen duration, or do
+  nothing. A swing lasts
+  \corlSwingDurationMin--\corlSwingDurationMax\,s, so GaitNet can
+  decide again while another leg is still in the air. Multi-leg
+  motion then comes from repeated fast decisions. It does not require
+  a gait phase, a library of motion primitives, or a planned contact
+  schedule. \changed{At deployment, GaitNet scores every valid cell in
+  each leg's terrain mask in one batched pass. It then selects the
+  highest-value option among all valid cells and the no-action
+  option.} We train the policy with reinforcement learning in NVIDIA
+  Isaac Lab. We deploy it on a Unitree Go1 through the Legged
+  Perceptive Stack's NMPC/WBC tracking pipeline. \pending{Across
+  matched hardware difficulty levels, GaitNet reaches a
+  \textbf{\corlHwFullSuccess\%} mean success rate. The scheduled NMPC
+  baseline reaches \textbf{\corlHwLPSSuccess\%}.}
+\end{abstract}
+
+\begin{IEEEkeywords}
+  Quadruped Locomotion, Footstep Planning
+\end{IEEEkeywords}
+
+\input{introduction}
+
+\section{Methodology}
+\label{sec:methodology}
+\input{methodology}
+
+\section{Experimental Results}
+\label{sec:results}
+\input{results}
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{conclusions}
+
+\bibliographystyle{ieeetr}
+\bibliography{refs}
+
+\end{document}
