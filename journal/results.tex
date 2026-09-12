@@ -30,7 +30,11 @@ evaluated conditions are:
   \item \textbf{Legged Perceptive Stack:} the scheduled NMPC/WBC
     baseline \cite{leggedperceptive}.
   \item \textbf{GaitNet-Single:} GaitNet with the contact-count
-    constraint tightened so only one leg may swing at a time.
+    constraint tightened so only one leg may swing at a time. This
+    matches the concurrency of ContactNet's walking-mode configuration
+    \cite{bratta_contactnet_2024}. ContactNet has no public
+    implementation, so we use this ablation as a standin for their
+    single leg concurrency.
   \item \textbf{GaitNet-Trot:} GaitNet with concurrency restricted to
     diagonally opposing leg pairs, matching a conventional trot
     structure.
