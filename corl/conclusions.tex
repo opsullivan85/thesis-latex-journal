@@ -5,20 +5,20 @@ between legs anywhere in its architecture. At each
 footstep, drawn from a small set of candidates filtered by terrain and
 locally refined against its own learned value function. Because a
 swing outlasts several such ticks, concurrency between legs emerges
-from high-rate re-decision rather than from an explicit schedule. On
-physical hardware, GaitNet (Full) outperforms both the Legged
-Perceptive Stack, a leading perceptive NMPC baseline, and ablations
-of itself with restricted concurrency (GaitNet-Single,
+from high-rate re-decision rather than from an explicit schedule.
+\pending{On physical hardware, GaitNet (Full) outperforms both the
+Legged Perceptive Stack, a leading perceptive NMPC baseline, and
+ablations of itself with restricted concurrency (GaitNet-Single,
 GaitNet-Trot), achieving \textbf{\corlHwFullSuccess\%} versus
 \textbf{\corlHwLPSSuccess\%} mean success rate across matched terrain
 difficulties, with the gap widening at the highest difficulties
-tested. Simulation results and an analysis of the swing schedule from
+tested.} Simulation results and an analysis of the swing schedule from
 our preliminary framework \cite{Sullivan2025} first demonstrated this
 mechanism. The same policy moves one foot at a time under easy
 commands and produces overlapping swings that do not alternate under
 harder ones, with no change to the decision rule that produces either
-behavior. The hardware results above confirm that the same mechanism
-transfers to physical deployment.
+behavior. \pending{The hardware results above confirm that the same
+mechanism transfers to physical deployment.}
 
 \subsection{Limitations and Future Work}
 

@@ -37,14 +37,20 @@ conservatively account for the physical extent of the robot's foot.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.7\linewidth]{images/diagrams/control-system.png}
+  \pending{%
+  \setlength{\fboxsep}{0pt}%
+  \fbox{\begin{minipage}[c][0.25\linewidth][c]{0.95\linewidth}
+    \centering
+    \textit{Need to update system diagram}
+  \end{minipage}}%
+  }
+  % \includegraphics[width=0.7\linewidth]{images/diagrams/control-system.png}
   \caption{System architecture of the proposed control framework. A
     terrain height scan is thresholded and dilated into a per-leg
     validity mask; a small set of candidate footsteps is sampled
     within that mask per leg and locally refined against GaitNet's
     value function; the single best candidate across all legs, or a
-    no-action option, is selected and passed to the tracking
-  controller.}
+    no-action option, is selected and passed to the tracking controller.}
   \label{fig:diagram-control-system}
 \end{figure*}
 

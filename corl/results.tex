@@ -49,10 +49,18 @@ without falling or placing a foot in a removed terrain section.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{images/figures/test-environment.png}
+  \pending{%
+  \setlength{\fboxsep}{0pt}%
+  \fbox{\begin{minipage}[c][0.5\linewidth][c]{0.95\linewidth}
+    \centering
+    \textit{Figure pending hardware trials}
+  \end{minipage}}%
+  }
   \caption{The Unitree Go1 platform navigating the physical testing
     track used for hardware evaluation. Terrain difficulty is the
-    percentage of the track area that cannot be stepped on.}
+    percentage of the track area that cannot be stepped on.
+    \textit{Placeholder: to be replaced with a photo of the physical
+    track once it is built and hardware data collection begins.}}
   \label{fig:figure-test-environment}
 \end{figure}
 
@@ -65,20 +73,20 @@ without falling or placing a foot in a removed terrain section.
     \toprule
     \textbf{Method} & \textbf{Success} & \textbf{Time [s]} & \textbf{Steps} \\
     \midrule
-    Legged Perceptive Stack \cite{leggedperceptive} & \corlHwLPSSuccess\% & \corlHwLPSTime{} & \corlHwLPSSteps{} \\
-    GaitNet-Single & \corlHwSingleSuccess\% & \corlHwSingleTime{} & \corlHwSingleSteps{} \\
-    GaitNet-Trot & \corlHwTrotSuccess\% & \corlHwTrotTime{} & \corlHwTrotSteps{} \\
-    \textbf{GaitNet (Full)} & \textbf{\corlHwFullSuccess\%} & \textbf{\corlHwFullTime{}} & \textbf{\corlHwFullSteps{}} \\
+    Legged Perceptive Stack \cite{leggedperceptive} & \pending{\corlHwLPSSuccess\%} & \pending{\corlHwLPSTime{}} & \pending{\corlHwLPSSteps{}} \\
+    GaitNet-Single & \pending{\corlHwSingleSuccess\%} & \pending{\corlHwSingleTime{}} & \pending{\corlHwSingleSteps{}} \\
+    GaitNet-Trot & \pending{\corlHwTrotSuccess\%} & \pending{\corlHwTrotTime{}} & \pending{\corlHwTrotSteps{}} \\
+    \textbf{GaitNet (Full)} & \textbf{\pending{\corlHwFullSuccess\%}} & \textbf{\pending{\corlHwFullTime{}}} & \textbf{\pending{\corlHwFullSteps{}}} \\
     \bottomrule
   \end{tabular}
   \label{tab:hardware-metrics}
 \end{table}
 
-\autoref{tab:hardware-metrics} and \autoref{fig:data-hardware-survival}
-summarize hardware results across the full difficulty range.
-GaitNet (Full) achieves the highest success rate of the four methods,
-with the gap widening substantially at high difficulty
-($\corlHighDifficultyRangeLow$--$\corlDifficultyMax\%$).
+\pending{\autoref{tab:hardware-metrics} and
+\autoref{fig:data-hardware-survival} summarize hardware results
+across the full difficulty range. GaitNet (Full) achieves the highest
+success rate of the four methods, with the gap widening substantially
+at high difficulty ($\corlHighDifficultyRangeLow$--$\corlDifficultyMax\%$).
 The Legged Perceptive Stack's fixed phase schedule, and the
 GaitNet-Trot and GaitNet-Single ablations, all increasingly commit to
 footholds inside a scheduled or single-leg sequence that cannot be
@@ -90,16 +98,41 @@ matches the ordering predicted by
 \autoref{subsec:methodology-high-rate-selection}: GaitNet-Single, the
 most constrained ablation, performs closest to the scheduled baseline,
 GaitNet-Trot recovers some concurrency and some performance, and
-GaitNet (Full) is uniformly best.
+GaitNet (Full) is uniformly best.}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{images/data/experiments/Gaitnet
-  - survival-curr - 69.4 - individual.png}
+  \pending{%
+  \setlength{\fboxsep}{0pt}%
+  \fbox{\begin{minipage}[c][0.5\linewidth][c]{0.95\linewidth}
+    \centering
+    \textit{Figure pending hardware trials}
+  \end{minipage}}%
+  }
   \caption{Hardware success rate versus terrain difficulty for all
-    four evaluated methods. \textit{Placeholder: simulation figure
-    shown pending hardware data collection.}}
+    four evaluated methods. \textit{Placeholder: to be replaced with
+    the real plot once hardware data collection is complete.}}
   \label{fig:data-hardware-survival}
+\end{figure}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{images/data/swing-schedule.png}
+  \caption{Example swing schedule. Each row represents a leg, with
+    color indicating swing phase. Below
+    \corlSwingScheduleTransitionMark\,s the robot is commanded at low
+    velocity and steps one foot at a time; above
+    \corlSwingScheduleTransitionMark\,s, at higher commanded velocity,
+    swings overlap without a fixed alternating pattern.}
+  \label{fig:data-swing-schedule}
+\end{figure*}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{images/data/swing_duration_histogram.png}
+  \caption{Histogram of swing durations selected by GaitNet during
+  evaluation.}
+  \label{fig:data-swing-duration-histogram}
 \end{figure}
 
 \subsection{Simulation Results (Preliminary Framework)}
@@ -166,18 +199,6 @@ expect the same emergent behavior to hold at deployment. The hardware
 comparison in \autoref{subsec:results-hardware-comparison} tests this
 directly.
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=0.85\textwidth]{images/data/swing-schedule.png}
-  \caption{Example swing schedule. Each row represents a leg, with
-    color indicating swing phase. Below
-    \corlSwingScheduleTransitionMark\,s the robot is commanded at low
-    velocity and steps one foot at a time; above
-    \corlSwingScheduleTransitionMark\,s, at higher commanded velocity,
-    swings overlap without a fixed alternating pattern.}
-  \label{fig:data-swing-schedule}
-\end{figure*}
-
 In this same study, swing durations vary rather than following a
 fixed schedule. \autoref{fig:data-swing-duration-histogram} shows a
 peak between
@@ -188,14 +209,6 @@ such as recovering a marginal foothold. The mean swing duration
 across training settles to $\corlResMeanSwingDuration$\,s with a
 standard deviation of $\corlResStdSwingDuration$\,s, indicating the
 duration head is in active use rather than collapsing to a constant.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{images/data/swing_duration_histogram.png}
-  \caption{Histogram of swing durations selected by GaitNet during
-  evaluation.}
-  \label{fig:data-swing-duration-histogram}
-\end{figure}
 
 \subsection{Swing Duration Ablation (Preliminary Framework)}
 \label{subsec:results-duration-ablation}

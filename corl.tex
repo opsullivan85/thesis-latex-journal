@@ -28,6 +28,11 @@
 T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \input{corl/constants}
 
+% Marks a claim, number, or figure that depends on hardware trial
+% results not yet collected. Remove this wrapper once real numbers
+% are in and the surrounding text has been checked against them.
+\newcommand{\pending}[1]{\textcolor{red}{#1}}
+
 \begin{document}
 
 \title{GaitNet: Greedy High-Rate Footstep Selection for Acyclic
@@ -74,10 +79,10 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
   building on simulation results from our preliminary framework, and
   evaluate the resulting system for the first time on a physical
   Unitree Go1 against the Legged Perceptive Stack, a leading
-  perceptive NMPC baseline. GaitNet achieves a
+  perceptive NMPC baseline. \pending{GaitNet achieves a
   \textbf{\corlHwFullSuccess\%} mean success rate versus
   \textbf{\corlHwLPSSuccess\%} for the baseline across matched terrain
-  difficulties.
+  difficulties.}
 \end{abstract}
 
 \begin{IEEEkeywords}
