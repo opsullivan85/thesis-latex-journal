@@ -22,32 +22,36 @@ GaitNet is responsible for ranking footstep candidates based on the
 one-hot encoded leg index $\mathbf{f_c}^{\prime}$ and the GaitNet
 input $\mathbf{x_g}$:
 
+{\color{red}
+\noindent\textbf{SS:}
 \begin{equation}
   \mathbf{x_g} =
   \begin{bmatrix}
-    \mathbf p_{b,xy} \\
-    \mathbf r_{w,z} \\
+    \mathbf p_{f,xy}^{b} \\
+    p_{b,z} \\
     \mathbf v_b \\
     \mathbf \omega_b \\
-    \mathbf u \\
-    \mathbf g \\
-    \mathbf c
+    \mathbf v^{usr} \\
+    \mathbf c \\
+    \mathbf g_b
   \end{bmatrix}
   \label{eq:gaitnet-x}
 \end{equation}
 
-Descriptions of the first five terms dictate the primary robot state,
-tracking current
-base position $p_{b,xy}$ and rotation $r_{w,z}$ in world coordinates,
-body linear
-$\mathbf v_b$ and angular $\mathbf \omega_b$ velocities, and current
-foot positions $\mathbf u$.
-The additional terms are $\mathbf g$ and $\mathbf c$, being the
-gravity vector and contact state
-respectively. Using $\mathbf{x_g}$ and $\mathbf{f_c}^{\prime}$,
+The tracking state contains the current foot positions
+$\mathbf p_{f,xy}^{b} \in \mathbb{R}^{8}$ in the base frame,
+base height $p_{b,z}$ in the world frame, body linear
+$\mathbf v_b \in \mathbb{R}^{3}$ and angular
+$\mathbf \omega_b \in \mathbb{R}^{3}$ velocities, and commanded
+velocity $\mathbf v^{usr} = [v_x, v_y, \omega_z]$.
+The remaining terms are the per-foot contact state
+$\mathbf c \in \{0,1\}^{4}$ and the projected gravity vector
+$\mathbf g_b \in \mathbb{R}^{3}$. Using $\mathbf{x_g}$ and
+$\mathbf{f_c}^{\prime}$,
 GaitNet outputs a logit associated with
 each evaluated spatial coordinate and the desired swing duration if
 that step is selected.
+}
 
 \begin{figure}[H]
   \centering

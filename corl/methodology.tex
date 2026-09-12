@@ -87,35 +87,38 @@ duration to use if that candidate is selected. GaitNet evaluates
 candidates conditioned on a one-hot leg encoding (including a
 no-action option) and the current tracking state $\mathbf{x_g}$:
 
+{\color{red}
+\noindent\textbf{SS:}
 \begin{equation}
   \mathbf{x_g} =
   \begin{bmatrix}
-    \mathbf p_{b,xy} &
-    \mathbf r_{w,z} &
+    \mathbf p_{f,xy}^{b} &
+    p_{b,z} &
     \mathbf v_b &
     \mathbf \omega_b &
-    \mathbf u &
-    \mathbf g &
-    \mathbf c
+    \mathbf v^{usr} &
+    \mathbf c &
+    \mathbf g_b
   \end{bmatrix}^T
   \label{eq:gaitnet-x}
 \end{equation}
 
-Here $\mathbf p_{b,xy} \in \mathbb{R}^{\corlFootPosDim}$ is the $xy$
-position of all four end-effectors in the base frame, and
-$\mathbf r_{w,z}$ is the height of the robot's center of mass in the
-world frame. $\mathbf v_b \in \mathbb{R}^{\corlVelDim}$ and
+Here $\mathbf p_{f,xy}^{b} \in \mathbb{R}^{\corlFootPosDim}$ is the
+$xy$ position of all four end-effectors in the base frame, and
+$p_{b,z}$ is the height of the robot's base in the world frame.
+$\mathbf v_b \in \mathbb{R}^{\corlVelDim}$ and
 $\mathbf \omega_b \in \mathbb{R}^{\corlAngVelDim}$ are the robot's
 linear and angular velocity in the root frame.
-$\mathbf u = [v_x, v_y, \omega_z]$ is the commanded velocity.
-$\mathbf g \in \mathbb{R}^{\corlGravityDim}$ is the direction of
-gravity in the body frame, and
+$\mathbf v^{usr} = [v_x, v_y, \omega_z]$ is the commanded velocity.
 $\mathbf c \in \{0,1\}^{\corlContactDim}$ is the per-foot contact
-state. Together these total \corlStateDim{} dimensions. Notably, the
+state, and $\mathbf g_b \in \mathbb{R}^{\corlGravityDim}$ is the
+projected gravity vector in the body frame.
+Together these total \corlStateDim{} dimensions. Notably, the
 inclusion of $\mathbf \omega_b$ distinguishes this formulation from
 that of ContactNet \cite{bratta_contactnet_2024}, which omits angular
 velocity from its state representation. We add it to improve
 performance in situations with high rotational velocities.
+}
 
 The network implements a middle-fusion style feature combinator
 \cite{feng2021deep}.
