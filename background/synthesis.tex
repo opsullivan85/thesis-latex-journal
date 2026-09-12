@@ -13,16 +13,15 @@ problem inherent in non-gaited contact planning
 end-to-end learning approaches achieve impressive dynamic, acyclic
 behaviors but lack formal guarantees and generalizability beyond
 their training distribution \cite{zhang_learning_2023}.
-\textcolor{red}{\textbf{SS:} I would not frame Taouil et al. only as
-a slow search baseline; they also use a learned evaluator.}
 
 Hybrid control architectures have emerged as the promising middle
 ground, integrating learned modules within model-based frameworks to
 balance agility and stability. However, existing hybrid footstep
-planners still face limits from fixed timing, candidate
-enumeration, or planner complexity.
-\textcolor{red}{\textbf{SS:} I think ContactNet's one-leg walking
-setup is experimental, not an architectural limit.}
+planners, such as recent ML planners \cite{bratta_contactnet_2024}, are often
+constrained by enforcing sequential, one-leg-at-a-time motion or
+relying on fixed gait timing. These constraints fundamentally limit
+the robot's ability to execute the fully dynamic, acyclic locomotion
+required for optimal performance in complex terrain.
 
 This thesis addresses the identified gap by proposing a novel hybrid
 architecture built upon the efficiency of greedy, NN-based selection
