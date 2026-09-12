@@ -1,7 +1,7 @@
 import re
 import os
 
-corl_files = ['corl/introduction.tex', 'corl/methodology.tex', 'corl/results.tex', 'corl/conclusions.tex']
+journal_files = ['journal/introduction.tex', 'journal/methodology.tex', 'journal/results.tex', 'journal/conclusions.tex']
 main_files = []
 for d in ['introduction', 'background', 'methodology', 'results', 'conclusions', 'header', 'appendices']:
     for root, dirs, files in os.walk(d):
@@ -25,10 +25,10 @@ def extract_contexts(files):
                         contexts[cite].append(f"[{fn}:{i+1}] {line.strip()}")
     return contexts
 
-corl_contexts = extract_contexts(corl_files)
+journal_contexts = extract_contexts(journal_files)
 main_contexts = extract_contexts(main_files)
 
-for cite, strings in corl_contexts.items():
+for cite, strings in journal_contexts.items():
     print(f"\n--- Citation: {cite} ---")
     print("CORL USAGE:")
     for s in strings:

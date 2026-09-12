@@ -1,7 +1,7 @@
 import re
 import os
 
-corl_files = ['corl/introduction.tex', 'corl/methodology.tex', 'corl/results.tex', 'corl/conclusions.tex']
+journal_files = ['journal/introduction.tex', 'journal/methodology.tex', 'journal/results.tex', 'journal/conclusions.tex']
 main_files = []
 for d in ['introduction', 'background', 'methodology', 'results', 'conclusions', 'header', 'appendices']:
     for root, dirs, files in os.walk(d):
@@ -30,11 +30,11 @@ def extract_contexts(files, context_lines=2):
                     contexts[cite].append(f"[{fn}:{i+1}]\n    " + snippet.replace("\n", "\n    "))
     return contexts
 
-corl_contexts = extract_contexts(corl_files)
+journal_contexts = extract_contexts(journal_files)
 main_contexts = extract_contexts(main_files)
 
 with open('cite_compare_wide.txt', 'w') as out:
-    for cite, strings in corl_contexts.items():
+    for cite, strings in journal_contexts.items():
         out.write(f"\n=========================================\n")
         out.write(f"CITATION: {cite}\n")
         out.write(f"=========================================\n")

@@ -1,15 +1,15 @@
 import re
 import os
 
-corl_cites = set()
-for fn in ['corl/introduction.tex', 'corl/methodology.tex', 'corl/results.tex', 'corl/conclusions.tex']:
+journal_cites = set()
+for fn in ['journal/introduction.tex', 'journal/methodology.tex', 'journal/results.tex', 'journal/conclusions.tex']:
     if os.path.exists(fn):
         with open(fn) as f:
             for match in re.finditer(r'\\cite\{([^\}]+)\}', f.read()):
                 for cite in [x.strip() for x in match.group(1).split(',')]:
-                    corl_cites.add(cite)
+                    journal_cites.add(cite)
 
-print(f"Total citations in corl: {len(corl_cites)}")
+print(f"Total citations in journal: {len(journal_cites)}")
 
 main_cites = set()
 main_cites_dict = {}
@@ -28,7 +28,7 @@ for d in ['introduction', 'background', 'methodology', 'results', 'conclusions',
 
 print(f"Total citations in main: {len(main_cites)}")
 
-missing_in_main = corl_cites - main_cites
-print(f"Citations in corl NOT in main: {missing_in_main}")
+missing_in_main = journal_cites - main_cites
+print(f"Citations in journal NOT in main: {missing_in_main}")
 
 # Also let's check for inconsistent contexts...

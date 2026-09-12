@@ -7,10 +7,10 @@ locomotion stack. At each control tick, the robot receives a terrain
 height scan. The scan is converted into steppable and unsteppable
 cells. The mask is dilated to account for foot size and
 state-estimation error. It is then converted into a per-leg validity
-mask. \changed{GaitNet scores every valid cell in that mask. It
+mask. GaitNet scores every valid cell in that mask. It
 compares those footstep candidates with a learned no-action option.
 It then sends the best single action to the low-level tracking
-controller.} The action contains one leg, one target foothold, and one
+controller. The action contains one leg, one target foothold, and one
 swing duration.
 
 The tracking layer depends on the platform. In simulation, GaitNet
@@ -21,9 +21,9 @@ action replaces the native gait scheduler in the Legged Perceptive
 Stack. The stack then tracks the action with its NMPC/Whole-Body
 Control (WBC) pipeline \cite{leggedperceptive}. This separation makes
 the hardware comparison focus on the planner. The low-level
-controller stays fixed. \changed{Using a frozen learned planner with a
+controller stays fixed. Using a frozen learned planner with a
 different model-based execution layer is also consistent with prior
-policy retargeting results \cite{li_zero-shot_2022}.}
+policy retargeting results \cite{li_zero-shot_2022}.
 
 Two feasibility rules run before the network scores a candidate.
 First, a leg that is already swinging is removed from the mask. Its
@@ -41,14 +41,14 @@ treats small gaps near a candidate foothold edge conservatively.
   % Source of truth is images/diagrams/gaitnet-architecture.svg (edit in
   % Inkscape). The PDF beside it is exported from that SVG for pdflatex:
   %   inkscape --export-type=pdf gaitnet-architecture.svg
-  \includegraphics[width=\textwidth]{ICRA/images/diagrams/gaitnet-architecture.png}
-  \caption{\changed{System overview. (a)~Deployment: a height scan
+  \includegraphics[width=\textwidth]{images/diagrams/gaitnet-architecture.png}
+  \caption{System overview. (a)~Deployment: a height scan
     becomes a per-leg validity mask; GaitNet scores every valid cell
     plus a no-action option in one pass, and the argmax is issued as a
     single footstep command. (b)~The network: state and candidate
     embeddings feed a shared trunk with value and duration heads.
     (c)~Training: PPO in Isaac Lab over a sampled 65-candidate set;
-    only the actor is deployed, frozen.}}
+    only the actor is deployed, frozen.}
   \label{fig:diagram-control-system}
 \end{figure*}
 
@@ -70,12 +70,12 @@ gait phase, leg pair, or contact sequence. Instead, it repeatedly asks
 a simple question: is any available footstep better than doing
 nothing? If yes, and another leg is already in swing, the swings
 overlap. If the no-action option wins, the robot waits.
-\changed{Learned per-candidate scoring has already made acyclic
+Learned per-candidate scoring has already made acyclic
 contact planning fast enough for online use
 \cite{bratta_contactnet_2024, taouil_non-gaited_2024}. The
 single-leg, single-tick action space used here makes the decision
 small enough to repeat every control tick, not only at contact
-events.}
+events.
 
 \subsection{GaitNet Formulation}
 \label{subsec:methodology-gaitnet-architecture}
@@ -145,7 +145,6 @@ ranked them. An ablation showed that zeroing this cost input improved
 survival rate. We therefore remove that stage. GaitNet's value head is
 the only ranking signal.
 
-\begin{changedblock}
 \subsection{Candidate Enumeration and Selection}
 \label{subsec:methodology-gaitnet-selection}
 
@@ -182,7 +181,6 @@ on \corlTrainTotalCandidates{} sampled candidates
 (\autoref{subsec:methodology-gaitnet-training}). At deployment, it is
 used frozen on up to \corlTotalCandidatesDense{} enumerated
 candidates. No retraining or fine-tuning is used.
-\end{changedblock}
 
 \subsection{Reinforcement Learning Framework}
 \label{subsec:methodology-gaitnet-training}
@@ -195,7 +193,7 @@ using Proximal Policy Optimization (PPO)
 
 The actor is the GaitNet network described above. The critic is a
 separate, smaller network. It has its own state encoder, footstep
-encoder, and trunk. \begin{changedblock}For each sampled candidate,
+encoder, and trunk. For each sampled candidate,
 the critic produces a score. A small combining MLP maps all
 \corlTrainTotalCandidates{} candidate scores to one state-value
 estimate. The critic shares no weights with the actor. It also has no
@@ -220,7 +218,6 @@ candidates are compared. It does not change the type of candidate the
 network sees. This width-agnostic property applies only to the actor.
 The critic's combining MLP is fixed to
 \corlTrainTotalCandidates{} inputs and is discarded after training.
-\end{changedblock}
 
 For the selected candidate, the duration output defines the mean of a
 Normal distribution. The distribution has fixed standard deviation

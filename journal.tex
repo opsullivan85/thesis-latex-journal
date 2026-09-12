@@ -1,6 +1,6 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
-\input{ICRA/constants}
+\input{journal/constants}
 % The preceding line is only needed to identify funding in the first
 % footnote. If that is unneeded, please comment it out.
 %Template version as of 6/27/2024
@@ -27,21 +27,10 @@
 \usepackage{fmtcount}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
 T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-\input{constants}
 
-% ---- revision markup ---------------------------------------------------
-% \changed{...} / \begin{changedblock}  RED: text that differs from the
-%   CoRL version in ../corl/*.tex. Use \changed for an inline span and
-%   changedblock when the edit spans a paragraph break.
-% \pending{...}                       ORANGE: a claim, number, or figure
-%   that depends on hardware trial results not yet collected.
-% Both are revision aids only. Set \revmarkupfalse below to render the
-% whole paper in plain black for submission.
-\newif\ifrevmarkup
-\revmarkuptrue
-\newcommand{\changed}[1]{\ifrevmarkup\textcolor{red}{#1}\else#1\fi}
-\newenvironment{changedblock}{\ifrevmarkup\color{red}\fi}{}
-\newcommand{\pending}[1]{\ifrevmarkup\textcolor{orange}{#1}\else#1\fi}
+% \pending{...} ORANGE: a claim, number, or figure that depends on
+% hardware trial results not yet collected.
+\newcommand{\pending}[1]{\textcolor{orange}{#1}}
 
 \begin{document}
 
@@ -81,10 +70,10 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
   decide again while another leg is still in the air. Multi-leg
   motion then comes from repeated fast decisions. It does not require
   a gait phase, a library of motion primitives, or a planned contact
-  schedule. \changed{At deployment, GaitNet scores every valid cell in
+  schedule. At deployment, GaitNet scores every valid cell in
   each leg's terrain mask in one batched pass. It then selects the
   highest-value option among all valid cells and the no-action
-  option.} We train the policy with reinforcement learning in NVIDIA
+  option. We train the policy with reinforcement learning in NVIDIA
   Isaac Lab. We deploy it on a Unitree Go1 through the Legged
   Perceptive Stack's NMPC/WBC tracking pipeline. \pending{Across
   matched hardware difficulty levels, GaitNet reaches a
@@ -96,19 +85,19 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
   Quadruped Locomotion, Footstep Planning
 \end{IEEEkeywords}
 
-\input{ICRA/introduction}
+\input{journal/introduction}
 
 \section{Methodology}
 \label{sec:methodology}
-\input{ICRA/methodology}
+\input{journal/methodology}
 
 \section{Experimental Results}
 \label{sec:results}
-\input{ICRA/results}
+\input{journal/results}
 
 \section{Conclusion}
 \label{sec:conclusion}
-\input{ICRA/conclusions}
+\input{journal/conclusions}
 
 \bibliographystyle{ieeetr}
 \bibliography{refs}

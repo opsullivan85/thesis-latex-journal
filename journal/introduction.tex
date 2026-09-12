@@ -26,7 +26,7 @@ limiting footholds to convex terrain regions
 timing together \cite{winkler_gait_2018,
 aceituno_simultaneous_2019}. These methods shrink the problem, but
 they are still costly for fast reactive correction.
-\changed{Other planners remove the periodic schedule without using a
+Other planners remove the periodic schedule without using a
 learned policy. They choose contact timing online from per-leg utility
 or feasibility rules
 \cite{fankhauser_free_gait_2016, boussema_online_2019,
@@ -39,9 +39,9 @@ Contact-implicit methods avoid the discrete branch by relaxing
 complementarity constraints. They can discover contacts from dynamics
 in real time on hardware \cite{kim_contact-implicit_2025}. They do
 not, however, choose footholds from a perceived steppability map. That
-is the decision learned in this work.}
+is the decision learned in this work.
 
-\changed{End-to-end policies put the same discrete choices inside one
+End-to-end policies put the same discrete choices inside one
 neural controller. They can cross hard terrain reliably
 \cite{zhang_learning_2023, zhang_novel_2024, duan_sim--real_2022,
 siekmann_blind_2021, lee_learning_2020}. But the contact decision is
@@ -49,7 +49,7 @@ hidden inside the joint targets. It cannot be checked or constrained
 before execution. Perceptive model-based stacks take a different path.
 They project a commanded foothold onto a convex terrain region before
 tracking \cite{grandia_perceptive_2022, leggedperceptive}. This
-requires an explicit foothold to project.}
+requires an explicit foothold to project.
 
 Hybrid methods keep learning more focused. A common design learns
 foothold placement. A lower-level controller or gait generator still
@@ -57,7 +57,7 @@ provides the contact schedule
 \cite{gangapurwala_rloc_2022, villarreal_fast_2019, omar_fast_2022,
 omar_safesteps_2023, asselmeier_steppability-informed_2024,
 gaspard_footstepnet_2024, peng_deeploco_2017, tsounis_deepgait_2020,
-shi_terrain-aware_2023, xie_glide_2023}. \changed{Another design
+shi_terrain-aware_2023, xie_glide_2023}. Another design
 learns contact structure and leaves foothold targets to a separate
 heuristic. Examples include selecting whole-robot contact
 configurations \cite{da_learning_2020}, phase parameters
@@ -70,7 +70,7 @@ per-foot flight-phase injections into an MPC horizon. This gives
 acyclic timing changes, but it does not learn foothold selection.
 End-to-end policies can also show emergent, speed-dependent gait
 structure when trained without an explicit schedule
-\cite{fu_minimizing_2021}.}
+\cite{fu_minimizing_2021}.
 
 The closest comparison is ContactNet \cite{bratta_contactnet_2024}.
 It uses a neural network to rank discretized foothold candidates. It
@@ -78,14 +78,13 @@ does not prescribe which leg should swing. Its concurrency level is
 set by configuration. In walking experiments, one leg swings at a
 time. In trot experiments, it ranks joint footholds for the two legs
 that swing together. It re-ranks candidates at touchdown. The
-configured gait sets the swing timing. \changed{GaitNet differs in
+configured gait sets the swing timing. GaitNet differs in
 three ways. It re-ranks during swing, selects swing duration, and lets
 leg overlap emerge from repeated single-leg decisions instead of a
-configured contact pattern.}
+configured contact pattern.
 
 \subsection{Contributions}
 
-\begin{changedblock}
 GaitNet makes one atomic decision at a fixed control rate. It chooses
 which leg to swing, where to place it, and how long the swing lasts.
 This decision can happen while another leg is already in the air. The
@@ -101,17 +100,16 @@ foothold remains explicit. The terrain projection step can still act
 as a safety layer. The same frozen planner is also used with two
 different low-level controllers: a convex MPC in simulation and an
 NMPC$+$WBC stack on hardware.
-\end{changedblock}
 
 The main contributions are:
 \begin{enumerate}
   \item A greedy, high-rate footstep planner that emits at most one
     action per control tick. It produces multi-leg swing without an
     explicit phase schedule or a separate footstep-evaluation stage.
-  \item \changed{A per-candidate formulation in which the learned
+  \item A per-candidate formulation in which the learned
     network does not depend on the number of candidates. A policy
     trained on sampled candidates can therefore be deployed, frozen,
-    on an exhaustive terrain-mask enumeration.}
+    on an exhaustive terrain-mask enumeration.
   \item Hardware validation on a Unitree Go1 against the Legged
     Perceptive Stack, a perceptive Nonlinear Model Predictive Control
     (NMPC) baseline. We also test concurrency-restricted GaitNet
@@ -121,8 +119,8 @@ The main contributions are:
 This paper extends our preliminary framework \cite{Sullivan2025}. The
 earlier work introduced the single-footstep, single-tick action space.
 It reported simulation results with randomly sampled candidate
-footholds. \changed{Here, deployment replaces random sampling with
-exhaustive enumeration over the same terrain mask.} We also provide
+footholds. Here, deployment replaces random sampling with
+exhaustive enumeration over the same terrain mask. We also provide
 the first hardware evaluation of the planner. We include preliminary
 simulation results for context in \autoref{sec:results}. They are
 marked as preliminary throughout. They were not rerun with the

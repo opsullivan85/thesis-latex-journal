@@ -140,9 +140,9 @@ grid cell used \corlSimTrialsPerCell{} trials of
 Those experiments used the sampled candidate distribution described in
 \autoref{subsec:methodology-gaitnet-training}. Each decision compared
 \corlTrainCandidatesPerLeg{} sampled candidates per leg and one
-no-action option. They did not use \changed{the exhaustive
+no-action option. They did not use the exhaustive
 deployment-time enumeration introduced in
-\autoref{subsec:methodology-gaitnet-selection}.} We therefore report
+\autoref{subsec:methodology-gaitnet-selection}. We therefore report
 the simulation results as evidence for the original mechanism. They
 are not a direct validation of the deployed enumeration procedure.
 
@@ -174,11 +174,11 @@ No mode switch or gait change triggers this transition. The same value
 function and no-action comparison govern both regimes. Higher
 commanded velocity simply makes useful footholds beat the no-action
 score more often while another leg is already in the air.
-\changed{Deployment-time enumeration changes which candidates are
+Deployment-time enumeration changes which candidates are
 available for comparison. It does not change how any individual
 candidate is ranked. We therefore expect the same decision mechanism
 to remain under dense enumeration. The hardware comparison tests that
-expectation directly.}
+expectation directly.
 
 \autoref{fig:data-swing-duration-histogram} shows that the duration
 head remains active. During typical forward motion, selected swing

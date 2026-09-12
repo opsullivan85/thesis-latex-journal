@@ -2,9 +2,9 @@ This paper presented GaitNet, a greedy footstep planner for acyclic
 quadruped locomotion. GaitNet makes one decision every
 \corlControlTickMs\,ms. It can select one terrain-valid footstep for
 one leg, choose the swing duration, or take no action.
-\changed{At deployment, the selected footstep is the exact maximizer
+At deployment, the selected footstep is the exact maximizer
 of GaitNet's learned value function over every valid candidate cell
-and the learned no-action option.} Each swing lasts longer than one
+and the learned no-action option. Each swing lasts longer than one
 planning tick. As a result, overlapping swings can emerge from
 repeated decisions. The planner does not represent a gait phase, leg
 pair, or contact sequence.
@@ -31,14 +31,14 @@ remain in ground contact, so at most
 \numberstringnum{\corlMaxConcurrentSwingLegs} legs may swing at once.
 This constraint gives the robot stability margin. Its effect at the
 easiest and hardest terrain settings has not yet been ablated.
-\changed{The actor is also trained on
+The actor is also trained on
 \numberstringnum{\corlTrainCandidatesPerLeg} randomly sampled
 candidates per leg. At deployment, it is evaluated on an exhaustive
 enumeration of the same discrete terrain grid. The deployed candidate
 set is a denser version of the training set, not a different action
 type. Still, we have not measured performance as a function of
 candidate-set size. That study would separate the benefit of dense
-selection from the benefit of the learned value function itself.}
+selection from the benefit of the learned value function itself.
 
 Both simulation and hardware rely on an external terrain scan to build
 the validity mask. Simulation uses a raycast height field. The
