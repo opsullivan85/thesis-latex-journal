@@ -1,0 +1,19 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented GaitNet, a planner that makes only the discrete contact
+decision for a quadruped: one leg, one foothold, and one swing
+duration, or no action, re-evaluated while other legs are still in
+swing. Because candidates are scored independently, a policy trained
+on sampled candidates is deployed without retraining on an exhaustive
+enumeration, and its argmax is realized by a model-based NMPC/WBC
+stack through a narrow interface.
+
+\pending{Systematic Gazebo experiments demonstrate the benefit of
+high-rate unrestricted contact selection.} Limited Go1 experiments
+establish that the frozen policy and planner-controller interface can
+execute on physical hardware, while larger hardware comparisons remain
+future work. Further work will remove the hand-tuned hardware
+adaptations by training with the execution controller's timing limits,
+restore the trained decision rate on hardware, and learn directly from
+elevation maps rather than thresholded masks.

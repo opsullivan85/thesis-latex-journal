@@ -1,0 +1,220 @@
+\section{Experiments}
+\label{sec:experiments}
+
+We ask four questions. (Q1)~Does unrestricted high-rate contact
+selection improve success as terrain becomes harder? (Q2)~How much of
+the benefit comes from emergent concurrency? (Q3)~Does exhaustive
+enumeration matter relative to sampling? (Q4)~Can the frozen planner
+run in real time with a model-based stack on a physical robot?
+
+\subsection{Training and Deployment Setup}
+\label{subsec:exp-setup}
+
+All conditions use one PPO checkpoint trained as in
+\autoref{subsec:method-training}, frozen after training. Conditions
+differ only in the action-selection constraints listed below, applied
+to the same logits. \pending{Random seeds, the checkpoint hash, and all
+launch parameters are logged for every trial.}
+
+\subsection{Gazebo Terrain Benchmark}
+\label{subsec:exp-gazebo}
+
+\textit{Terrain.} Each world is a grid of rigid tiles on pillars with
+a fraction of tiles removed; removed tiles are true drops rather than
+painted regions. Terrain difficulty is the percentage of removed tile
+area, from $\corlDifficultyMin\%$ to $\corlDifficultyMax\%$ in
+$\corlDifficultyStep\%$ steps. \pending{Tile size, track length, and
+the world seeds per difficulty level will be reported here.}
+
+\textit{Protocol.} Commanded forward speed ranges from
+$\corlVelocityMin$ to $\corlVelocityMax$\,m/s. Each (method,
+difficulty, speed) cell is run for \pending{\corlSimTrialsPerCell}
+trials of \pending{\corlSimEpisodeDuration}\,s on matched worlds and
+seeds. A trial succeeds if the robot reaches the end of the track
+without the base contacting the ground, the controller safety check
+triggering, or the base height falling below a fixed threshold.
+
+\textit{Conditions.}
+\begin{enumerate}
+  \item \textbf{Scheduled NMPC:} the native periodic gait of the
+    execution stack with its heuristic foothold projected onto convex
+    terrain regions \cite{leggedperceptive}.
+  \item \textbf{GaitNet-RoundRobin:} GaitNet footholds and durations,
+    but legs are served in a fixed cyclic order.
+  \item \textbf{GaitNet-Single:} at most one swinging leg. This matches
+    the concurrency of ContactNet's walking configuration
+    \cite{bratta_contactnet_2024}; ContactNet has no public
+    implementation, so we do not compare against it directly.
+  \item \textbf{GaitNet-Diagonal:} a second swing is allowed only for
+    the diagonal partner of the leg in the air, a trot-like
+    restriction.
+  \item \textbf{GaitNet-Full:} the proposed planner, with up to
+    \numberstringnum{\corlMaxConcurrentSwingLegs} swinging legs and no
+    restriction on which legs overlap.
+\end{enumerate}
+
+\begin{table}[t]
+  \centering
+  \caption{Gazebo success rate, mean over speeds.}
+  \label{tab:gazebo}
+  \small
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Method} & \textbf{All difficulties} &
+    \textbf{$\ge\corlHighDifficultyRangeLow\%$} \\
+    \midrule
+    Scheduled NMPC \cite{leggedperceptive} &
+      \pending{\corlGzSchedSuccess\%} & \pending{\corlGzSchedSuccessHard\%} \\
+    GaitNet-RoundRobin & \pending{XX\%} & \pending{XX\%} \\
+    GaitNet-Single & \pending{\corlGzSingleSuccess\%} & \pending{XX\%} \\
+    GaitNet-Diagonal & \pending{\corlGzDiagSuccess\%} & \pending{XX\%} \\
+    \textbf{GaitNet-Full} & \pending{\textbf{\corlGzFullSuccess\%}} &
+      \pending{\textbf{\corlGzFullSuccessHard\%}} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \pending{%
+  \setlength{\fboxsep}{0pt}%
+  \fbox{\begin{minipage}[c][0.55\linewidth][c]{0.95\linewidth}
+    \centering
+    \textit{Success rate vs.\ terrain difficulty (pending)}
+  \end{minipage}}%
+  }
+  \caption{Gazebo success rate versus terrain difficulty for all
+    conditions, with 95\% Wilson intervals.}
+  \label{fig:gazebo-difficulty}
+\end{figure}
+
+\pending{\autoref{tab:gazebo} and \autoref{fig:gazebo-difficulty}
+report the results. Describe the ordering of methods, where the gap
+opens as difficulty increases, and whether differences are
+statistically significant (report the test used).}
+
+\subsection{Concurrency Ablation}
+\label{subsec:exp-concurrency}
+
+GaitNet-Single, GaitNet-Diagonal, and GaitNet-Full share the same
+weights and differ only in which second swing is admissible, so their
+difference isolates the contribution of emergent overlap (Q2). We
+report the fraction of time with two legs in swing, the distribution
+of overlapping leg pairs, and the number of step requests blocked by
+the restriction. \pending{In GaitNet-Full, two legs are in swing
+\corlGzOverlapPct\% of the time. Report the pair distribution and
+whether same-side pairs occur.} An example swing schedule is shown in
+\autoref{fig:swing-schedule}.
+
+\begin{figure}[t]
+  \centering
+  \pending{%
+  \setlength{\fboxsep}{0pt}%
+  \fbox{\begin{minipage}[c][0.45\linewidth][c]{0.95\linewidth}
+    \centering
+    \textit{Gazebo swing schedule (pending)}
+  \end{minipage}}%
+  }
+  \caption{Swing schedule from a GaitNet-Full Gazebo trial. Each row
+    is one leg; bars are swings.}
+  \label{fig:swing-schedule}
+\end{figure}
+
+\subsection{Candidate-Enumeration Study}
+\label{subsec:exp-enumeration}
+
+To separate the benefit of dense selection from that of the learned
+value function (Q3), we evaluate GaitNet-Full with (i)~exhaustive
+enumeration of all valid cells and (ii)~the
+\corlTrainTotalCandidates-candidate sampled set used in training, and
+\pending{(iii)~intermediate per-leg sample counts}. The weights are
+identical across settings. \pending{Dense enumeration reaches
+\corlGzDenseSuccess\% success versus \corlGzSampledSuccess\% with
+sampling.}
+
+\subsection{Computation and Real-Time Feasibility}
+\label{subsec:exp-compute}
+
+We measure (i)~the network forward time, (ii)~the end-to-end service
+latency from request to response, and (iii)~the realized decision
+interval, which also includes request gating in the controller. In an
+isolated process, dense scoring takes \corlDenseScoreMs\,ms.
+\pending{In Gazebo, the end-to-end service latency is
+\corlGzServiceLatencyMs\,ms (p90 \corlGzServiceLatencyPNinetyMs\,ms),
+and the realized decision interval is XX\,ms against the
+\corlControlTickMs\,ms target.} The NMPC and WBC run at the rates in
+\autoref{tab:stack} regardless of planner latency, since the planner
+only updates the mode schedule and foothold targets.
+
+\subsection{Physical-Robot Proof-of-Concept}
+\label{subsec:exp-hardware}
+
+We deploy the frozen policy on a Unitree Go1 through the same NMPC/WBC
+stack (\autoref{tab:stack}), with an Intel RealSense D435i providing
+the point cloud. The track is \verify{\corlHwTerrainBlockMinMm--%
+\corlHwTerrainBlockMaxMm\,mm blocks on a mat}, the robot is commanded
+\verify{\corlHwTrackLengthM\,m at \corlHwCommandSpeed\,m/s}, and a trial
+succeeds if the robot reaches the target distance.
+
+\textit{Deployment adaptations.} The hardware run differs from the
+Gazebo configuration in ways that we report explicitly:
+\begin{itemize}
+  \item Requests are gated to at most one every
+    \corlHwRequestPeriod\,s, with a \corlHwNoopCooldown\,s cooldown after
+    a no-action response, so the realized decision rate is at most
+    4\,Hz rather than \corlControlHz\,Hz.
+  \item The requested duration is floored at
+    $\max(\corlHwMinSwingDuration,\, d/\corlHwMaxFootSpeed)$\,s, where
+    $d$ is the swing travel in meters, and capped at
+    \corlHwMaxSwingDuration\,s, because the shortest learned swings
+    exceed the Go1's achievable foot speed.
+  \item A second swing is restricted to the diagonal partner.
+  \item The no-action logit is reduced by \corlHwNoopLogitPenalty{}
+    and recently used legs receive a penalty of
+    \corlHwRepeatPenalty{}.
+\end{itemize}
+The policy weights are unchanged; these adaptations act on the
+interface, not on the network.
+
+\textit{Results.} \verify{GaitNet completed
+\corlHwTerrainSuccesses/\corlHwTerrainAttempts{} attempts on the
+block track. The single failure was a step that landed short onto a
+block.} \verify{In a trial with diagonal overlap enabled, two legs
+were simultaneously in swing \corlHwOverlapPct\% of the time
+(\corlHwOverlapPairs{} overlapping pairs, all diagonal; median overlap
+\corlHwOverlapMedianMs\,ms, maximum \corlHwOverlapMaxMs\,ms, against
+\corlHwNominalSwingMs\,ms swings).} Dense-mode service latency was
+\verify{\corlHwServiceLatencyMinMs--\corlHwServiceLatencyMaxMs\,ms}.
+\pending{Report the planner latency distribution and mean traversal
+time if additional trials are collected.} With $n=\corlHwTerrainAttempts$
+we make no statistical comparison against any baseline; these trials
+establish only that the frozen policy and interface execute on
+physical hardware.
+
+\subsection{Limitations}
+\label{subsec:exp-limitations}
+
+\textit{Decision rate on hardware.} The high-rate mechanism evaluated
+in Gazebo was not reproduced on the Go1, where request gating limited
+decisions to at most 4\,Hz and overlap was brief. The hardware trials
+therefore demonstrate feasibility of the interface, not the benefit of
+high-rate selection.
+
+\textit{Interface adaptations.} The duration floor, diagonal
+restriction, and logit penalties are hand-tuned for the Go1. They
+reduce the degrees of freedom that GaitNet exercises on hardware, and
+their individual effects have not been ablated.
+
+\textit{Controller dependence.} The planner does not access the
+controller's internal optimization, but its success depends on the
+controller tracking the requested footholds and durations; we have
+evaluated one training controller and one execution stack.
+
+\textit{Concurrency bound.} The rule that
+\numberstringnum{\corlMinContactLegs} legs remain in contact is fixed
+in all experiments and has not been ablated.
+
+\textit{Perception.} The validity mask is thresholded from a planar
+decomposition of the elevation map. Small voids below the camera's
+effective resolution are not represented, and the sim-to-real gap in
+the mask has not been quantified.
