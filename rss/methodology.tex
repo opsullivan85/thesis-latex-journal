@@ -190,8 +190,9 @@ by supervised regression. For the training controller, the steps come
 from two earlier policies without randomization, at up to 30\% voids
 and across our speed range; a policy's own commands cover only the
 footholds it prefers, so we add Gaussian noise to every command to
-widen the data around them. For OCS2, the steps are logged on OCS2
-itself \pending{(policy, worlds, and number of steps to be added)}.
+widen the data around them. For OCS2, we log the steps of the frozen
+GaitNet, run on OCS2 with the training controller's IDM, on world seeds
+61--110, fewer than 20{,}000 steps in all.
 
 \subsection{Training GaitNet with the IDM}
 \label{subsec:method-training}
@@ -242,8 +243,7 @@ each choice, and a small MLP maps these scores to one state value.
       \corlTrackYawStd\,rad/s; \corlDurationExploreStd\,s \\
     Curriculum & \corlNumLevels{} levels, 0--\corlMaxVoidPct\% voids \\
     \grouprow{2}{OCS2}
-    Step lead; foothold radius & \corlGzLead\,s;
-      \verify{\corlGzAuthorityRadius\,m} \\
+    Step lead & \corlGzLead\,s \\
     \bottomrule
   \end{tabular*}
 \end{table}
@@ -310,12 +310,7 @@ The IDM fixes where the foot lands; when a step starts is set by how
 steps are delivered to OCS2, which also starts each step on its own
 schedule. Each step is therefore written into OCS2's contact schedule
 at absolute times on the NMPC clock, starting a fixed lead after the
-decision, and is merged with the steps already planned. \pending{Two
-settings of our earlier configuration, which reused the training
-controller's IDM, may be kept or dropped with the OCS2 IDM: anchoring,
-which moves the command forward by the distance the hip travels before
-touchdown, and a small region within which OCS2 may move a commanded
-foothold.} The body reference also stays a short distance ahead of the
+decision, and is merged with the steps already planned. The body reference also stays a short distance ahead of the
 body, and OCS2 runs with its stock task settings.
 
 On OCS2, GaitNet and the controller get terrain either from

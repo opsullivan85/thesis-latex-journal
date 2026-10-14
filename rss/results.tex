@@ -1,8 +1,14 @@
 % Section IV: GaitNet on OCS2, from the benchmark the author sent on
-% 2026-10-14 (OCS2-fitted IDM, depth-camera terrain, 0-70 % voids,
-% 0.05-0.25 m/s, 10 trials per cell). Plots: figures/ocs2_results.pdf, made
-% by figures/plot_ocs2_results.py, which holds the per-cell data. Pooled
-% values: \corlOcs* macros in constants.tex.
+% 2026-10-14 (OCS2-fitted IDM, depth-vote terrain from the simulated camera
+% for every condition, 0-70 % voids, 0.05-0.25 m/s, 10 trials per cell).
+% Plots: figures/ocs2_results.pdf, made by figures/plot_ocs2_results.py,
+% which holds the per-cell data. Pooled values: \corlOcs* macros in
+% constants.tex. Facts confirmed by the author on 2026-10-14: GaitNet,
+% GaitNet-Single and GaitNet-no-IDM share checkpoint SC-idm@1000; the
+% per-candidate network was trained with GaitNet's recipe, IDM in the
+% loop, first of several seeds; OCS2's own trot uses the same depth-vote
+% terrain; mean speed is over successful trials only; 2 m track with a
+% 1.5x time limit; fresh world seeds; landing error RMS 6 / 2 cm.
 
 \section{Simulation Experiments}
 \label{sec:experiments}
@@ -10,50 +16,52 @@
 We ask three questions. (Q1)~Does the frozen GaitNet succeed on OCS2 as
 often as OCS2's own trot as voids get denser and commands faster?
 (Q2)~Does GaitNet need to swing more than one leg at a time?
-(Q3)~Do the IDM and the candidate mixer matter?
+(Q3)~How much do the IDM and the comparison between candidates
+contribute?
 
 \subsection{Setup}
 \label{subsec:exp-setup}
 
-We deploy iteration \corlTrainingIterations{} of one training run, frozen
-after training \verify{(to be confirmed for the OCS2 benchmark)}. The
-run's settings changed while it trained. It used omnidirectional
-commands for its first \corlOmniIterations{} iterations, then forward
-commands without the IDM until iteration \corlIdmStartIteration, and
-with the IDM in the loop after that. It was not seeded and used
-$\corlTotalTransitions$ transitions, about \corlTrainHours\,h on one
-NVIDIA RTX PRO 6000.
-
 We run GaitNet on OCS2 in Gazebo (Sec.~\ref{subsec:method-deployment}),
-with terrain from the simulated depth camera and the IDM fitted on
-OCS2's own steps (Sec.~\ref{subsec:method-idm}). Each world is a strip
-of pillars in which each tile is a real drop with probability equal to
+with the IDM fitted on OCS2's own steps (Sec.~\ref{subsec:method-idm}).
+All GaitNet conditions use iteration \corlOcsCheckpoint{} of one
+training run, frozen after training; the run was not seeded and had the
+IDM in the loop from iteration \corlIdmStartIteration. Each world is a strip of
+pillars in which each tile is a real drop with probability equal to
 the void fraction. We test eight void fractions, from 0 to
 \corlOcsMaxVoidPct\%, and five forward speeds, from \corlOcsSpeedMin{}
 to \corlOcsSpeedMax\,m/s, with \corlOcsTrialsPerCell{} trials for each
-pair, and 14 for OCS2's own trot in the comparison by speed. The fastest command lies above the \corlCmdVxMax\,m/s that
-GaitNet was trained on. A trial succeeds if the robot does not fall and
-walks at least half the commanded distance \verify{(trial length to be
-stated)}; leaving the strip also counts as a failure.
-\pending{The benchmark's world seeds will be listed.}
+pair, and 14 for OCS2's own trot in the comparison by speed. The
+world seeds are new, disjoint from those that tuned the execution
+layer, supplied the IDM's data, or were used to develop the camera
+pipeline. The fastest command lies above the \corlCmdVxMax\,m/s that
+GaitNet was trained on. A trial succeeds if the robot reaches the end
+of a \corlOcsTrackM\,m track without falling or leaving the strip,
+within \corlOcsTimeFactor{} times the time the command needs, from
+60\,s at \corlOcsSpeedMin\,m/s to 12\,s at \corlOcsSpeedMax\,m/s.
 
-We compare five conditions. All except OCS2's own trot keep OCS2's NMPC
-and WBC but replace its gait scheduler and foothold choice with the
-planner's steps, so the comparison focuses on the planner rather than
-the tracker.
+Every condition gets its terrain from the same depth-vote map, built
+from the simulated depth camera, and runs on the same NMPC and WBC.
+The conditions therefore differ only in how steps are chosen and
+executed:
 \begin{enumerate}
   \item GaitNet: as deployed; up to two legs may swing at once.
   \item OCS2's own trot: OCS2's perceptive trot, with its own gait
-    scheduler and footholds \verify{(on the same camera)}.
-  \item GaitNet-Single: only one leg may swing at a time.
-  \item GaitNet, no IDM: the chosen landing point is sent to OCS2
-    unchanged.
+    scheduler and footholds.
+  \item GaitNet-Single: the same weights, but only one leg may swing at
+    a time.
+  \item GaitNet, no IDM: the same weights, but the chosen landing point
+    is sent to OCS2 unchanged.
   \item Per-candidate + IDM: the per-candidate network of
     \cite{Sullivan2025} (Sec.~\ref{subsec:method-network}), which scores
-    each candidate on its own, with the same IDM \verify{(checkpoint to
-    be stated)}.
+    each candidate on its own and has no history. It is trained with
+    GaitNet's recipe and the IDM in the loop, and runs with the same
+    OCS2 IDM; we show the first of several seeded runs, chosen before
+    evaluation.
 \end{enumerate}
-\verify{GaitNet-Single and GaitNet, no IDM use GaitNet's weights.}
+With 50 trials per void fraction, a success rate between 30 and 70\%
+carries a 95\% interval of about $\pm$13 points, so we read only
+larger or consistent differences as real.
 
 \begin{figure*}[t]
   \centering
@@ -61,8 +69,8 @@ the tracker.
   \caption{Success on OCS2 with depth-camera terrain. (a)~By void
     fraction, pooled over the five commanded speeds (50 trials per
     point). (b)~By commanded speed, pooled over the eight void fractions
-    (80 trials per point, 112 for OCS2's own trot); GaitNet was trained up to
-    \corlCmdVxMax\,m/s.}
+    (80 trials per point, 112 for OCS2's own trot); GaitNet was trained
+    up to \corlCmdVxMax\,m/s.}
   \label{fig:ocs2-results}
 \end{figure*}
 
@@ -71,14 +79,33 @@ the tracker.
 
 GaitNet matches OCS2's own trot on sparse voids and does better as the
 voids get denser (Fig.~\ref{fig:ocs2-results}a). Both succeed in every
-trial up to 10\% voids and are within two points at 20\%. From 30\% voids on,
-GaitNet leads at every void fraction, with \corlOcsDenseFull\% against
-\corlOcsDenseTrot\% success over 40--\corlOcsMaxVoidPct\% voids.
-At \corlOcsMaxVoidPct\% voids, GaitNet still succeeds in half of the trials and OCS2's own trot in few. GaitNet also leads at every
-commanded speed (Fig.~\ref{fig:ocs2-results}b) and walks closer to
-the commanded speed, at about 92\% of it against about 84\% for
-OCS2's own trot \verify{(mean over trials)}. Both lose success at
-\corlOcsSpeedMax\,m/s, above GaitNet's training range.
+trial up to 10\% voids and are within two points at 20\%. From 30\%
+voids on, GaitNet leads at every void fraction, with
+\corlOcsDenseFull\% against \corlOcsDenseTrot\% success over
+40--\corlOcsMaxVoidPct\% voids, and the gap is largest from 50\% voids
+on. At \corlOcsMaxVoidPct\% voids, GaitNet still succeeds in half of
+the trials and OCS2's own trot in few.
+
+Because both see the same terrain and run on the same tracker, this
+gap comes from how steps are chosen. OCS2's trot lifts each diagonal
+pair on a fixed schedule and must then find a foothold for it, while
+GaitNet chooses at every tick which leg to move, if any, and where.
+On sparse voids, a safe foothold is almost always close to where the
+trot would step, so the fixed schedule costs nothing. On dense voids,
+safe cells are fewer and further apart; our interpretation, which
+these trials do not test directly, is that the trot is then often
+forced to step when no good foothold is in reach, whereas GaitNet can
+wait, move another leg first, or take a longer step to a safe cell.
+
+GaitNet also leads at every commanded speed
+(Fig.~\ref{fig:ocs2-results}b), by 5 to 17 points. Both lose success
+as the command rises, and both lose most at \corlOcsSpeedMax\,m/s,
+above the range GaitNet was trained on, yet GaitNet still succeeds in
+two thirds of those trials. In the trials that succeed, GaitNet also
+walks closer to the command, at 89--94\% of it against 78--87\% for
+OCS2's own trot. Because this speed is averaged only over successful
+trials, it describes how well each method tracks the command when it
+gets through, not how far it walks on average.
 
 \subsection{Ablations}
 \label{subsec:exp-why}
@@ -86,19 +113,39 @@ OCS2's own trot \verify{(mean over trials)}. Both lose success at
 Overlapping swings matter (Q2). Under a one-swing limit, GaitNet still
 walks, but it succeeds less often at every void fraction and every
 speed, \corlOcsAllSingle\% against \corlOcsAllFull\% on average over
-void fractions, and the gap is largest on dense voids and at the
-faster commands. Because GaitNet was never trained under this limit,
-this shows that GaitNet relies on occasionally swinging two legs
-together, not that overlap is better in general.
+void fractions. The gap grows with speed, from 10 points at
+\corlOcsSpeedMin\,m/s to more than 20 points from 0.10\,m/s on, and in
+its successful trials GaitNet-Single falls further behind the command
+at the higher speeds. It also takes shorter steps:
+\corlOcsStepsPerMSingle{} steps per metre against
+\corlOcsStepsPerMFull{} for GaitNet. With one leg in the air at a time
+and swings of at least \corlSwingDurationMin\,s, it cannot step more
+than about ten times per second, yet at \corlOcsSpeedMax\,m/s, with
+steps this short, it would need about eleven. This is the likely
+reason it falls behind, and fails more often, as the command rises. Because GaitNet was never trained under this
+limit, these results show that GaitNet relies on occasionally swinging
+two legs together, not that overlap is better in general.
 
-The IDM matters most (Q3). Without it, GaitNet's success falls from
-\corlOcsAllFull\% to \corlOcsAllNoIdm\% on average over void fractions.
-Only on ground without voids, where a missed landing costs little,
-does GaitNet do well without it.
+The IDM contributes most (Q3). Without it, GaitNet's success falls from
+\corlOcsAllFull\% to \corlOcsAllNoIdm\% on average over void
+fractions, below GaitNet-Single at most void fractions. Only on ground
+without voids, where a missed landing costs little, does GaitNet do
+well without it; already at 10\% voids it loses 20 points. GaitNet
+chooses cells that are safe with a margin of \corlMarginCm\,cm. Without the IDM, OCS2 lands the foot
+\corlOcsLandRmsNoIdm\,cm RMS from the chosen cell, three times that
+margin, so a foot aimed next to a void often ends up in it; with the
+IDM, the error drops to \corlOcsLandRmsIdm\,cm, about the margin itself,
+in a separate test on flat ground \verify{(speeds to be stated)}. On OCS2,
+landing each step where it was chosen thus matters more than being
+able to overlap swings.
 
-Comparing candidates matters on dense voids. The per-candidate network,
-which has neither the candidate mixer nor the history, with the same IDM, is about as good as GaitNet up to 20\% voids but
-falls behind from 30\% on, with \corlOcsDenseMlp\% against
-\corlOcsDenseFull\% over 40--\corlOcsMaxVoidPct\% voids. \verify{The two
-networks also differ in training history}, so this is not a fully
-controlled comparison.
+Comparing candidates matters on dense voids. The per-candidate network
+was trained with the same recipe and runs with the same IDM, but
+scores each candidate on its own and has no motion history. It is
+about as good as GaitNet up to 20\% voids but falls behind from 30\%
+on, with \corlOcsDenseMlp\% against \corlOcsDenseFull\% over
+40--\corlOcsMaxVoidPct\% voids. The gap is largest at 30 and 40\%
+voids and shrinks at the densest voids, where both often fail. The
+comparison changes both the candidate mixer and the history at once,
+and each network is a single run, so it does not show which of the
+two matters more.

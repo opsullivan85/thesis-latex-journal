@@ -236,10 +236,24 @@
 % OCS2's trot by void fraction, as corrected by the author on 2026-10-14:
 % 100 100 88 75 70 38 30 12 (10 trials per cell, 64.1 % on average). Its
 % speed table uses 14 trials per cell (112 per speed, 69.4 % on average), so
-% the two tables pool different trials. Open (\verify): its 12 % at 70 %
-% (n=10) is below the 32 % of its first 5 trials (6 against 8 successes),
-% which n=10 including n=5 rules out.
+% the two tables pool different trials. Its 12 % at 70 %
+% (n=10) was confirmed by the author on 2026-10-14; the n=5 row is not used.
 \newcommand{\corlOcsTrialsPerCell}{10}
+% Author, 2026-10-14: checkpoint SC-idm@1000 (unseeded run, IDM in the loop
+% from iteration 890); per-candidate = first of several seeded runs of the
+% same recipe; track 2 m, time limit 1.5 x (2 m / commanded speed); world
+% seeds disjoint from tuning, IDM-data and camera-development seeds; OCS2
+% landing error RMS 6 cm without the IDM, 2 cm with it.
+\newcommand{\corlOcsCheckpoint}{1000}
+\newcommand{\corlOcsTrackM}{2}
+\newcommand{\corlOcsTimeFactor}{1.5}
+\newcommand{\corlOcsLandRmsNoIdm}{6}
+\newcommand{\corlOcsLandRmsIdm}{2}
+% Author, 2026-10-14: steps per metre walked on OCS2, GaitNet-Single vs
+% GaitNet; OCS2 IDM fitted on fewer than 20k logged steps (seeds 61-110);
+% anchoring and the foothold region are not used with the OCS2 IDM.
+\newcommand{\corlOcsStepsPerMSingle}{45.6}
+\newcommand{\corlOcsStepsPerMFull}{32.4}
 \newcommand{\corlOcsMaxVoidPct}{70}
 \newcommand{\corlOcsSpeedMin}{0.05}
 \newcommand{\corlOcsSpeedMax}{0.25}

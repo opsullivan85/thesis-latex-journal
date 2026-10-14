@@ -28,16 +28,15 @@ controller first; adapting it online, in the spirit of
 \cite{xie_fada_2026}, could remove that step.
 
 The evidence for GaitNet's design is also incomplete. On OCS2, the
-per-candidate network falls behind GaitNet on dense voids, but the two
-differ in training history as well as architecture, and the candidate
-mixer and the history have not been ablated separately. The deployed
-checkpoint comes from an unseeded run whose settings changed during
-training, and seeded runs of the final setting are still training.
+per-candidate network, trained with the same recipe, falls behind
+GaitNet on dense voids, but this comparison changes the candidate
+mixer and the history at once, and the two have not been ablated
+separately. All OCS2 results also come from one checkpoint per
+network; GaitNet's is from an unseeded run, \pending{and seeded runs of
+the final setting are still training}.
 
-Finally, our tests are mild in several ways. The success rule, half the
-commanded distance (Sec.~\ref{subsec:exp-setup}), is lenient.
-\pending{We will add the distance walked and a stricter threshold.}
-Commands stay at or below \corlOcsSpeedMax\,m/s, and GaitNet was
+Finally, our tests are mild in several ways. Each trial covers only a
+\corlOcsTrackM\,m track (Sec.~\ref{subsec:exp-setup}). Commands stay at or below \corlOcsSpeedMax\,m/s, and GaitNet was
 trained only up to \corlCmdVxMax\,m/s. At \corlOcsMaxVoidPct\% voids,
 GaitNet and OCS2's own trot succeed in at most half of the trials.
 GaitNet also chooses from a rule-based mask of safe cells, and
