@@ -1,0 +1,182 @@
+% Fig. 1: GaitNet pipeline overview. Layout follows the FADA method
+% overview (Xie et al.): training on the training controller on the left;
+% data collection, IDM refit and deployment on the new controller on the
+% right. The deployment panel shows GaitNet's architecture and the
+% execution layer (IDM for where, timing for when) as separate blocks;
+% domain bands below. Styles and colours: fig_style.tex. Architecture
+% follows gaitnet-docs/methodology.md 5-6 (detailed version:
+% fig_architecture.tex); step timing follows Sec. III-E.
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[gfig]
+% ---------------------------------------------------------------- panels
+\draw[region={rgS}{rgSd}] (0,0)        rectangle (6.6,-2.75);    % (a)
+\draw[region={rgS}{rgSd}] (0,-2.95)    rectangle (6.6,-6.35);    % (b)
+\draw[region={rgG}{rgGd}] (6.85,0)     rectangle (12.25,-2.75);  % (c)
+\draw[region={rgG}{rgGd}] (12.5,0)     rectangle (19.6,-2.75);   % (d)
+\draw[region={rgG}{rgGd}] (6.85,-2.95) rectangle (19.6,-6.35);   % (e)
+\node[ptitle] at (0.2,-0.2)   {(a) IDM training};
+\node[ptitle] at (0.2,-3.15)  {(b) GaitNet training};
+\node[ptitle] at (7.05,-0.2)  {(c) Data collection on OCS2};
+\node[ptitle] at (12.7,-0.2)  {(d) IDM refit for OCS2};
+\node[ptitle] at (7.05,-3.15) {(e) Deployment};
+% domain bands
+\draw[band={rgS}{rgSd}] (0,-6.6)    rectangle (6.6,-7.15);
+\draw[band={rgG}{rgGd}] (6.85,-6.6) rectangle (19.6,-7.15);
+\node[font=\sffamily\footnotesize\bfseries, text=ink] at (3.3,-6.875)
+  {Isaac Lab, training controller};
+\node[font=\sffamily\footnotesize\bfseries, text=ink] at (13.225,-6.875)
+  {OCS2, new controller};
+
+% ---------------------------------------------------------------- (a)
+% IDM fitted by hindsight relabelling: input the landing o, target the
+% command u that produced it.
+\def\ya{-1.6}
+\node[mod=acC, minimum width=16mm, minimum height=14mm] (ia) at (3.0,\ya)
+  {IDM\\[1pt]$I^{\text{train}}_\theta$ \hot};
+\node[font=\sffamily\footnotesize, anchor=east] (ao) at (1.55,{\ya+0.35}) {landing $\mathbf o$};
+\node[font=\sffamily\footnotesize, anchor=east] (as) at (1.55,{\ya-0.35}) {$\mathbf s,\ell,T$};
+\draw[arr] (ao.east) -- (ao.east -| ia.west);
+\draw[arr] (as.east) -- (as.east -| ia.west);
+\node (ua) at (4.45,\ya) {$\hat{\mathbf u}$};
+\draw[arr] (ia) -- (ua);
+\node[mod=acT, minimum width=10mm, text=acT] (ma) at (5.55,\ya) {MSE};
+\draw[arr] (ua) -- (ma);
+\node[font=\sffamily\footnotesize] (ta) at (5.55,-0.55) {command $\mathbf u$};
+\draw[arr] (ta) -- (ma);
+\node[sub] at (5.2,-2.3) {relabelled in hindsight:\\input $\mathbf o$, target $\mathbf u$};
+
+% ---------------------------------------------------------------- (b)
+% PPO with the training controller's IDM fixed between GaitNet and the
+% (randomized) training controller.
+\def\yb{-4.55}
+\node[mod=acB, minimum width=15mm, minimum height=10.5mm] (gb) at (1.0,\yb) {GaitNet\\[1pt]\hot};
+\node[mod=acC, minimum width=15mm, minimum height=10.5mm] (ib) at (3.0,\yb) {IDM\\[1pt]$I^{\text{train}}_\theta$ \frz};
+\node[mod=muted, minimum width=19mm, minimum height=10.5mm] (cb) at (5.2,\yb) {training\\controller};
+\draw[arr] (gb) -- node[above, alab] {$\mathbf u^\star$} (ib);
+\draw[arr] (ib) -- node[above, alab] {$\mathbf u$} (cb);
+\draw[tarr] (cb.south) -- (5.2,-5.75) -- node[above, tlab, text=acT]
+  {reward, PPO update} (1.0,-5.75) -- (gb.south);
+\draw[->, line width=0.7pt, draw=acC, dash pattern=on 2pt off 1.5pt]
+  (ia.south) -- node[right, tlab, text=muted, pos=0.82] {fixed} (ib.north);
+
+% ---------------------------------------------------------------- (c)
+% A policy walks on OCS2 and every executed step is logged as (o, u).
+\def\yc{-1.3}
+\node[mod=ink, minimum width=16mm, minimum height=10mm, rounded corners=8pt] (pc) at (8.1,\yc) {};
+\node[font=\sffamily\footnotesize] at (8.1,{\yc+0.27}) {policy};
+\pic[scale=0.7] at (8.1,{\yc-0.13}) {mlp=acB};
+\node[mod=ink, minimum width=17mm, minimum height=10mm, rounded corners=8pt] (oc) at (10.95,\yc)
+  {OCS2\\[-1pt]{\scriptsize NMPC + WBC}};
+\draw[arr] ([yshift=1.6mm]pc.east) -- node[above, alab] {$\mathbf u$} ([yshift=1.6mm]oc.west);
+\draw[arr] ([yshift=-1.6mm]oc.west) -- node[below, alab] {$\mathbf o$} ([yshift=-1.6mm]pc.east);
+\node[font=\sffamily\scriptsize, text=ink, anchor=west, inner sep=0pt] at (pc.west |- 0,-2.3) {logged steps};
+\node[tok={tkS}{acB!45}, minimum width=6.5mm] at (9.2,-2.3)  {$\mathbf o_1$};
+\node[tok={white}{acC},  minimum width=6.5mm] at (9.85,-2.3) {$\mathbf u_1$};
+\node[tok={tkS}{acB!45}, minimum width=6.5mm] at (10.6,-2.3) {$\mathbf o_2$};
+\node[tok={white}{acC},  minimum width=6.5mm] at (11.25,-2.3) {$\mathbf u_2$};
+\node[inner sep=1pt] (dots) at (11.85,-2.3) {$\cdots$};
+
+% ---------------------------------------------------------------- (d)
+% The logged landing o is the IDM's input and the logged command u its
+% target (hindsight relabelling, as in (a)); GaitNet is not retrained.
+\def\yd{-1.3}
+\node[mod=acC, minimum width=17mm, minimum height=10mm] (id) at (14.4,\yd)
+  {IDM \hot\\[-1pt]{\scriptsize $\mathbf o + \Delta^{\text{OCS2}}_\theta$}};
+\node[mod=acT, minimum width=10mm, text=acT] (md) at (16.55,\yd) {MSE};
+\draw[arr] (id) -- node[above, alab] {$\hat{\mathbf u}$} (md);
+\coordinate (jd) at (12.95,-2.3);
+\draw[line width=0.7pt, draw=ink] (dots.east) -- (jd);
+\fill[ink] (jd) circle (0.05);
+\draw[arr] (jd) |- node[pos=0.75, above, alab] {$\mathbf o$} (id.west);
+\draw[tarr] (jd) -| node[pos=0.25, above, tlab, text=acT] {target $\mathbf u$} (md.south);
+\draw[muted, line width=0.6pt, dash pattern=on 2pt off 2pt] (17.6,-0.65) -- (17.6,-2.5);
+\node[mod=acB, minimum width=14mm, minimum height=10mm] (gd) at (18.6,\yd) {GaitNet\\[1pt]\frz};
+\node[sub, anchor=north] at (18.6,-1.88) {unchanged};
+
+% ---------------------------------------------------------------- (e)
+% GaitNet (frozen) as in Sec. III-B: context z = f_s(x_g) + W_h f_h(h);
+% tokens W_t[z; e_i] with e_i = f_c(q_i) and a learned e_0 for no-step;
+% candidate mixer; heads (alpha_i, T_i); masked argmax. The execution
+% layer (Sec. III-C, III-E) sets where (IDM) and when (timing) the step
+% is executed on OCS2.
+\def\yA{-4.25} \def\yB{-4.78} \def\yC{-5.31} \def\yD{-5.84}
+\def\yTop{-4.03} \def\yBot{-6.06}   % top of row A and bottom of row D tokens
+\draw[fill=rgB, draw=acB!70, line width=0.6pt, rounded corners=5pt] (7.05,-3.5) rectangle (15.45,-6.2);
+\node[font=\sffamily\footnotesize\bfseries, text=acB, anchor=north west, inner sep=0pt] at (7.275,-3.6) {GaitNet \frz};
+% inputs
+\node[tok={tkS}{acB!45}, minimum height=4.4mm] (xe) at (7.6,\yA) {$\mathbf x_g$};
+\node[tok={tkS}{acB!45}, minimum height=4.4mm] (he) at (7.6,\yB) {$\mathbf h$};
+\node[tok={tkC}{tkCd},   minimum height=4.4mm] (qe) at (7.6,\yC) {$\mathbf q_i$};
+\node[tok={tkN}{rgAd},   minimum height=4.4mm] (ne) at (7.6,\yD) {$\varnothing$};
+% context z = f_s(x_g) + W_h f_h(h)
+\node[mod=acB, minimum width=7mm, minimum height=4.4mm, inner sep=1pt] (fse) at (8.6,\yA) {$f_s$};
+\node[mod=acB, minimum width=7mm, minimum height=4.4mm, inner sep=1pt] (fhe) at (8.6,\yB) {$f_h$};
+\node[mod=acB, minimum width=7mm, minimum height=4.4mm, inner sep=1pt] (whe) at (9.6,\yB) {$W_h$};
+\node[draw=acB, circle, line width=0.7pt, fill=white, inner sep=0.2pt] (pe) at (10.3,\yA) {$+$};
+\node[tok={tkS}{acB!45}, minimum height=4.4mm] (ze) at (11.1,\yA) {$\mathbf z$};
+\draw[arr] (xe) -- (fse);  \draw[arr] (he) -- (fhe);
+\draw[arr] (fse) -- (pe);  \draw[arr] (fhe) -- (whe);
+\draw[arr] (whe.east) -| (pe.south);
+\draw[arr] (pe) -- (ze);
+% candidate embeddings and tokens [z; e_i]; W_t spans rows C-D
+\node[mod=acB, minimum width=7mm, minimum height=4.4mm, inner sep=1pt] (fce) at (8.6,\yC) {$f_c$};
+\node[tok={tkN}{acB!45}, minimum width=7mm, minimum height=4.4mm] (e0e) at (8.6,\yD) {$\mathbf e_\varnothing$};
+\draw[arr] (qe) -- (fce);  \draw[arr] (ne) -- (e0e);
+\node[mod=acB, minimum width=9mm, minimum height=9.7mm, inner sep=1pt] (wte) at (11.1,{(\yC+\yD)/2})
+  {$W_t$\\[-2pt]{\scriptsize $[\mathbf z;\mathbf e_i]$}};
+\draw[arr] (fce) -- node[above, alab, font=\scriptsize, pos=0.7] {$\mathbf e_i$} (fce -| wte.west);
+\draw[arr] (e0e) -- (e0e -| wte.west);
+\draw[arr] (ze) -- (wte);
+% candidate mixer spans rows B-D
+\node[mod=acB, minimum width=20mm, minimum height=15mm] (mxe) at (12.85,{(\yB+\yD)/2}) {};
+\node[font=\sffamily\scriptsize\bfseries, text=acB] at (12.85,{\yB-0.05}) {candidate mixer};
+\pic[scale=0.8] at (12.85,\yC) {attn=acB};
+\node[sub] at (12.85,{\yD+0.05}) {self-attn $\times$2};
+\draw[arr] (wte) -- (wte -| mxe.west);
+% heads (alpha_i, T_i) on the row-D baseline, masked argmax up to row A
+\begin{scope}[shift={(14.2,\yBot)}]
+  \foreach \x/\hgt/\c in {0/0.35/acB!35, 0.15/0.6/acB!35, 0.3/0.85/tkCd, 0.45/0.45/acB!35, 0.6/0.25/acB!35}
+    \fill[\c] (\x,0) rectangle ++(0.11,\hgt);
+  \draw[muted, line width=0.4pt] (-0.05,0) -- (0.76,0);
+\end{scope}
+\draw[arr] (mxe.east |- 0,\yC) -- (14.12,\yC);
+\node[tok={tkC}{tkCd}, minimum width=14mm, minimum height=4.4mm] (se) at (14.555,\yA) {$(\ell,\mathbf u^\star\!,T)$};
+\node[sub, anchor=south] at (14.555,{\yTop+0.02}) {masked argmax};
+\draw[arr] (14.555,{\yBot+0.9}) -- (se);
+% execution layer: where (IDM, row A) and when (timing, row C)
+\draw[fill=white, draw=acC!70, line width=0.6pt, rounded corners=5pt] (15.7,-3.5) rectangle (18.25,-6.2);
+\node[font=\sffamily\footnotesize\bfseries, text=acC, anchor=north west, inner sep=0pt] at (15.95,-3.6) {Execution layer};
+\coordinate (je) at (15.95,\yA);
+\draw[line width=0.7pt, draw=ink] (se.east) -- (je);
+\fill[ink] (je) circle (0.05);
+\node[mod=acC, minimum width=14mm, minimum height=6mm] (ie) at (17.15,\yA) {IDM \frz};
+\node[sub, anchor=north] at (17.15,{\yA-0.33}) {where the foot lands};
+\node[mod=acC, minimum width=14mm, minimum height=6mm] (tie) at (17.15,\yC) {timing};
+\node[sub, anchor=north] at (17.15,{\yC-0.33}) {when the step starts};
+\draw[arr] (je) -- (ie);
+\draw[arr] (je) |- (tie.west);
+% OCS2 receives the command and the start time; centred on row B
+\node[mod=ink, minimum width=9.5mm, minimum height=15mm] (oe) at (18.95,\yB) {OCS2};
+\draw[arr] (ie.east) -- node[pos=0.3, above, alab] {$\mathbf u$} (ie.east -| oe.west);
+\draw[arr] (tie.east) -- (tie.east -| oe.west);
+\end{tikzpicture}%
+}
+\caption{GaitNet pipeline. (a)~An inverse footstep model (IDM) for the
+  training controller is fitted on its logged steps: given where a foot
+  landed, it predicts the command that put it there. (b)~GaitNet is
+  trained with PPO, with this IDM fixed between GaitNet and the
+  controller. (c)~On a new controller, OCS2, steps are logged
+  again\pending{ (policy to be added)}, and (d)~a new IDM is fitted on
+  them while GaitNet stays frozen. (e)~At deployment, GaitNet encodes the
+  state $\mathbf x_g$ and its recent motion $\mathbf h$ into a context
+  $\mathbf z$, scores each safe candidate $\mathbf q_i$ and the no-step
+  option $\varnothing$ in a candidate mixer, and picks one step
+  $(\ell,\mathbf u^\star\!,T)$ (Fig.~\ref{fig:architecture}). The
+  execution layer then sets where and when OCS2 executes it: the OCS2 IDM
+  turns $\mathbf u^\star$ into a command $\mathbf u$, and the step is
+  written into OCS2's schedule a fixed lead after the decision.
+  \hot~trained; \frz~frozen.}
+\label{fig:overview}
+\end{figure*}

@@ -1,0 +1,107 @@
+% Fig. 2: detailed GaitNet architecture and execution layer.
+% Styles and colours: fig_style.tex. Architecture follows
+% gaitnet-docs/methodology.md 5-6.
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[gfig]
+% rows
+\def\yS{-0.95} \def\yH{-1.9} \def\yC{-4.2} \def\yZ{-5.15}
+% ---------------------------------------------------------------- regions
+\draw[region={rgA}{rgAd}] (0,0) rectangle (4.6,-6.0);
+\draw[region={rgB}{rgBd}] (4.85,0) rectangle (13.25,-6.0);
+\draw[region={rgC}{rgCd}] (13.5,0) rectangle (19.6,-6.0);
+\node[rlabel] at (0.2,-5.85) {(a) Candidates};
+\node[rlabel] at (5.05,-5.85) {(b) GaitNet planner};
+\node[rlabel] at (13.7,-5.85) {(c) Execution layer};
+
+% ---------------------------------------------------------------- (a)
+\node[inner sep=0pt] at (2.3,-1.5)
+  {\includegraphics[width=3.9cm, trim=270 0 240 150, clip]{images/figures/environment-close.png}};
+\node[sub] at (2.3,-3.2) {safe cells around each hip,\\$\geq$\,\corlMarginCm\,cm from any void};
+\draw[arr] (2.3,-3.55) -- (2.3,-3.88);
+\node[tok={tkC}{tkCd}] (q1) at (1.35,\yC) {$\mathbf q_1$};
+\node[tok={tkC}{tkCd}] (qd) at (2.3,\yC)  {$\cdots$};
+\node[tok={tkC}{tkCd}] (qN) at (3.25,\yC) {$\mathbf q_N$};
+\node[sub, anchor=north] at (2.3,{\yC-0.32}) {\corlTrainCandidatesPerLeg{} per leg};
+\node[tok={tkN}{rgAd}] (q0) at (3.25,\yZ) {$\varnothing$};
+\node[sub, anchor=east] at (2.85,\yZ) {no-step option};
+
+% ---------------------------------------------------------------- (b)
+% context: z = f_s(x_g) + W_h f_h(h)
+\node[tok={tkS}{acB!45}] (xg) at (5.45,\yS) {$\mathbf x_g$};
+\node[tok={tkS}{acB!45}] at (5.57,{\yH+0.12}) {};
+\node[tok={tkS}{acB!45}] (h)  at (5.45,\yH) {$\mathbf h$};
+\node[sub, anchor=north] at (5.45,{\yH-0.32}) {25 ticks};
+\node[mod=acB, minimum width=8mm] (fs) at (6.55,\yS) {$f_s$};
+\node[mod=acB, minimum width=8mm] (fh) at (6.55,\yH) {$f_h$};
+\node[mod=acB, minimum width=9mm, font=\small] (Wh) at (7.6,\yH) {$W_h$};
+\node[sub, anchor=north] at (7.6,{\yH-0.38}) {0-init};
+\node[draw=acB, circle, line width=0.7pt, fill=white, inner sep=0.2pt] (plus) at (7.6,\yS) {$+$};
+\node[tok={tkS}{acB!45}] (z) at (8.4,\yS) {$\mathbf z$};
+\node[sub, anchor=south] at (8.4,{\yS+0.3}) {context};
+\draw[arr] (xg) -- (fs);  \draw[arr] (h) -- (fh);
+\draw[arr] (fs) -- (plus); \draw[arr] (fh) -- (Wh); \draw[arr] (Wh) -- (plus);
+\draw[arr] (plus) -- (z);
+% candidate embeddings and tokens
+\node[mod=acB, minimum width=10mm] (fc) at (6.0,\yC) {$f_c$};
+\node[sub, anchor=south] at (6.0,{\yC+0.38}) {shared};
+\node[tok={tkN}{acB!45}, minimum width=9mm] (e0) at (6.0,\yZ) {$\mathbf e_\varnothing$};
+\draw[arr] (qN) -- (fc);
+\draw[arr] (q0) -- (e0);
+\node[mod=acB, minimum width=13mm, minimum height=17mm] (Wt) at (8.4,{(\yC+\yZ)/2})
+  {$W_t$\\[-1pt]{\scriptsize tokens}\\[-2pt]{\scriptsize $[\mathbf z;\mathbf e_i]$}};
+\draw[arr] (fc) -- node[above, sub] {$\mathbf e_i$} (fc -| Wt.west);
+\draw[arr] (e0) -- node[above, sub] {learned} (e0 -| Wt.west);
+\draw[arr] (z) -- (Wt);
+% candidate mixer
+\node[mod=acB, minimum width=23mm, minimum height=21mm] (mix) at (10.45,{(\yC+\yZ)/2}) {};
+\node[font=\sffamily\scriptsize\bfseries, text=acB] at (10.45,-3.92) {candidate mixer};
+\pic at (10.45,-4.6) {attn=acB};
+\node[sub] at (10.45,-5.25) {masked self-attn\,$\times$2};
+\draw[arr] (Wt) -- (mix);
+% readout g, heads, scores
+\begin{scope}[shift={(11.9,-5.15)}]
+  \foreach \x/\hgt/\c in {0/0.5/acB!35, 0.22/0.85/acB!35, 0.44/1.3/tkCd, 0.66/0.65/acB!35, 0.88/0.35/acB!35}
+    \fill[\c] (\x,0) rectangle ++(0.16,\hgt);
+  \draw[muted, line width=0.4pt] (-0.06,0) -- (1.1,0);
+  \node[sub, anchor=north] at (0.52,-0.04) {$\alpha_i,\,T_i$};
+\end{scope}
+\draw[arr] (mix.east) -- node[above, sub] {$g$} (11.82,{(\yC+\yZ)/2});
+\node[tok={tkC}{tkCd}, minimum width=14mm] (step) at (12.42,\yS) {$(\ell,\mathbf u^\star\!,T)$};
+\node[sub, anchor=south] at (12.42,{\yS+0.3}) {masked argmax};
+\draw[arr] (12.42,-3.8) -- (step);
+
+% ---------------------------------------------------------------- (c)
+\node[mod=acC, minimum width=36mm, minimum height=22mm] (idm) at (15.6,-1.45) {};
+\node[font=\sffamily\footnotesize\bfseries, text=acC] at (15.6,-0.65) {inverse footstep model $I^c_\theta$};
+\pic at (15.6,-1.35) {mlp=acC};
+\node[font=\scriptsize] at (15.6,-2.1) {$\mathbf u = \mathbf u^\star + \Delta^c_\theta(\mathbf h_{\text{last}},\ell,T,\mathbf u^\star)$};
+\draw[arr] (step) -- (step -| idm.west);
+\node[sub] (fit) at (15.6,-2.95) {one per controller $c$ (Fig.~\ref{fig:overview})};
+\draw[->, line width=0.6pt, draw=acC, dash pattern=on 2pt off 1.5pt] (fit) -- (idm);
+\node[tok={white}{acC}, minimum width=7mm] (u) at (18.75,-1.45) {$\mathbf u$};
+\node[sub, anchor=south] at (18.75,-1.15) {command};
+\draw[arr] (idm) -- (u);
+\node[mod=muted, minimum width=36mm] (mpc) at (15.6,-3.95)
+  {training controller\\[-1pt]{\scriptsize convex MPC, Isaac Lab}};
+\node[mod=muted, minimum width=36mm] (ocs) at (15.6,-5.05)
+  {OCS2\\[-1pt]{\scriptsize NMPC + WBC}};
+\coordinate (j1) at (18.75,-3.95);
+\coordinate (j2) at (18.75,-5.05);
+\draw[line width=0.7pt, draw=ink] (u) -- (j2);
+\fill[ink] (j1) circle (0.05);
+\draw[arr] (j1) -- node[above, sub] {train} (mpc);
+\draw[arr] (j2) -- node[above, sub] {deploy} (ocs);
+
+\end{tikzpicture}%
+}
+\caption{GaitNet architecture. (a)~Each tick, GaitNet samples safe
+  footholds around each hip. (b)~The planner encodes the state and the
+  last second of motion into a context $\mathbf z$, embeds each candidate
+  (and the learned no-step option), lets the choices attend to each other
+  in the candidate mixer, and picks one step: a leg, a landing point, and
+  a swing time. (c)~A controller-specific inverse footstep model turns the
+  landing point into the command that lands there.}
+\label{fig:architecture}
+\end{figure*}

@@ -1,0 +1,53 @@
+% Shared colours, TikZ styles and icons for Figs. 1 and 2 (modern minimal
+% style after recent CoRL figures such as FACET). Loaded in the preamble.
+\definecolor{ink}{HTML}{1F2937}       % text and arrows
+\definecolor{muted}{HTML}{6B7280}     % secondary text
+\definecolor{rgA}{HTML}{F5F6F8}\definecolor{rgAd}{HTML}{C3C9D2}   % scene region
+\definecolor{rgB}{HTML}{EEF1FD}\definecolor{rgBd}{HTML}{A9B4F4}   % planner region
+\definecolor{rgC}{HTML}{EBF7F1}\definecolor{rgCd}{HTML}{8FD3B3}   % execution region
+\definecolor{acB}{HTML}{4F46E5}       % planner accent (indigo)
+\definecolor{acC}{HTML}{0F9F6E}       % execution accent (emerald)
+\definecolor{acT}{HTML}{D97706}       % training signal (amber)
+\definecolor{acF}{HTML}{2B8CC4}       % frozen marker (blue)
+\definecolor{tkS}{HTML}{E0E7FF}       % state / history tokens
+\definecolor{tkC}{HTML}{FEF3C7}\definecolor{tkCd}{HTML}{F2B43A} % candidate tokens
+\definecolor{tkN}{HTML}{F3F4F6}       % no-step token
+\definecolor{rgT}{HTML}{FFF8EE}\definecolor{rgTd}{HTML}{F1C48A}   % training regions
+\definecolor{rgS}{HTML}{EEF1FD}\definecolor{rgSd}{HTML}{A9B4F4}   % source (Isaac Lab)
+\definecolor{rgG}{HTML}{EBF7F1}\definecolor{rgGd}{HTML}{8FD3B3}   % target (OCS2)
+\tikzset{
+  arr/.style={->, line width=0.7pt, draw=ink},
+  tarr/.style={->, line width=0.8pt, draw=acT, dash pattern=on 3pt off 2pt},
+  region/.style 2 args={fill=#1, draw=#2, line width=0.7pt,
+    dash pattern=on 3pt off 2pt, rounded corners=6pt},
+  rlabel/.style={font=\sffamily\footnotesize, text=muted, anchor=south west,
+    inner sep=0pt},
+  sub/.style={font=\sffamily\scriptsize, text=muted, align=center, inner sep=1pt},
+  tok/.style 2 args={fill=#1, draw=#2, line width=0.5pt, rounded corners=1.5pt,
+    minimum width=7.5mm, minimum height=5.2mm, inner sep=1pt},
+  mod/.style={fill=white, draw=#1, line width=0.7pt, rounded corners=4pt,
+    align=center, inner sep=2.5pt, minimum height=7mm},
+  pics/attn/.style={code={
+    \foreach \i in {0,...,4}{\foreach \j in {0,...,4}{
+      \draw[#1!55, line width=0.25pt] (\i*0.26-0.52,0.24) -- (\j*0.26-0.52,-0.24);}}
+    \foreach \i in {0,...,4}{
+      \fill[#1] (\i*0.26-0.52,0.24) circle (0.042);
+      \fill[#1] (\i*0.26-0.52,-0.24) circle (0.042);}
+  }},
+  pics/mlp/.style={code={
+    \foreach \i in {0,...,2}{\foreach \j in {0,...,3}{
+      \draw[#1!55, line width=0.25pt] (-0.42,\i*0.24-0.24) -- (0,\j*0.24-0.36);}}
+    \foreach \i in {0,...,3}{\foreach \j in {0,...,1}{
+      \draw[#1!55, line width=0.25pt] (0,\i*0.24-0.36) -- (0.42,\j*0.24-0.12);}}
+    \foreach \i in {0,...,2}{\fill[#1] (-0.42,\i*0.24-0.24) circle (0.042);}
+    \foreach \i in {0,...,3}{\fill[#1] (0,\i*0.24-0.36) circle (0.042);}
+    \foreach \i in {0,...,1}{\fill[#1] (0.42,\i*0.24-0.12) circle (0.042);}
+  }},
+  gfig/.style={font=\sffamily\small, text=ink, >={Stealth[length=2.1mm,width=1.6mm]}},
+  ptitle/.style={font=\sffamily\footnotesize\bfseries, text=ink, anchor=north west, inner sep=0pt},
+  band/.style 2 args={fill=#1, draw=#2, line width=0.6pt, rounded corners=5pt},
+  alab/.style={font=\footnotesize, text=ink, inner sep=2pt},   % arrow labels (symbols)
+  tlab/.style={font=\sffamily\scriptsize, inner sep=2pt},     % arrow labels (words)
+}
+\newcommand{\hot}{\textcolor{acT}{\faFire}}
+\newcommand{\frz}{\textcolor{acF}{\faSnowflake}}
