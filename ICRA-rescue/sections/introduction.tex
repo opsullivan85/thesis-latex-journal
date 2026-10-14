@@ -1,0 +1,120 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Legged robots can cross broken or narrow terrain as long as a sequence
+of usable footholds exists. Finding that sequence requires more than
+choosing foothold positions. The robot must also decide which leg
+moves, when it lifts off, and how long its swing lasts. We call this
+joint discrete decision \textit{contact selection}. We use
+\textit{acyclic} for contact sequences that are neither a periodic
+gait cycle nor transitions through a fixed gait library; the
+literature also uses \textit{non-gaited} and \textit{free-gait}.
+
+Most deployed model-based stacks fix the contact schedule in advance
+and optimize motion around it \cite{Kim2019highly-dynamic,
+Wensing2022Nov, grandia_perceptive_2022}. This is effective on regular
+terrain, but a scheduled leg must step even when no good foothold is
+reachable, and an unscheduled leg cannot step even when one is.
+
+GaitNet makes only the contact decision. At each tick it outputs a
+leg, a foothold, and a swing duration, or no action. It does
+\emph{not} generate joint torques, joint positions, contact forces,
+base trajectories, or whole-body control (WBC) objectives. A
+downstream model-based controller realizes the decision. This
+division keeps the learned component small enough to re-evaluate at a
+high rate, and it keeps the foothold explicit so that the controller
+can still check it against the terrain before execution.
+
+\subsection{Related Work}
+\label{subsec:related-work}
+
+\textit{Optimization and search.} When contacts are decision
+variables, planning becomes a mixed-integer program
+\cite{Geisert2019contact-planning}. Convex terrain regions
+\cite{deits_footstep_2014} and joint optimization of schedule and
+timing \cite{winkler_gait_2018, aceituno_simultaneous_2019} shrink the
+problem, but remain costly for fast reactive correction. Free-gait and
+utility-based planners choose contact timing online from per-leg rules
+\cite{fankhauser_free_gait_2016, boussema_online_2019,
+bjelonic_whole-body_2021}, and search-based planners generate acyclic
+sequences directly \cite{amatucci_monte_2022}. Recent work accelerates
+search by learning cost-to-go \cite{taouil_non-gaited_2024} or
+transition feasibility \cite{akizhanov_learning_2024}.
+Contact-implicit MPC discovers contacts from dynamics in real time
+\cite{kim_contact-implicit_2025}, but does not select footholds from a
+perceived steppability map.
+
+\textit{Learned controllers and hybrid planners.} End-to-end policies
+cross difficult terrain reliably \cite{zhang_learning_2023,
+zhang_novel_2024, duan_sim--real_2022, siekmann_blind_2021,
+lee_learning_2020}, but the contact decision is implicit in joint
+targets and cannot be inspected or constrained before execution.
+Hybrid methods learn foothold placement while a gait generator
+provides the schedule \cite{gangapurwala_rloc_2022,
+villarreal_fast_2019, omar_fast_2022, omar_safesteps_2023,
+asselmeier_steppability-informed_2024, gaspard_footstepnet_2024,
+tsounis_deepgait_2020, shi_terrain-aware_2023, xie_glide_2023}, or
+learn contact structure while a heuristic provides footholds
+\cite{da_learning_2020, yang_fast_2021, sun_online_2024}. Patrizi et
+al. \cite{patrizi_rl-augmented_2026} learn per-foot flight-phase
+injections into an MPC horizon, which yields acyclic timing but not
+foothold selection.
+
+\textit{ContactNet.} The closest method is ContactNet
+\cite{bratta_contactnet_2024}, which ranks discretized foothold
+candidates with a neural network. Its concurrency is set by
+configuration: one leg at a time in walking experiments and joint
+footholds for a swinging pair in trot experiments. It re-ranks at
+touchdown, and the configured gait sets swing timing.
+\autoref{tab:capabilities} summarizes the differences we rely on.
+Entries for ContactNet reflect only what is reported in
+\cite{bratta_contactnet_2024}.
+
+\begin{table}[t]
+  \centering
+  \caption{Contact-decision capabilities.}
+  \label{tab:capabilities}
+  \footnotesize
+  \setlength{\tabcolsep}{2.5pt}
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Capability} & \textbf{Scheduled} & \textbf{ContactNet
+    \cite{bratta_contactnet_2024}} & \textbf{GaitNet} \\
+    \midrule
+    Explicit foothold & Yes & Yes & Yes \\
+    Chooses leg & Scheduled & Config.-dependent & Yes \\
+    Chooses swing duration & Fixed & No & Yes$^{\dagger}$ \\
+    Explicit no-action option & Implicit & \verify{Not reported} & Yes \\
+    Re-decides during a swing & No & No (at touchdown) & Yes \\
+    Swing overlap & Scheduled & Configured & Emergent \\
+    \bottomrule
+  \end{tabular}\\[2pt]
+  \footnotesize{$^{\dagger}$The Go1 deployment floors the duration
+  (\autoref{subsec:exp-hardware}).}
+\end{table}
+
+\subsection{Contributions}
+
+\begin{enumerate}
+  \item \textbf{High-rate acyclic selection.} A planner that selects
+    one leg-specific foothold, swing duration, or no-action every
+    \corlControlTickMs\,ms, without representing gait phase,
+    predefined leg pairs, or a contact schedule.
+  \item \textbf{Set-size-independent scoring.} A per-candidate
+    architecture trained with sampled candidates but deployable
+    through exhaustive batched enumeration without retraining.
+  \item \textbf{Controller-decoupled execution.} A narrow
+    planner-controller interface that lets the frozen planner operate
+    with a model-based NMPC/WBC execution stack without accessing its
+    internal optimization.
+  \item \textbf{Systematic evaluation.} Matched Gazebo experiments
+    studying terrain difficulty, concurrency restrictions, candidate
+    enumeration, timing behavior, and computation, supplemented by a
+    proof-of-concept Go1 deployment.
+\end{enumerate}
+
+An earlier thesis \cite{Sullivan2025} documented the initial
+development of GaitNet. This paper provides its first archival
+presentation and systematic evaluation, including exhaustive
+deployment-time enumeration, controller transfer, concurrency
+ablations, and physical deployment.

@@ -1,0 +1,56 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% ICRA submission. Build from this directory:
+%   latexmk -pdf main.tex
+% Shared assets live one level up: ../refs.bib and ../images/.
+\input{constants}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{adjustbox}
+\usepackage{fmtcount}
+
+\graphicspath{{../}}
+
+% \pending{...} ORANGE: a number, claim, or figure that depends on
+% experiments that have not finished (Gazebo benchmark, extra Go1 trials).
+\newcommand{\pending}[1]{\textcolor{orange}{#1}}
+% \verify{...} MAGENTA: taken from run logs, READMEs, or code comments;
+% confirm against the raw data before submission.
+\newcommand{\verify}[1]{\textcolor{magenta}{#1}}
+
+\begin{document}
+
+\title{GaitNet: Controller-Decoupled High-Rate Footstep Selection for
+  Acyclic Quadruped Locomotion}
+
+\author{Anonymous Authors}
+
+\maketitle
+
+\input{sections/abstract}
+
+\begin{IEEEkeywords}
+  Legged Robots, Footstep Planning, Reinforcement Learning
+\end{IEEEkeywords}
+
+\input{sections/introduction}
+\input{sections/method}
+\input{sections/experiments}
+\input{sections/conclusion}
+
+\bibliographystyle{ieeetr}
+\bibliography{../refs}
+
+\end{document}

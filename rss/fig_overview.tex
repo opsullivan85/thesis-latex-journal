@@ -1,0 +1,27 @@
+% Fig. 1: GaitNet overview. Drawn in Inkscape: edit figures/fig_overview.svg
+% and save a PDF copy, with text converted to paths, as
+% figures/fig_overview.pdf. Panels: (a) architecture (Sec. III-A, III-B),
+% (b) IDM training per controller (III-C), (c) PPO training in Isaac Lab
+% (III-D), (d) deployment on OCS2 (III-E).
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_overview}
+\caption{GaitNet overview. (a)~A safe-cell sampler draws candidate
+  footholds $\mathbf q_i$ from the terrain. GaitNet encodes the state
+  $\mathbf x_g$ and the last second of motion $\mathbf h$ into a context
+  $\mathbf z$, forms one token per candidate and for a learned no-step
+  option $\varnothing$, lets the tokens attend to each other in a
+  candidate mixer, and gives each choice a score and a swing time; the
+  masked categorical over the choices is sampled in training, and its
+  argmax is taken at deployment. (b)~For each controller, an inverse
+  footstep model (IDM) is fitted offline on that controller's logged
+  steps: given where a foot landed, it predicts the command $\mathbf u$
+  that put it there. (c)~GaitNet is trained with PPO in Isaac Lab, with
+  the training controller's IDM fixed between GaitNet and the
+  controller. (d)~At deployment, GaitNet runs frozen on OCS2, and the
+  execution layer sets where the foot lands, with the OCS2 IDM, and when
+  the step starts, a fixed lead after the decision. Solid amber arrows
+  are training signals and dashed ones parameter updates; \hot~trained,
+  \frz~frozen.}
+\label{fig:overview}
+\end{figure*}

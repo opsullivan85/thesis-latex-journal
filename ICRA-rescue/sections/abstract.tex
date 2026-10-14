@@ -1,0 +1,26 @@
+\begin{abstract}
+  Fixed gait schedules decide in advance which leg moves and when.
+  This makes locomotion control tractable, but it also restricts
+  foothold selection when safe footholds appear at irregular times
+  and places. We present GaitNet, a learned planner that makes only
+  the discrete contact decision. Every \corlControlTickMs\,ms it
+  selects one leg, one foothold, and one swing duration, or it selects
+  no action. Swings last several decisions, so the planner can commit
+  a new step while another leg is still in the air. Multi-leg
+  coordination therefore emerges from repeated single-leg decisions,
+  without a gait phase, predefined leg pairs, or a contact schedule.
+  Each candidate is scored independently, so a policy trained with
+  PPO on sampled candidates in Isaac Lab is deployed, frozen, on an
+  exhaustive enumeration of every terrain-valid cell. GaitNet
+  communicates with the execution controller through a narrow
+  interface and never accesses its internal optimization. We evaluate
+  the frozen planner systematically in Gazebo with a
+  \texttt{legged\_control} NMPC/WBC execution stack that differs from
+  the controller used in training. \pending{Systematic Gazebo
+  experiments show that unrestricted GaitNet improves success over
+  scheduled and concurrency-restricted alternatives, by
+  \corlGzImprovementPts{} percentage points on average, with the
+  largest gains at high terrain difficulty.} Limited Unitree Go1
+  experiments further demonstrate deployment of the frozen policy
+  through the same NMPC/WBC execution stack.
+\end{abstract}
