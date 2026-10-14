@@ -1,0 +1,357 @@
+% Section IV follows the structure of the ICRA draft
+% (ICRA-rescue/sections/experiments.tex at dfd2481): the questions, the
+% setup, then one subsection per study that states what is compared
+% before what was found. Result numbers are \xx placeholders until the
+% updated runs arrive; the previous numbers are in gaitnet-docs/results.md
+% and in the result macros of constants.tex.
+% Setup values (seeds, speeds, trial counts) are kept.
+
+\section{Simulation Experiments}
+\label{sec:experiments}
+
+We ask five questions. (Q1)~Does the frozen GaitNet succeed on OCS2 as
+often as OCS2's own trot? (Q2)~Which leg coordination emerges when no
+gait is given, and does GaitNet need to pick leg pairs freely?
+(Q3)~Does the transfer depend on the choice of step or on its
+execution? (Q4)~Does GaitNet still work when terrain comes from a
+depth camera? (Q5)~How does GaitNet cope with denser voids, and how
+repeatable is its training?
+
+\subsection{Training and Evaluation Setup}
+\label{subsec:exp-setup}
+
+All OCS2 conditions use one GaitNet checkpoint, iteration
+\corlTrainingIterations{} of one training run, frozen after training.
+\pending{Which IDM each OCS2 result uses will be stated with the
+updated results.} The run's settings changed while it trained. It used
+omnidirectional commands for its first \corlOmniIterations{}
+iterations, during which the curriculum was changed twice and its
+state was reset at each restart; one segment ran on to iteration 1103 % TODO-macro gaitnet-docs/runs.md (SC-scratch-fast-r2 ran to 1103)
+and was rolled back to its best checkpoint, at \corlOmniIterations,
+which is also one of the IDM's two data sources. The run then trained
+on forward commands without the IDM until iteration
+\corlIdmStartIteration, and with the IDM in the loop after that. It
+was not seeded and used $\corlTotalTransitions$ transitions, about
+\corlTrainHours\,h on one NVIDIA RTX PRO 6000.
+
+On the training controller, we also evaluate three other policies.
+GaitNet (eval IDM) shares GaitNet's run up to iteration
+\corlIdmStartIteration, then continued without the IDM and saw it only
+at evaluation. The two per-candidate baselines use the network of
+\cite{Sullivan2025} (Sec.~\ref{subsec:method-network}).
+\verify{Per-candidate (prior) was trained before this work, with the
+preliminary version's controller, commands, and curriculum}, on a CPU
+version of our training controller. Per-candidate (ours) is fine-tuned
+from it with our rewards, curriculum, and controller randomization, but
+with longer rollouts.
+
+Isaac Lab tests run on the training controller without randomization,
+with one void fraction and one forward speed, \corlSimSpeedSlow{} or
+\corlSimSpeedFast\,m/s, per test \emph{cell}, with
+\corlSimRobotsPerCell{} robots for \corlSimEpisodeDuration\,s. Every
+policy takes its top-scoring choice, and because terrain is generated
+per cell, we compare policies only within one evaluation. A trial
+succeeds if the robot does not fail and walks at least half the
+commanded distance; at \corlSimSpeedSlow\,m/s, that is 1\,m, of which % TODO-macro experiment-setup.md 1 (strip, spawn platform)
+the first 0.5\,m is the solid spawn platform. The \emph{10--30\% band}
+averages the 10, 20, and 30\% void cells.
+
+\subsection{OCS2 Terrain Benchmark}
+\label{subsec:exp-transfer}
+
+We run the frozen GaitNet on OCS2 (Sec.~\ref{subsec:method-deployment})
+and compare it with OCS2's own trot \cite{ocs2, leggedcontrol} (Q1).
+Each world is a strip of pillars in which each tile is a real drop
+with probability equal to the void fraction. The tiles are larger than
+the training cells (\corlGzTileCm{} against \corlTerrainCellCm\,cm)
+because the camera pipeline cannot see smaller voids, so void
+fractions in the two simulators are not comparable. Each world seed
+has one fixed role: seeds 51--60 tuned the execution layer, seeds
+61--110 supplied OCS2 steps for an OCS2-specific IDM, and seeds 1--20
+are the held-out benchmark. However, the camera pipeline, including
+OCS2's estimator slip gate, was developed on seeds 1--40, which
+include them.
+
+Each condition runs \corlGzTrialsPerArm{} trials of
+\corlGzTrialSeconds\,s at \corlGzSpeed\,m/s on the held-out seeds at
+10, 20, and 30\% voids. A trial succeeds under the same rule as in
+Isaac Lab; the failure limits are measured from the surface, and
+leaving the strip also counts as a failure. Rates carry 95\% Wilson
+score intervals, and we compare trial counts with two-sided Fisher
+exact tests.
+
+OCS2's own trot uses its native gait scheduler with fixed swings and
+picks its own footholds on the same terrain map. The GaitNet
+conditions keep OCS2's NMPC and WBC but replace its gait scheduler and
+foothold choice with GaitNet's steps, delivered through the execution
+layer, so the comparison focuses on the planner rather than the
+tracker. We evaluate four conditions:
+\begin{enumerate}
+  \item OCS2's own trot: OCS2's scheduled trot, no GaitNet.
+  \item GaitNet-Single: only one leg may swing at a time.
+  \item GaitNet-Trot: only diagonal leg pairs may swing
+    together, as in a conventional trot.
+  \item GaitNet (Full): GaitNet as deployed; up to two legs
+    may swing at once, in any pair.
+\end{enumerate}
+The three GaitNet variants share the same weights and differ only in
+the concurrency constraints applied during action selection.
+
+\begin{table}[t]
+  \centering
+  \caption{Comparison with OCS2's own trot}
+  \label{tab:gazebo-gaits}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccccc@{}}
+    \toprule
+    \thd{Condition} & \mc{\thd{Success}} & \mc{\thd{Falls}} &
+      \mc{\thd{Steps}} & \mc{\thd{Swing}} & \mc{\thd{Feet up}} \\
+    & \mc{\unit{[\%, 95\% CI] $\uparrow$}} & \mc{\unit{tip / void}} &
+      \mc{\unit{[1/s]}} & \mc{\unit{[s]}} & \mc{\unit{(mean)}} \\
+    \midrule
+    OCS2's own trot & \xx{} [\xx, \xx] & \xx\,/\,\xx & \xx & \xx & \xx \\
+    GaitNet-Single  & \xx{} [\xx, \xx] & \xx\,/\,\xx & \xx & \xx & \xx \\
+    GaitNet-Trot    & \xx{} [\xx, \xx] & \xx\,/\,\xx & \xx & \xx & \xx \\
+    GaitNet (Full)  & \xx{} [\xx, \xx] & \xx\,/\,\xx & \xx & \xx & \xx \\
+    \bottomrule
+  \end{tabular*}
+\end{table}
+
+GaitNet (Full) succeeds in \xx\% [\xx, \xx] of held-out trials and
+OCS2's own trot in \xx\% [\xx, \xx] (Table~\ref{tab:gazebo-gaits},
+$p = \xx$); the sample cannot rule out a difference of about \xx{}
+points in either direction. The two fail differently: every failure of
+OCS2's own trot is a foot in a void, whereas GaitNet also tips over. On
+flat ground at the faster speed, GaitNet succeeded in \xx{} of 10
+trials, while OCS2's own trot succeeded in \xx{} of 10 in a separate
+run. The execution layer was tuned on the tuning seeds with this same
+policy.
+
+\subsection{Concurrency Ablation}
+\label{subsec:exp-coordination}
+
+GaitNet-Single, GaitNet-Trot, and GaitNet (Full) share the same
+weights and differ only in which second swing is allowed, so their
+difference isolates the role of overlapping swings (Q2). We report the
+step rate, the swing duration, the mean number of feet in the air, the
+share of no-step choices, and which leg pairs swing together. The gait
+statistics in Table~\ref{tab:gazebo-gaits} come from the true foot
+heights, measured the same way for every condition, so measured swings
+are shorter than scheduled ones.
+
+Although it is given no gait, GaitNet coordinates its legs like a
+trot. It mostly swings one leg at a time: it takes fewer and shorter
+steps than OCS2's own trot, keeps \xx{} feet in the air on average,
+and chooses the no-step option on \xx\% of ticks. When it does swing
+two legs together, they are almost always a diagonal pair: of its
+paired swings, \xx{} were diagonal, \xx{} were the two rear legs,
+\xx{} were on one side, and \xx{} were the two front legs. This
+pattern comes from repeated decisions of the same network and no-step
+comparison, together with the two feasibility rules
+(Sec.~\ref{subsec:method-step}), not from a schedule. Restricting
+GaitNet to diagonal pairs (GaitNet-Trot) gives \xx\% success, so under
+these conditions the freedom to pick any pair does not raise success.
+
+GaitNet cannot, however, walk one leg at a time. GaitNet-Single
+succeeds in \xx\% of trials ($p < \xx$ against GaitNet (Full)), and
+the robot tips over within seconds in nearly every trial. Because
+GaitNet was never trained under a one-swing limit, this shows that
+GaitNet depends on occasionally swinging two legs together, not that
+overlap is better in general.
+
+\subsection{Execution Study}
+\label{subsec:exp-why}
+
+To separate the choice of a step from its execution (Q3), we change
+only how steps are executed: on the training controller, we switch the
+IDM on and off with each policy unchanged, and on OCS2, we change how
+steps are delivered.
+
+\begin{table}[t]
+  \centering
+  \caption{Effect of the IDM on the training controller}
+  \label{tab:idm}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lccc@{}}
+    \toprule
+    & \multicolumn{2}{c}{\thd{10--30\% voids}} &
+      \mc{\thd{40\% voids}} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-4}
+        \thd{Policy} & \mc{\thd{No IDM}} & \mc{\thd{With IDM}} &
+      \mc{\thd{With IDM}} \\
+    & \multicolumn{3}{c}{\unit{success [\%] at
+      \corlSimSpeedSlow\,/\,\corlSimSpeedFast\,m/s $\uparrow$}} \\
+    \midrule
+    Per-candidate (prior) & \xx\,/\,\xx & \xx\,/\,\xx & \xx\,/\,\xx \\
+    Per-candidate (ours)  & --          & \xx\,/\,\xx & \xx\,/\,\xx \\
+    GaitNet (eval IDM)    & --          & \xx\,/\,\xx & \xx\,/\,\xx \\
+    \bottomrule
+  \end{tabular*}
+\end{table}
+
+The first obstacle is where the foot lands. None of the policies in
+Table~\ref{tab:idm} saw the IDM in training; they differ in training
+history and checkpoint, so the table is not an architecture
+comparison. Per-candidate (prior) succeeds in \xx\% of trials at the
+slower speed but in only \xx\% at the faster one. The IDM changes only
+the command sent, not the policy, and with it the same policy reaches
+\xx\% and \xx\%. This speed effect matches the size of the landing
+shift, which exceeds the margin around voids only at the faster speed
+(Sec.~\ref{subsec:method-idm}); we have not tested this explanation
+directly. Sending instead the command that recreates the landing the
+policy would have had without the IDM was worse than the IDM in every
+cell, because it brings the shift back. Training with the IDM in the
+loop does not raise success further: in a separate evaluation, GaitNet
+and GaitNet (eval IDM) reach \xx\,/\,\xx\% and \xx\,/\,\xx\% on
+10--30\% voids, and \xx\,/\,\xx\% and \xx\,/\,\xx\% on 40\% voids, and
+training with the IDM adds only about \xx{} to the share of the
+commanded distance walked. The IDM's value therefore lies in the
+interface, not in what GaitNet learns from it.
+
+The second obstacle is when a step starts, and on OCS2 it was the
+largest. Our first gait node re-sent a one-step schedule for every
+step, which cut off swings already under way. Delivered this way, even
+OCS2's own trot survived only \xx{} of \xx{} trials, against \xx{} of
+\xx{} through its native interface, and scheduling steps at absolute
+times fixed this. Before that fix, OCS2 also landed GaitNet's feet a
+few centimetres short and outboard, with about \xx{} times the landing
+scatter seen in training, and lifted them late. Zeroing GaitNet's
+history never helped, so the history was not the cause.
+\pending{Landing error after the adaptations has not been measured
+again.}
+
+Once steps were delivered at the right time, the IDM itself made no
+significant difference on OCS2. On the tuning seeds, GaitNet succeeds
+in \xx\% of trials with the IDM and \xx\% without it ($p = \xx$,
+$n = \xx$ each), against \xx\% on the held-out seeds, and an IDM fitted
+on OCS2's own steps did not improve success either, in a test with a
+different, controller-randomized policy. One possible reason, which we
+have not tested, is speed: at \corlGzSpeed\,m/s the landing shift is
+smaller than the margin used on OCS2. \pending{A comparison of no IDM,
+the training controller's IDM, and the OCS2-fitted IDM with the
+deployed policy will be added here.}
+
+\subsection{Depth-Camera Study}
+\label{subsec:exp-camera}
+
+\begin{table}[t]
+  \centering
+  \caption{Terrain from a simulated depth camera}
+  \label{tab:camera}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}llcc@{}}
+    \toprule
+    \thd{Terrain} & \thd{Odometry} & \mc{\thd{Success}} & \mc{\thd{$n$}} \\
+    & & \mc{\unit{[\%, 95\% CI] $\uparrow$}} & \\
+    \midrule
+    Elevation map + planes & leg & \xx{} [\xx, \xx] & 60 \\
+    Depth vote, tuned & leg & \xx & \corlCamTrials \\
+    Depth vote & leg + slip gate & \xx{} [\xx, \xx] & \corlCamTrials \\
+    Depth vote & true pose & \xx{} [\xx, \xx] & \corlCamTrials \\
+    Exact & -- & \xx & 60 \\
+    \bottomrule
+  \end{tabular*}
+\end{table}
+
+We replace exact terrain with terrain built from a simulated RealSense
+D435 depth camera (Sec.~\ref{subsec:method-deployment}) and compare the
+terrain and odometry sources in Table~\ref{tab:camera} (Q4). GaitNet
+keeps most of its success once odometry and the terrain map are right,
+although here, unlike with exact terrain, GaitNet's own terrain input
+also becomes an obstacle. The default camera pipeline fails on voids:
+an elevation map followed by plane fitting succeeds in only \xx\% of
+trials. A split test, which gives OCS2 and GaitNet different terrain,
+showed that both suffered with an earlier camera pipeline: giving only
+GaitNet exact terrain raised success on voids from \xx{} to \xx\%, and
+giving only OCS2 exact terrain raised flat-ground success from \xx{} to
+\xx{} of 20 trials.
+
+With the depth-vote terrain and the slip gate, GaitNet succeeds in
+\xx\% [\xx, \xx] of trials over all three void fractions, pooled over
+seeds 1--110 (\xx, \xx, and \xx\% at 10, 20, and 30\% voids), and in
+\xx{} of \corlCamFinalFlatTrials{} trials on flat ground at the faster
+speed. The slip gate fixed an odometry bias: a setting for two dead
+contact sensors on the real robot was active in simulation, so the
+estimator took those feet's contact from the schedule, and the gate
+cuts the median odometry error over 1\,m from \xx{} to \xx\,cm. With
+the true base pose in place of leg odometry, a stand-in for a tracking
+camera, success rises to \xx\%, and exact terrain gives \xx\% on seeds
+1--20. That exact-terrain figure is \xx{} points above the \xx\% of
+Table~\ref{tab:gazebo-gaits} on the same seeds, which we attribute to
+run-to-run variation. The pooled camera results include the
+development and tuning seeds, so they are not strictly held out.
+
+\subsection{Void-Density and Repeatability Study}
+\label{subsec:exp-density}
+
+\begin{table}[t]
+  \centering
+  \caption{Success at high void density}
+  \label{tab:hard}
+  \footnotesize
+  \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lcc@{}}
+    \toprule
+        \thd{Policy @ iteration} & \mc{\thd{40\% voids}} &
+      \mc{\thd{50\% voids}} \\
+    & \multicolumn{2}{c}{\unit{success [\%] at
+      \corlSimSpeedSlow\,/\,\corlSimSpeedFast\,m/s $\uparrow$}} \\
+    \midrule
+    \grouprow{3}{GaitNet, with the IDM in training}
+    GaitNet @ 1040 & \xx\,/\,\xx & \xx\,/\,\xx \\
+    GaitNet @ 1265 & \xx\,/\,\xx & \xx\,/\,\xx \\
+    GaitNet @ 1485 & \xx\,/\,\xx & \xx\,/\,\xx \\
+    GaitNet \verify{@ 1650}$^{\dagger}$ & \xx\,/\,\xx & \xx\,/\,\xx \\
+    GaitNet \verify{@ 1760}$^{\dagger}$ & \xx\,/\,\xx & \xx\,/\,\xx \\
+    \grouprow{3}{Per-candidate network, no IDM in training}
+    Per-candidate (ours) @ 1440 & \xx\,/\,\xx & \xx\,/\,\xx \\
+    \bottomrule
+    \multicolumn{3}{@{}l}{\scriptsize $^{\dagger}$The same run continued
+      past \corlTrainingIterations, with $p_{\text{up}} = 0.2$.} \\
+  \end{tabular*}
+\end{table}
+
+We evaluate checkpoints before and after the deployed one at 40 and
+50\% voids on the training controller (Q5; Table~\ref{tab:hard}).
+GaitNet stays near \xx\% success at 40\% voids, and at 50\% voids it
+holds up at the slower speed but not at the faster one, where most
+failures are feet in voids. No checkpoint after the first one shown
+beats it beyond the 95\% intervals. The per-candidate network does
+worse at 50\% voids and the slower speed, but it also trained
+differently, without the IDM and with longer rollouts, so this is not
+an architecture comparison.
+
+Repeatability is still being measured. \pending{Four seeded runs of
+the final setting, trained from scratch, were at iterations \xx--\xx{}
+at the last evaluation. Each passed \xx\% success with the IDM on
+10--30\% voids by iteration \xx. Between evaluations, one seed moved by
+\xx{} points, so we will report their final spread at 1600
+iterations.} Training can also \emph{collapse}, with the policy
+suddenly getting much worse. With longer rollouts at our learning
+rate, training collapsed \xx{} times: \xx{} with the per-candidate
+network, and \xx{} with GaitNet's network started from it; the
+per-candidate network was stable at a lower learning rate. No run of
+GaitNet's recipe collapsed, the seeds included.
+
+\subsection{Negative Results}
+\label{subsec:exp-negative}
+
+Several ideas did not help. Sampling the action, as in training, was
+worse than taking the top-scoring choice for every policy. On OCS2, no
+swing or posture weight we tried brought the landing scatter down;
+more SQP iterations, a shorter MPC horizon, a longer lead before each
+step, and a constant per-leg landing correction gave no gain; and our % TODO-macro gaitnet-docs/results.md sec. 6 (item 3)
+earlier changes to OCS2's task settings broke its own gait at
+0.15--0.2\,m/s, so we restored six of them to their stock values.
+Training with a broadly randomized controller, meant to cover
+OCS2-like controllers, made policies robust on flat ground on an
+\emph{OCS2-like executor}, the training controller with landing
+offsets, landing noise, and a lift-off delay set to mimic how OCS2
+executed GaitNet's steps. It also cost them their skill on voids on the
+training controller; one fell from \xx{} to \xx\% on 10--30\% voids at
+the slower speed. On the OCS2-like executor, the per-candidate network
+was also more robust on flat ground than GaitNet (\xx--\xx\% against
+\xx--\xx\%). A privileged teacher reached \xx\% on 10--30\% voids but
+did not transfer to other controllers, so we did not distill it.

@@ -1,0 +1,56 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented GaitNet, a footstep planner that is given no gait and
+that separates choosing a step from executing it. GaitNet picks one
+step per tick from sampled safe footholds, and an execution layer
+makes each controller land that step where and when GaitNet meant.
+Trained on one controller and run with its weights frozen on OCS2,
+GaitNet succeeds about as often as OCS2's own trot on held-out worlds
+with exact terrain, at the lower of our two speeds. In our pair of
+controllers, the obstacles we found lay in execution rather than in
+the choice of step: correcting only the landing point recovers an
+earlier planner at speed on its own controller, and on OCS2 the
+largest obstacle was when steps were delivered. Separating what to
+step on from how a controller lands the foot there thus appears to be
+a practical way to reuse a learned footstep planner across
+controllers.
+
+\section{Limitations}
+\label{sec:limitations}
+
+\pending{All results are in simulation; GaitNet has not yet run on a
+Unitree Go1.} Within simulation, we moved GaitNet between only one pair
+of controllers, and the OCS2 comparison uses \corlGzTrialsPerArm{}
+trials per condition, which cannot separate GaitNet from OCS2's own
+trot. The execution layer was also tuned with the same policy, and GaitNet
+did worse than OCS2's own trot on flat ground at the faster speed
+(Sec.~\ref{subsec:exp-transfer}). Nor have we ablated the execution layer on OCS2: we have
+not run GaitNet there without anchoring, or with a simple hand-made
+correction of the landing shift in place of the learned IDM, which
+would show how much of the gain needs learning at all. At
+\corlGzSpeed\,m/s the landing shift is also small, so our OCS2 tests
+do not stress it. \pending{The OCS2 results reported here still use the training
+controller's IDM.} Refitting the IDM requires logging steps on each new
+controller first; adapting it online, in the spirit of
+\cite{xie_fada_2026}, could remove that step.
+
+The evidence for GaitNet's design is also incomplete. The value of the
+candidate mixer and the history is not isolated: with the IDM, the
+per-candidate network is within noise of GaitNet in Isaac Lab, it is
+more robust on an OCS2-like executor on flat ground, and it has not
+been tested on OCS2 from a healthy checkpoint. The deployed
+checkpoint comes from an unseeded run whose settings changed during
+training, and seeded runs of the final setting are still training.
+
+Finally, our tests are mild in several ways. The success rule, half the
+commanded distance (Sec.~\ref{subsec:exp-setup}), is lenient.
+\pending{We will add the distance walked and a stricter threshold.}
+Commands stay at or below \corlCmdVxMax\,m/s, and the weakest settings
+are 50\% voids at the faster speed in Isaac Lab and the faster speed
+with the camera on OCS2. GaitNet may pick any leg pair but pairs its
+legs diagonally, and this freedom did not raise success here; harder
+terrain or faster commands may need other pairs, which we have not
+shown. GaitNet also chooses from a rule-based mask of safe cells, and
+reading depth or height maps directly could help where the rules are
+too strict or too loose.
