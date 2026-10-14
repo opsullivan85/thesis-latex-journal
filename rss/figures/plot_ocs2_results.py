@@ -36,6 +36,7 @@ SUCCESS_BY_SPEED = {                                    # success [%], 80 trials
     "GaitNet-Single": [74, 68, 62, 54, 40],
 }
 TRAINED_MAX_SPEED = 0.2                                 # \corlCmdVxMax
+TRAINED_MAX_VOID = 40                                  # \corlMaxVoidPct
 
 # ---------------------------------------------------------------- style
 # Same palette and font as Fig. 1 (fig_overview.svg).
@@ -66,6 +67,10 @@ fig, (ax_v, ax_s) = plt.subplots(1, 2, figsize=(181 * MM, 52 * MM),
 
 for name, ys in SUCCESS_BY_VOID.items():
     ax_v.plot(VOIDS, ys, label=name, **STYLE[name])
+ax_v.axvspan(TRAINED_MAX_VOID + 5, 72.5, color="#E5E7EB", zorder=0, lw=0)
+ax_v.text(60, 101, "above training range", ha="center", va="top",
+          fontsize=6.5, color="#4B5563")
+ax_v.set_xlim(-2.5, 72.5)
 ax_v.set_xlabel("Void fraction [%]")
 ax_v.set_ylabel("Success [%]")
 ax_v.set_xticks(VOIDS)

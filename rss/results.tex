@@ -35,7 +35,10 @@ pair, and 14 for OCS2's own trot in the comparison by speed. The
 world seeds are new, disjoint from those that tuned the execution
 layer, supplied the IDM's data, or were used to develop the camera
 pipeline. The fastest command lies above the \corlCmdVxMax\,m/s that
-GaitNet was trained on. A trial succeeds if the robot reaches the end
+GaitNet was trained on, and void fractions above \corlMaxVoidPct\% lie
+above those it was trained on. The tiles are larger than the training
+cells (\corlGzTileCm{} against \corlTerrainCellCm\,cm), so the two void
+fractions are not directly comparable. A trial succeeds if the robot reaches the end
 of a \corlOcsTrackM\,m track without falling or leaving the strip,
 within \corlOcsTimeFactor{} times the time the command needs, from
 60\,s at \corlOcsSpeedMin\,m/s to 12\,s at \corlOcsSpeedMax\,m/s.
@@ -69,8 +72,9 @@ larger or consistent differences as real.
   \caption{Success on OCS2 with depth-camera terrain. (a)~By void
     fraction, pooled over the five commanded speeds (50 trials per
     point). (b)~By commanded speed, pooled over the eight void fractions
-    (80 trials per point, 112 for OCS2's own trot); GaitNet was trained
-    up to \corlCmdVxMax\,m/s.}
+    (80 trials per point, 112 for OCS2's own trot). Shading marks
+    values above GaitNet's training range: \corlMaxVoidPct\% voids and
+    \corlCmdVxMax\,m/s.}
   \label{fig:ocs2-results}
 \end{figure*}
 
@@ -83,8 +87,10 @@ trial up to 10\% voids and are within two points at 20\%. From 30\%
 voids on, GaitNet leads at every void fraction, with
 \corlOcsDenseFull\% against \corlOcsDenseTrot\% success over
 40--\corlOcsMaxVoidPct\% voids, and the gap is largest from 50\% voids
-on. At \corlOcsMaxVoidPct\% voids, GaitNet still succeeds in half of
-the trials and OCS2's own trot in few.
+on. From 50\% voids on, GaitNet runs on denser voids than it was
+trained on, yet it still succeeds in 50--80\% of the trials, and at
+\corlOcsMaxVoidPct\% voids in half of them, against few for OCS2's own
+trot.
 
 Because both see the same terrain and run on the same tracker, this
 gap comes from how steps are chosen. OCS2's trot lifts each diagonal
