@@ -7,7 +7,7 @@
 % GaitNet-Single and GaitNet-no-IDM share checkpoint SC-idm@1000; the
 % per-candidate network was trained with GaitNet's recipe, IDM in the
 % loop, first of several seeds; OCS2's own trot uses the same depth-vote
-% terrain; mean speed is over successful trials only; 2 m track with a
+% terrain; mean speed is over successful trials only; 3 m track with a
 % 1.5x time limit; fresh world seeds; landing error RMS 6 / 2 cm.
 
 \section{Simulation Experiments}
@@ -41,7 +41,7 @@ cells (\corlGzTileCm{} against \corlTerrainCellCm\,cm), so the two void
 fractions are not directly comparable. A trial succeeds if the robot reaches the end
 of a \corlOcsTrackM\,m track without falling or leaving the strip,
 within \corlOcsTimeFactor{} times the time the command needs, from
-60\,s at \corlOcsSpeedMin\,m/s to 12\,s at \corlOcsSpeedMax\,m/s.
+90\,s at \corlOcsSpeedMin\,m/s to 18\,s at \corlOcsSpeedMax\,m/s.
 
 Every condition gets its terrain from the same depth-vote map, built
 from the simulated depth camera, and runs on the same NMPC and WBC.
