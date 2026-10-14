@@ -226,3 +226,32 @@
 \newcommand{\corlGzFullVsOcsP}{0.65}
 \newcommand{\corlGzTuneP}{0.67}
 \newcommand{\corlGzSingleP}{10^{-22}}
+
+% --- OCS2 benchmark with the OCS2-fitted IDM and depth-camera terrain
+% (results sent by the author on 2026-10-14; not yet in gaitnet-docs).
+% 8 void fractions (0-70 %) x 5 commanded speeds (0.05-0.25 m/s), 10 trials
+% per (void, speed) cell, all conditions on OCS2 in Gazebo. Per-cell tables
+% are written in results.tex. Pooled values below assume 10 trials in every
+% cell (50 per void level); CIs are 95 % Wilson, computed 2026-10-14.
+% OCS2's trot by void fraction, as corrected by the author on 2026-10-14:
+% 100 100 88 75 70 38 30 12 (10 trials per cell, 64.1 % on average). Its
+% speed table uses 14 trials per cell (112 per speed, 69.4 % on average), so
+% the two tables pool different trials. Open (\verify): its 12 % at 70 %
+% (n=10) is below the 32 % of its first 5 trials (6 against 8 successes),
+% which n=10 including n=5 rules out.
+\newcommand{\corlOcsTrialsPerCell}{10}
+\newcommand{\corlOcsMaxVoidPct}{70}
+\newcommand{\corlOcsSpeedMin}{0.05}
+\newcommand{\corlOcsSpeedMax}{0.25}
+\newcommand{\corlOcsAllFull}{83}      % mean over void levels, 82.6
+\newcommand{\corlOcsAllTrot}{64}      % 64.1
+\newcommand{\corlOcsAllSingle}{60}    % 59.5
+\newcommand{\corlOcsAllNoIdm}{55}     % 55.0
+\newcommand{\corlOcsAllMlp}{74}       % 73.5
+\newcommand{\corlOcsDenseFull}{71}    % pooled 40-70 % voids, 70.5
+\newcommand{\corlOcsDenseFullCiLow}{64}
+\newcommand{\corlOcsDenseFullCiHigh}{76}
+\newcommand{\corlOcsDenseTrot}{38}    % 37.5
+\newcommand{\corlOcsDenseTrotCiLow}{31}
+\newcommand{\corlOcsDenseTrotCiHigh}{45}
+\newcommand{\corlOcsDenseMlp}{59}     % 58.5

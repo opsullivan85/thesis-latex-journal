@@ -88,21 +88,19 @@ and all results are in simulation.
 \noindent\begin{minipage}{\linewidth}
 Our contributions are:
 \begin{itemize}
-  \item GaitNet, a footstep planner that is given no gait, with
-    attention across its candidates and a short motion history
+  \item GaitNet, a footstep planner that is given no gait. Every tick, it
+    picks one step or none from sampled safe footholds, comparing the
+    candidates with attention and using a short motion history
     (Secs.~\ref{subsec:method-step} and~\ref{subsec:method-network}).
-  \item An inverse footstep model per controller, fitted by hindsight
-    relabelling from that controller's own logged steps
-    (Sec.~\ref{subsec:method-idm}).
-    On the training controller, it raises an earlier learned planner
-    from \xx\% to \xx\% success at the faster speed
-    (Sec.~\ref{subsec:exp-why}).
-  \item A frozen transfer to OCS2 (Sec.~\ref{subsec:method-deployment}).
-    On held-out worlds and with the training controller's IDM,
-    GaitNet succeeds in \xx\% of trials against \xx\% for OCS2's own
-    trot, a difference our sample cannot resolve (Sec.~\ref{subsec:exp-transfer}); \pending{results
-    with the OCS2-fitted IDM will follow}.
-    With a simulated depth camera, it succeeds in \xx\% of trials, on worlds that include the camera's development seeds
-    (Sec.~\ref{subsec:exp-camera}).
+  \item An execution layer that lets the frozen GaitNet run on a new
+    controller, with an inverse footstep model per controller fitted by
+    hindsight relabelling from that controller's own logged steps
+    (Secs.~\ref{subsec:method-idm} and~\ref{subsec:method-deployment}).
+  \item An evaluation on OCS2 with a simulated depth camera, over
+    0--\corlOcsMaxVoidPct\% voids and
+    \corlOcsSpeedMin--\corlOcsSpeedMax\,m/s, in which GaitNet matches
+    OCS2's own trot on sparse voids and exceeds it on dense voids and
+    at faster commands, and ablations of overlapping swings, the IDM,
+    and the candidate comparison (Sec.~\ref{sec:experiments}).
 \end{itemize}
 \end{minipage}

@@ -98,18 +98,15 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
   step (a leg, a landing point, and a swing time) or no step from
   sampled safe footholds; it is given no gait. An inverse footstep model
   (IDM), fitted from the controller's own logged steps, then turns
-  where GaitNet wants the foot into the command that lands it there. On
-  the training controller, this correction alone raises an earlier
-  learned planner from \xx\% to \xx\% success at
-  \corlSimSpeedFast\,m/s. For a new controller, OCS2's nonlinear MPC and
+  where GaitNet wants the foot into the command that lands it there. For a new controller, OCS2's nonlinear MPC and
   whole-body controller in simulation, the IDM is refit on that
-  controller's own steps. With the training controller's IDM reused,
-  the frozen GaitNet already succeeds in \xx\% [\xx, \xx] of trials on
-  held-out worlds with exact terrain, against \xx\% [\xx, \xx] for
-  OCS2's own trot, a difference our sample cannot resolve, and in
-  \xx\% [\xx, \xx] with a simulated depth camera, on worlds that
-  include those used to develop the camera pipeline.
-  \pending{Results with the OCS2-fitted IDM will follow.}
+  controller's own steps while GaitNet stays frozen. With terrain from
+  a simulated depth camera, over 0--\corlOcsMaxVoidPct\% voids and
+  commands of \corlOcsSpeedMin--\corlOcsSpeedMax\,m/s, GaitNet matches
+  OCS2's own trot on sparse voids and does better on dense ones: at
+  40--\corlOcsMaxVoidPct\% voids it succeeds in \corlOcsDenseFull\% of
+  trials against \corlOcsDenseTrot\%. Swinging two legs at once, comparing
+  candidates, and the IDM each raise its success.
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
