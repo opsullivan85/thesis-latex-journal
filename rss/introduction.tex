@@ -1,0 +1,108 @@
+\section{Introduction}
+\label{sec:introduction}
+
+\input{fig_overview}
+
+Legged robots can cross broken or narrow terrain that stops wheels
+and tracks, as long as they find a usable foothold for every step.
+Choosing those footholds is only part of the problem: the robot must
+also decide which leg to move, when to lift it, and how long its swing
+should last. Together, these decisions are called
+\emph{contact planning}. Most controllers simplify contact planning
+with a fixed gait, which sets the leg timing in advance but cannot
+react when safe footholds appear at irregular places and times.
+Learned footstep planners can make these choices online, and
+simulation lets them practise on large amounts of terrain. Yet a learned planner is trained on top of one low-level controller and
+then deployed on another, and a controller does not always place the
+foot where it is told. Our \emph{training controller}, for example,
+lands the foot a few centimetres past the commanded point, which at
+our faster speed is more than the safety margin around a hole.
+\emph{OCS2} \cite{ocs2}, a nonlinear model predictive controller
+(NMPC) with whole-body control (WBC), misses in a different way and
+also starts each step on its own schedule. When a learned planner fails
+on a new controller, the fault therefore need not lie in choosing a
+safe foothold; it can lie in landing on it.
+
+Model-based planners place
+foothold choice, contact timing, and whole-body motion inside one
+model predictive controller \cite{Wensing2022Nov}. This works well
+when the contact pattern is known, but once the planner must choose
+contacts, the problem becomes a mixed-integer program. Some methods
+reduce the search by limiting footholds to convex terrain regions
+\cite{deits_footstep_2014}, and others optimize contact schedules and
+timing together \cite{winkler_gait_2018}. Gait-free planners remove the
+periodic schedule altogether, choosing contact timing online from
+per-leg feasibility rules \cite{bjelonic_whole-body_2021} or by tree
+search \cite{amatucci_monte_2022}, and recent work speeds up this
+search by learning its cost-to-go \cite{taouil_non-gaited_2024} or by
+learning per-foot flight phases inside an MPC horizon
+\cite{patrizi_rl-augmented_2026}. These planners decide contact
+timing, but not footholds chosen from a perceived map of safe cells.
+
+Learned planners make the contact decision instead. End-to-end
+policies put it inside one neural controller and cross hard terrain
+reliably \cite{lee_learning_2020, zhang_learning_2023}; trained
+without an explicit schedule, they can even develop gaits on their own
+\cite{fu_minimizing_2021}. Their contact decision, however, is hidden
+inside the joint targets, so it cannot be checked before execution or
+handed to a model-based controller. Perceptive model-based stacks
+instead project an explicit foothold onto a convex terrain region
+\cite{grandia_perceptive_2022}, and hybrid methods learn that foothold
+while a gait generator still fixes the timing
+\cite{gangapurwala_rloc_2022, tsounis_deepgait_2020}. The closest
+work, ContactNet \cite{bratta_contactnet_2024}, ranks discretized
+foothold candidates with a network without prescribing which leg
+swings. Its concurrency, however, is set by configuration, it re-ranks
+candidates only at touchdown, and its gait sets the swing timing.
+
+Finally, work on moving learned policies to new robots or domains has
+moved body motion, joint actions, or footholds within a fixed gait,
+but not gait-free footstep choices. Li et al.
+\cite{li_zero-shot_2022} retarget learned quadruped locomotion
+policies to new robots through a hybrid kinodynamic MPC, and RLOC
+\cite{gangapurwala_rloc_2022} moves its learned footstep policy to a
+larger robot while keeping its gait. Xie et al. \cite{xie_fada_2026}
+split a humanoid policy into a planner, which states the intended
+motion, and an inverse dynamics model, which turns it into actions,
+and then adapt only the inverse model to a new domain.
+
+We present GaitNet (Fig.~\ref{fig:overview}), which separates choosing
+a step from executing it. Every \emph{tick}, the planner picks one step
+or a \emph{no-step option} from a few safe \emph{candidate} footholds
+per leg, kept away from \emph{voids}, the holes in the ground. Because
+a controller may not place the foot where it is told, an execution
+layer then makes the controller land each step where and when the
+planner meant. On the training controller, this layer is an
+\emph{inverse footstep model} (IDM), fitted from the controller's own
+logged steps, which turns where GaitNet wants the foot into the command
+that lands it there. For a new controller, the IDM is refit on that
+controller's own logged steps, and on OCS2 steps are also delivered on
+OCS2's own schedule. GaitNet is trained in Isaac Lab
+\cite{mittal_orbit_2023} and is never retrained. It builds on the
+one-step-per-tick action space of \cite{Sullivan2025}, which was tested
+on one controller; the candidate attention, the motion history, the
+execution layer, the second controller, and all results are new here,
+and all results are in simulation.
+
+% Kept in one block so the list never breaks across columns or pages.
+\noindent\begin{minipage}{\linewidth}
+Our contributions are:
+\begin{itemize}
+  \item GaitNet, a footstep planner that is given no gait, with
+    attention across its candidates and a short motion history
+    (Secs.~\ref{subsec:method-step} and~\ref{subsec:method-network}).
+  \item An inverse footstep model per controller, fitted by hindsight
+    relabelling from that controller's own logged steps
+    (Sec.~\ref{subsec:method-idm}).
+    On the training controller, it raises an earlier learned planner
+    from \xx\% to \xx\% success at the faster speed
+    (Sec.~\ref{subsec:exp-why}).
+  \item A frozen transfer to OCS2 (Sec.~\ref{subsec:method-deployment}).
+    On held-out worlds and with the training controller's IDM,
+    GaitNet succeeds in \xx\% of trials against \xx\% for OCS2's own
+    trot, a difference our sample cannot resolve (Sec.~\ref{subsec:exp-transfer}); \pending{results
+    with the OCS2-fitted IDM will follow}.
+    With a simulated depth camera, it succeeds in \xx\% of trials, on worlds that include the camera's development seeds
+    (Sec.~\ref{subsec:exp-camera}).
+\end{itemize}
+\end{minipage}
