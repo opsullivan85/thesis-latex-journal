@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="181.00mm" height="73.94mm" viewBox="0 0 181.00 73.94">
+<!-- Fig. 1 of the RSS paper (GaitNet overview), at print size in mm (181 mm = \textwidth).
+     One layer per panel, one named group per block. After editing in Inkscape, save a PDF
+     copy as fig_overview.pdf next to this file, with text converted to paths. -->
+<g inkscape:groupmode="layer" inkscape:label="background">
+<rect inkscape:label="page" x="0" y="0" width="181.00" height="73.94" fill="white"/>
+</g>
+<g inkscape:groupmode="layer" inkscape:label="(a) architecture">
+<rect inkscape:label="panel" x="0.250" y="0.250" width="180.500" height="31.400" rx="2.0" fill="#EEF1FD" stroke="#A9B4F4" stroke-width="0.27" stroke-dasharray="1.2,0.8"/>
+<g inkscape:label="title">
+<text fill="#1F2937" xml:space="preserve"><tspan x="1.850" y="3.800" font-family="Fira Sans" font-size="2.820" font-weight="600">(a)</tspan><tspan x="6.066" y="3.800" font-family="Fira Sans" font-size="2.820">GaitNet architecture</tspan></text>
+</g>
+<g inkscape:label="terrain">
+<rect x="8.567" y="5.950" width="11.714" height="4.800" rx="1.3" fill="white" stroke="#8A9099" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="10.067" y="9.365" font-family="Fira Sans" font-size="2.820">terrain</tspan></text>
+</g>
+<g inkscape:label="safe-cell sampler">
+<rect x="1.850" y="18.550" width="25.148" height="4.800" rx="1.3" fill="white" stroke="#4F46E5" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="3.350" y="21.965" font-family="Fira Sans" font-size="2.820">safe-cell sampler</tspan></text>
+</g>
+<polyline points="14.424,10.750 14.424,17.425" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="14.424,18.550 13.849,17.050 14.424,17.500 14.999,17.050" fill="#1F2937"/>
+<g inkscape:label="state x_g">
+<rect x="31.791" y="5.950" width="20.302" height="4.800" rx="0.7" fill="#E0E7FF" stroke="#A7A3F2" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="36.775" y="9.083" font-family="Fira Sans" font-size="2.820">state </tspan><tspan x="43.946" y="9.083" font-family="Latin Modern Math" font-size="3.328">𝐱</tspan><tspan x="45.966" y="9.675" font-family="Latin Modern Math" font-size="2.396">𝑔</tspan></text>
+</g>
+<g inkscape:label="history h">
+<rect x="30.991" y="11.450" width="20.302" height="4.800" rx="0.7" fill="#E0E7FF" stroke="#A7A3F2" stroke-width="0.22"/>
+<rect x="31.391" y="11.850" width="20.302" height="4.800" rx="0.7" fill="#E0E7FF" stroke="#A7A3F2" stroke-width="0.22"/>
+<rect x="31.791" y="12.250" width="20.302" height="4.800" rx="0.7" fill="#E0E7FF" stroke="#A7A3F2" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="36.053" y="15.665" font-family="Fira Sans" font-size="2.820">history </tspan><tspan x="45.705" y="15.665" font-family="Latin Modern Math" font-size="3.328">𝐡</tspan></text>
+</g>
+<g inkscape:label="candidates q_i">
+<rect x="30.991" y="17.750" width="20.302" height="4.800" rx="0.7" fill="#FEF3C7" stroke="#F2B43A" stroke-width="0.22"/>
+<rect x="31.391" y="18.150" width="20.302" height="4.800" rx="0.7" fill="#FEF3C7" stroke="#F2B43A" stroke-width="0.22"/>
+<rect x="31.791" y="18.550" width="20.302" height="4.800" rx="0.7" fill="#FEF3C7" stroke="#F2B43A" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="33.091" y="21.683" font-family="Fira Sans" font-size="2.820">candidates </tspan><tspan x="47.947" y="21.683" font-family="Latin Modern Math" font-size="3.328">𝐪</tspan><tspan x="49.967" y="22.275" font-family="Latin Modern Math" font-size="2.396">𝑖</tspan></text>
+</g>
+<g inkscape:label="no-step option">
+<rect x="31.791" y="24.850" width="20.302" height="4.800" rx="0.7" fill="#FEF3C7" stroke="#F2B43A" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="35.477" y="28.265" font-family="Fira Sans" font-size="2.820">no step </tspan><tspan x="45.818" y="28.265" font-family="Latin Modern Math" font-size="3.328">⌀</tspan></text>
+</g>
+<polyline points="26.998,20.950 29.866,20.950" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="30.991,20.950 29.491,21.525 29.941,20.950 29.491,20.375" fill="#1F2937"/>
+<g inkscape:label="state encoder f_s">
+<rect x="56.086" y="5.950" width="6.818" height="4.800" rx="0.7" fill="white" stroke="#4F46E5" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="58.118" y="9.083" font-family="Latin Modern Math" font-size="3.328">𝑓</tspan><tspan x="59.748" y="9.675" font-family="Latin Modern Math" font-size="2.396">𝑠</tspan></text>
+</g>
+<g inkscape:label="history encoder f_h">
+<rect x="56.086" y="12.250" width="6.818" height="4.800" rx="0.7" fill="white" stroke="#4F46E5" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="57.990" y="15.383" font-family="Latin Modern Math" font-size="3.328">𝑓</tspan><tspan x="59.620" y="15.975" font-family="Latin Modern Math" font-size="2.396">ℎ</tspan></text>
+</g>
+<g inkscape:label="candidate encoder f_c">
+<rect x="56.086" y="18.550" width="6.818" height="4.800" rx="0.7" fill="white" stroke="#4F46E5" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="58.161" y="21.683" font-family="Latin Modern Math" font-size="3.328">𝑓</tspan><tspan x="59.791" y="22.275" font-family="Latin Modern Math" font-size="2.396">𝑐</tspan></text>
+</g>
+<g inkscape:label="learned no-step embedding e_0">
+<rect x="56.086" y="24.850" width="6.818" height="4.800" rx="0.7" fill="white" stroke="#4F46E5" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="57.686" y="27.983" font-family="Latin Modern Math" font-size="3.328">𝐞</tspan><tspan x="59.440" y="28.575" font-family="Latin Modern Math" font-size="2.396">⌀</tspan></text>
+</g>
+<polyline points="52.093,8.350 54.961,8.350" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="56.086,8.350 54.586,8.925 55.036,8.350 54.586,7.775" fill="#1F2937"/>
+<polyline points="52.093,14.650 54.961,14.650" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="56.086,14.650 54.586,15.225 55.036,14.650 54.586,14.075" fill="#1F2937"/>
+<polyline points="52.093,20.950 54.961,20.950" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="56.086,20.950 54.586,21.525 55.036,20.950 54.586,20.375" fill="#1F2937"/>
+<polyline points="52.093,27.250 54.961,27.250" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="56.086,27.250 54.586,27.825 55.036,27.250 54.586,26.675" fill="#1F2937"/>
+<g inkscape:label="sum (context z = f_s + W_h f_h)"><circle cx="68.347" cy="8.350" r="1.45" fill="white" stroke="#4F46E5" stroke-width="0.3"/><path d="M 67.547,8.350 h 1.6 M 68.347,7.550 v 1.6" stroke="#1F2937" stroke-width="0.28"/></g>
+<polyline points="62.904,8.350 65.772,8.350" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="66.897,8.350 65.397,8.925 65.847,8.350 65.397,7.775" fill="#1F2937"/>
+<polyline points="62.904,14.650 68.347,14.650 68.347,10.925" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="68.347,9.800 68.922,11.300 68.347,10.850 67.772,11.300" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="63.275" y="13.333" font-family="Latin Modern Math" font-size="3.328">𝑊</tspan><tspan x="66.417" y="13.925" font-family="Latin Modern Math" font-size="2.396">ℎ</tspan></text>
+<g inkscape:label="tokens t_i = ReLU(W_t[z; e_i])">
+<rect x="73.789" y="5.950" width="14.676" height="23.700" rx="1.3" fill="white" stroke="#4F46E5" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="75.289" y="16.616" font-family="Fira Sans" font-size="2.820">tokens </tspan><tspan x="84.652" y="16.616" font-family="Latin Modern Math" font-size="3.328">𝐭</tspan><tspan x="86.139" y="17.208" font-family="Latin Modern Math" font-size="2.396">𝑖</tspan></text>
+<text fill="#1F2937" xml:space="preserve"><tspan x="77.047" y="20.451" font-family="Latin Modern Math" font-size="3.328">[</tspan><tspan x="77.972" y="20.451" font-family="Latin Modern Math" font-size="3.328">𝐳; 𝐞</tspan><tspan x="83.456" y="21.043" font-family="Latin Modern Math" font-size="2.396">𝑖</tspan><tspan x="84.283" y="20.451" font-family="Latin Modern Math" font-size="3.328">]</tspan></text>
+</g>
+<polyline points="69.797,8.350 72.664,8.350" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="73.789,8.350 72.289,8.925 72.739,8.350 72.289,7.775" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="70.943" y="7.315" font-family="Latin Modern Math" font-size="3.328">𝐳</tspan></text>
+<polyline points="62.904,20.950 72.664,20.950" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="73.789,20.950 72.289,21.525 72.739,20.950 72.289,20.375" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="67.056" y="19.633" font-family="Latin Modern Math" font-size="3.328">𝐞</tspan><tspan x="68.810" y="20.225" font-family="Latin Modern Math" font-size="2.396">𝑖</tspan></text>
+<polyline points="62.904,27.250 72.664,27.250" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="73.789,27.250 72.289,27.825 72.739,27.250 72.289,26.675" fill="#1F2937"/>
+<g inkscape:label="candidate mixer M (pre-norm transformer encoder)">
+<rect x="92.459" y="5.950" width="17.873" height="23.700" rx="1.3" fill="white" stroke="#4F46E5" stroke-width="0.3"/>
+<text fill="#4F46E5" xml:space="preserve"><tspan x="94.963" y="9.685" font-family="Fira Sans" font-size="2.820" font-weight="600">candidate</tspan></text>
+<text fill="#4F46E5" xml:space="preserve"><tspan x="97.753" y="13.126" font-family="Fira Sans" font-size="2.820" font-weight="600">mixer</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="93.959" y="25.122" font-family="Fira Sans" font-size="2.400">2 transformer</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="98.123" y="28.050" font-family="Fira Sans" font-size="2.400">layers</tspan></text>
+<line x1="95.395" y1="16.112" x2="95.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="95.395" y1="16.112" x2="98.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="95.395" y1="16.112" x2="101.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="95.395" y1="16.112" x2="104.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="95.395" y1="16.112" x2="107.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="98.395" y1="16.112" x2="95.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="98.395" y1="16.112" x2="98.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="98.395" y1="16.112" x2="101.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="98.395" y1="16.112" x2="104.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="98.395" y1="16.112" x2="107.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="101.395" y1="16.112" x2="95.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="101.395" y1="16.112" x2="98.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="101.395" y1="16.112" x2="101.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="101.395" y1="16.112" x2="104.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="101.395" y1="16.112" x2="107.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="104.395" y1="16.112" x2="95.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="104.395" y1="16.112" x2="98.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="104.395" y1="16.112" x2="101.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="104.395" y1="16.112" x2="104.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="104.395" y1="16.112" x2="107.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="107.395" y1="16.112" x2="95.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="107.395" y1="16.112" x2="98.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="107.395" y1="16.112" x2="101.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="107.395" y1="16.112" x2="104.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<line x1="107.395" y1="16.112" x2="107.395" y2="20.512" stroke="#4F46E5" stroke-opacity="0.45" stroke-width="0.14"/>
+<circle cx="95.395" cy="16.112" r="0.5" fill="#4F46E5"/>
+<circle cx="95.395" cy="20.512" r="0.5" fill="#4F46E5"/>
+<circle cx="98.395" cy="16.112" r="0.5" fill="#4F46E5"/>
+<circle cx="98.395" cy="20.512" r="0.5" fill="#4F46E5"/>
+<circle cx="101.395" cy="16.112" r="0.5" fill="#4F46E5"/>
+<circle cx="101.395" cy="20.512" r="0.5" fill="#4F46E5"/>
+<circle cx="104.395" cy="16.112" r="0.5" fill="#4F46E5"/>
+<circle cx="104.395" cy="20.512" r="0.5" fill="#4F46E5"/>
+<circle cx="107.395" cy="16.112" r="0.5" fill="#4F46E5"/>
+<circle cx="107.395" cy="20.512" r="0.5" fill="#4F46E5"/>
+</g>
+<g inkscape:label="heads: score alpha_i, swing time T_i">
+<rect x="114.324" y="5.950" width="20.284" height="23.700" rx="1.3" fill="white" stroke="#4F46E5" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="119.146" y="16.616" font-family="Fira Sans" font-size="2.820">score </tspan><tspan x="126.831" y="16.616" font-family="Latin Modern Math" font-size="3.328">𝛼</tspan><tspan x="128.960" y="17.208" font-family="Latin Modern Math" font-size="2.396">𝑖</tspan></text>
+<text fill="#1F2937" xml:space="preserve"><tspan x="115.824" y="20.451" font-family="Fira Sans" font-size="2.820">swing time </tspan><tspan x="130.339" y="20.451" font-family="Latin Modern Math" font-size="3.328">𝑇</tspan><tspan x="132.282" y="21.043" font-family="Latin Modern Math" font-size="2.396">𝑖</tspan></text>
+</g>
+<g inkscape:label="masked categorical (sample in training, argmax at deployment)">
+<rect x="138.601" y="5.950" width="20.652" height="23.700" rx="1.3" fill="white" stroke="#4F46E5" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="143.960" y="14.195" font-family="Fira Sans" font-size="2.820">masked</tspan></text>
+<text fill="#1F2937" xml:space="preserve"><tspan x="141.856" y="17.635" font-family="Fira Sans" font-size="2.820">categorical</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="141.281" y="21.300" font-family="Fira Sans" font-size="2.400">sample (train)</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="140.101" y="24.228" font-family="Fira Sans" font-size="2.400">argmax (deploy)</tspan></text>
+</g>
+<g inkscape:label="chosen step (l, u*, T) or no step">
+<rect x="163.246" y="13.365" width="15.904" height="8.870" rx="0.7" fill="#FEF3C7" stroke="#F2B43A" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="164.546" y="16.898" font-family="Latin Modern Math" font-size="3.328">(</tspan><tspan x="165.841" y="16.898" font-family="Latin Modern Math" font-size="3.328">ℓ, 𝐮</tspan><tspan x="171.384" y="15.713" font-family="Latin Modern Math" font-size="2.396">⋆</tspan><tspan x="172.582" y="16.898" font-family="Latin Modern Math" font-size="3.328">, 𝑇)</tspan></text>
+<text fill="#1F2937" xml:space="preserve"><tspan x="168.162" y="20.733" font-family="Fira Sans" font-size="2.820">or </tspan><tspan x="171.645" y="20.733" font-family="Latin Modern Math" font-size="3.328">⌀</tspan></text>
+</g>
+<polyline points="88.466,17.800 91.334,17.800" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="92.459,17.800 90.959,18.375 91.409,17.800 90.959,17.225" fill="#1F2937"/>
+<polyline points="110.331,17.800 113.199,17.800" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="114.324,17.800 112.824,18.375 113.274,17.800 112.824,17.225" fill="#1F2937"/>
+<polyline points="134.609,17.800 137.476,17.800" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="138.601,17.800 137.101,18.375 137.551,17.800 137.101,17.225" fill="#1F2937"/>
+<polyline points="159.253,17.800 162.121,17.800" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="163.246,17.800 161.746,18.375 162.196,17.800 161.746,17.225" fill="#1F2937"/>
+</g>
+<g inkscape:groupmode="layer" inkscape:label="(b) IDM training">
+<rect inkscape:label="panel" x="0.250" y="33.250" width="43.894" height="40.437" rx="2.0" fill="#EBF7F1" stroke="#8FD3B3" stroke-width="0.27" stroke-dasharray="1.2,0.8"/>
+<g inkscape:label="title">
+<text fill="#1F2937" xml:space="preserve"><tspan x="1.850" y="36.800" font-family="Fira Sans" font-size="2.820" font-weight="600">(b)</tspan><tspan x="6.204" y="36.800" font-family="Fira Sans" font-size="2.820">IDM training per controller</tspan></text>
+</g>
+<g inkscape:label="controller c (one IDM per controller)">
+<rect x="2.047" y="38.850" width="17.867" height="9.500" rx="1.3" fill="white" stroke="#8A9099" stroke-width="0.3"/>
+<rect x="2.447" y="39.250" width="17.867" height="9.500" rx="1.3" fill="white" stroke="#8A9099" stroke-width="0.3"/>
+<rect x="2.847" y="39.650" width="17.867" height="9.500" rx="1.3" fill="white" stroke="#8A9099" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="4.347" y="43.951" font-family="Fira Sans" font-size="2.820">controller </tspan><tspan x="17.773" y="43.951" font-family="Latin Modern Math" font-size="3.328">𝑐</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="4.870" y="46.984" font-family="Fira Sans" font-size="2.400">logged steps</tspan></text>
+</g>
+<g inkscape:label="logged input (s, l, T, o)">
+<rect x="24.314" y="42.000" width="18.033" height="4.800" rx="0.7" fill="#E0E7FF" stroke="#A7A3F2" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="25.614" y="45.415" font-family="Latin Modern Math" font-size="3.328">(</tspan><tspan x="26.908" y="45.415" font-family="Latin Modern Math" font-size="3.328">𝐬, ℓ, 𝑇, 𝐨</tspan><tspan x="39.753" y="45.415" font-family="Latin Modern Math" font-size="3.328">)</tspan></text>
+</g>
+<g inkscape:label="IDM I^c (trained)">
+<rect x="24.314" y="51.744" width="18.033" height="9.199" rx="1.3" fill="white" stroke="#0F9F6E" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="27.593" y="55.727" font-family="Fira Sans" font-size="2.820">IDM </tspan><tspan x="33.182" y="55.727" font-family="Latin Modern Math" font-size="3.328">𝐼</tspan><tspan x="34.647" y="54.542" font-family="Latin Modern Math" font-size="2.396">𝑐</tspan></text>
+<path d="M422 828C422 874 362 893 336 854C94 500 438 484 438 312C438 242 381 187 311 188C242 189 188 245 188 314V481C188 523 136 545 107 514C55 459 0 365 0 250C0 43 168 -125 375 -125C582 -125 750 43 750 250C750 583 422 627 422 828Z" fill="#D97706" transform="translate(36.671,55.727) scale(0.00231,-0.00231)"/>
+<text fill="#4B5563" xml:space="preserve"><tspan x="26.482" y="59.125" font-family="Fira Sans" font-size="2.400">fitted offline</tspan></text>
+</g>
+<g inkscape:label="MSE loss">
+<rect x="24.314" y="65.887" width="18.033" height="5.800" rx="1.3" fill="white" stroke="#D97706" stroke-width="0.3"/>
+<text fill="#D97706" xml:space="preserve"><tspan x="30.711" y="69.802" font-family="Fira Sans" font-size="2.820">MSE</tspan></text>
+</g>
+<g inkscape:label="logged command u (target)">
+<rect x="9.417" y="65.887" width="4.726" height="5.800" rx="0.7" fill="white" stroke="#0F9F6E" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="10.717" y="69.802" font-family="Latin Modern Math" font-size="3.328">𝐮</tspan></text>
+</g>
+<polyline points="20.714,44.400 23.189,44.400" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="24.314,44.400 22.814,44.975 23.264,44.400 22.814,43.825" fill="#1F2937"/>
+<polyline points="11.780,49.150 11.780,64.762" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="11.780,65.887 11.205,64.387 11.780,64.837 12.355,64.387" fill="#1F2937"/>
+<polyline points="33.331,46.800 33.331,50.619" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="33.331,51.744 32.756,50.244 33.331,50.694 33.906,50.244" fill="#1F2937"/>
+<polyline points="31.831,60.943 31.831,64.762" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="31.831,65.887 31.256,64.387 31.831,64.837 32.406,64.387" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="29.004" y="64.430" font-family="Latin Modern Math" font-size="3.328">𝐮̂</tspan></text>
+<polyline points="34.831,65.887 34.831,62.068" fill="none" stroke="#D97706" stroke-width="0.3" stroke-linejoin="round" stroke-dasharray="1.1,0.75"/>
+<polygon points="34.831,60.943 35.406,62.443 34.831,61.993 34.256,62.443" fill="#D97706"/>
+<polyline points="14.144,68.787 23.189,68.787" fill="none" stroke="#D97706" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="24.314,68.787 22.814,69.362 23.264,68.787 22.814,68.212" fill="#D97706"/>
+</g>
+<g inkscape:groupmode="layer" inkscape:label="(c) GaitNet training">
+<rect inkscape:label="panel" x="45.744" y="33.250" width="45.505" height="40.437" rx="2.0" fill="#FFF8EE" stroke="#F1C48A" stroke-width="0.27" stroke-dasharray="1.2,0.8"/>
+<g inkscape:label="title">
+<text fill="#1F2937" xml:space="preserve"><tspan x="47.344" y="36.800" font-family="Fira Sans" font-size="2.820" font-weight="600">(c)</tspan><tspan x="51.366" y="36.800" font-family="Fira Sans" font-size="2.820">PPO training in Isaac Lab</tspan></text>
+</g>
+<g inkscape:label="GaitNet (trained)">
+<rect x="50.841" y="38.850" width="15.992" height="9.500" rx="1.3" fill="white" stroke="#4F46E5" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="52.341" y="44.615" font-family="Fira Sans" font-size="2.820">GaitNet</tspan></text>
+<path d="M422 828C422 874 362 893 336 854C94 500 438 484 438 312C438 242 381 187 311 188C242 189 188 245 188 314V481C188 523 136 545 107 514C55 459 0 365 0 250C0 43 168 -125 375 -125C582 -125 750 43 750 250C750 583 422 627 422 828Z" fill="#D97706" transform="translate(62.936,44.615) scale(0.00231,-0.00231)"/>
+</g>
+<g inkscape:label="IDM I^train (fixed)">
+<rect x="70.833" y="38.850" width="18.619" height="9.500" rx="1.3" fill="white" stroke="#0F9F6E" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="72.333" y="44.615" font-family="Fira Sans" font-size="2.820">IDM </tspan><tspan x="77.922" y="44.615" font-family="Latin Modern Math" font-size="3.328">𝐼</tspan><tspan x="79.386" y="43.431" font-family="Fira Sans" font-size="2.400">train</tspan></text>
+<path d="M860 201 794 239 845 253C861 257 870 273 866 289L858 319C854 335 837 344 821 340L683 303L558 375L683 447L821 410C837 406 854 415 858 431L866 460C870 476 861 493 845 497L794 511L860 549C874 557 879 576 871 590L841 643C833 657 813 662 799 654L733 616L747 666C751 682 742 699 726 703L697 711C681 715 664 706 660 690L623 552L500 481V632L605 737C617 749 617 769 605 781L583 803C571 815 551 815 539 803L500 765V844C500 861 486 875 469 875H406C389 875 375 861 375 844V765L337 803C325 815 304 815 292 803L270 781C258 769 258 749 270 737L375 632V481L252 552L215 690C211 706 194 715 178 711L149 703C133 699 124 682 128 666L142 616L76 654C62 662 42 657 34 643L4 590C-4 576 1 557 15 549L81 511L30 497C14 493 5 476 9 460L17 431C21 415 38 406 54 410L192 447L317 375L192 303L54 340C38 344 21 335 17 319L9 290C5 274 14 257 30 253L81 239L15 201C1 193 -4 174 4 160L34 107C42 93 61 88 75 96L141 134L128 83C124 67 133 50 149 46L178 39C194 35 211 44 215 60L252 198L375 269V118L270 13C258 1 258 -19 270 -31L292 -54C304 -66 324 -66 336 -54L375 -15V-94C375 -111 389 -125 406 -125H468C485 -125 500 -111 500 -94V-15L538 -53C550 -65 570 -65 582 -53L604 -31C616 -19 616 1 604 13L500 118V269L623 198L660 60C664 44 681 35 697 39L726 47C742 51 751 68 747 84L733 134L799 96C813 88 833 93 841 107L871 160C879 174 874 193 860 201Z" fill="#2B8CC4" transform="translate(85.555,44.615) scale(0.00231,-0.00231)"/>
+</g>
+<g inkscape:label="PPO (separate critic)">
+<rect x="50.841" y="51.950" width="15.992" height="14.837" rx="1.3" fill="white" stroke="#D97706" stroke-width="0.3"/>
+<text fill="#D97706" xml:space="preserve"><tspan x="56.223" y="57.456" font-family="Fira Sans" font-size="2.820">PPO</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="54.054" y="60.489" font-family="Fira Sans" font-size="2.400">separate</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="56.117" y="63.417" font-family="Fira Sans" font-size="2.400">critic</tspan></text>
+</g>
+<g inkscape:label="training controller (redrawn at every reset)">
+<rect x="70.833" y="51.950" width="18.619" height="14.837" rx="1.3" fill="white" stroke="#8A9099" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="75.141" y="55.735" font-family="Fira Sans" font-size="2.820">training</tspan></text>
+<text fill="#1F2937" xml:space="preserve"><tspan x="73.803" y="59.176" font-family="Fira Sans" font-size="2.820">controller</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="74.224" y="62.209" font-family="Fira Sans" font-size="2.400">redrawn at</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="74.108" y="65.137" font-family="Fira Sans" font-size="2.400">every reset</tspan></text>
+</g>
+<polyline points="66.833,43.600 69.708,43.600" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="70.833,43.600 69.333,44.175 69.783,43.600 69.333,43.025" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="67.171" y="42.565" font-family="Latin Modern Math" font-size="3.328">𝐮</tspan><tspan x="69.297" y="41.381" font-family="Latin Modern Math" font-size="2.396">⋆</tspan></text>
+<polyline points="80.143,48.350 80.143,50.825" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="80.143,51.950 79.568,50.450 80.143,50.900 80.718,50.450" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="80.943" y="51.165" font-family="Latin Modern Math" font-size="3.328">𝐮</tspan></text>
+<polyline points="70.833,59.368 67.958,59.368" fill="none" stroke="#D97706" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="66.833,59.368 68.333,58.793 67.883,59.368 68.333,59.943" fill="#D97706"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="68.083" y="58.334" font-family="Latin Modern Math" font-size="3.328">𝑟</tspan></text>
+<polyline points="58.837,51.950 58.837,49.475" fill="none" stroke="#D97706" stroke-width="0.3" stroke-linejoin="round" stroke-dasharray="1.1,0.75"/>
+<polygon points="58.837,48.350 59.412,49.850 58.837,49.400 58.262,49.850" fill="#D97706"/>
+<polyline points="80.143,66.787 80.143,71.687 47.541,71.687 47.541,43.600 49.716,43.600" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="50.841,43.600 49.341,44.175 49.791,43.600 49.341,43.025" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="63.071" y="70.070" font-family="Latin Modern Math" font-size="3.328">𝐱</tspan><tspan x="65.090" y="70.662" font-family="Latin Modern Math" font-size="2.396">𝑔</tspan><tspan x="66.233" y="70.070" font-family="Latin Modern Math" font-size="3.328">, 𝐡, 𝒞</tspan></text>
+</g>
+<g inkscape:groupmode="layer" inkscape:label="(d) deployment">
+<rect inkscape:label="panel" x="92.849" y="33.250" width="87.901" height="40.437" rx="2.0" fill="#F5F6F8" stroke="#C3C9D2" stroke-width="0.27" stroke-dasharray="1.2,0.8"/>
+<g inkscape:label="title">
+<text fill="#1F2937" xml:space="preserve"><tspan x="94.449" y="36.800" font-family="Fira Sans" font-size="2.820" font-weight="600">(d)</tspan><tspan x="98.812" y="36.800" font-family="Fira Sans" font-size="2.820">Deployment on OCS2</tspan></text>
+</g>
+<g inkscape:label="GaitNet (frozen)">
+<rect x="94.646" y="49.070" width="15.992" height="9.500" rx="1.3" fill="white" stroke="#4F46E5" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="96.146" y="54.836" font-family="Fira Sans" font-size="2.820">GaitNet</tspan></text>
+<path d="M860 201 794 239 845 253C861 257 870 273 866 289L858 319C854 335 837 344 821 340L683 303L558 375L683 447L821 410C837 406 854 415 858 431L866 460C870 476 861 493 845 497L794 511L860 549C874 557 879 576 871 590L841 643C833 657 813 662 799 654L733 616L747 666C751 682 742 699 726 703L697 711C681 715 664 706 660 690L623 552L500 481V632L605 737C617 749 617 769 605 781L583 803C571 815 551 815 539 803L500 765V844C500 861 486 875 469 875H406C389 875 375 861 375 844V765L337 803C325 815 304 815 292 803L270 781C258 769 258 749 270 737L375 632V481L252 552L215 690C211 706 194 715 178 711L149 703C133 699 124 682 128 666L142 616L76 654C62 662 42 657 34 643L4 590C-4 576 1 557 15 549L81 511L30 497C14 493 5 476 9 460L17 431C21 415 38 406 54 410L192 447L317 375L192 303L54 340C38 344 21 335 17 319L9 290C5 274 14 257 30 253L81 239L15 201C1 193 -4 174 4 160L34 107C42 93 61 88 75 96L141 134L128 83C124 67 133 50 149 46L178 39C194 35 211 44 215 60L252 198L375 269V118L270 13C258 1 258 -19 270 -31L292 -54C304 -66 324 -66 336 -54L375 -15V-94C375 -111 389 -125 406 -125H468C485 -125 500 -111 500 -94V-15L538 -53C550 -65 570 -65 582 -53L604 -31C616 -19 616 1 604 13L500 118V269L623 198L660 60C664 44 681 35 697 39L726 47C742 51 751 68 747 84L733 134L799 96C813 88 833 93 841 107L871 160C879 174 874 193 860 201Z" fill="#2B8CC4" transform="translate(106.741,54.836) scale(0.00231,-0.00231)"/>
+</g>
+<g inkscape:label="step (l, u*, T)">
+<rect x="114.638" y="51.420" width="15.904" height="4.800" rx="0.7" fill="#FEF3C7" stroke="#F2B43A" stroke-width="0.22"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="115.938" y="54.836" font-family="Latin Modern Math" font-size="3.328">(</tspan><tspan x="117.232" y="54.836" font-family="Latin Modern Math" font-size="3.328">ℓ, 𝐮</tspan><tspan x="122.776" y="53.651" font-family="Latin Modern Math" font-size="2.396">⋆</tspan><tspan x="123.974" y="54.836" font-family="Latin Modern Math" font-size="3.328">, 𝑇)</tspan></text>
+</g>
+<polyline points="110.638,53.820 113.513,53.820" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="114.638,53.820 113.138,54.395 113.588,53.820 113.138,53.245" fill="#1F2937"/>
+<g inkscape:label="execution layer">
+<rect x="134.542" y="38.850" width="22.963" height="26.741" rx="1.6" fill="white" stroke="#0F9F6E" stroke-width="0.3"/>
+<text fill="#0F9F6E" xml:space="preserve"><tspan x="136.142" y="42.215" font-family="Fira Sans" font-size="2.820" font-weight="600">Execution layer</tspan></text>
+<g inkscape:label="where: IDM I^OCS2 (frozen)">
+<rect x="136.142" y="43.250" width="18.938" height="9.770" rx="1.3" fill="white" stroke="#0F9F6E" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="141.298" y="47.233" font-family="Fira Sans" font-size="2.820" font-weight="600">where:</tspan></text>
+<text fill="#1F2937" xml:space="preserve"><tspan x="137.642" y="51.068" font-family="Fira Sans" font-size="2.820">IDM </tspan><tspan x="143.231" y="51.068" font-family="Latin Modern Math" font-size="3.328">𝐼</tspan><tspan x="144.695" y="49.884" font-family="Fira Sans" font-size="2.400">OCS2</tspan></text>
+<path d="M860 201 794 239 845 253C861 257 870 273 866 289L858 319C854 335 837 344 821 340L683 303L558 375L683 447L821 410C837 406 854 415 858 431L866 460C870 476 861 493 845 497L794 511L860 549C874 557 879 576 871 590L841 643C833 657 813 662 799 654L733 616L747 666C751 682 742 699 726 703L697 711C681 715 664 706 660 690L623 552L500 481V632L605 737C617 749 617 769 605 781L583 803C571 815 551 815 539 803L500 765V844C500 861 486 875 469 875H406C389 875 375 861 375 844V765L337 803C325 815 304 815 292 803L270 781C258 769 258 749 270 737L375 632V481L252 552L215 690C211 706 194 715 178 711L149 703C133 699 124 682 128 666L142 616L76 654C62 662 42 657 34 643L4 590C-4 576 1 557 15 549L81 511L30 497C14 493 5 476 9 460L17 431C21 415 38 406 54 410L192 447L317 375L192 303L54 340C38 344 21 335 17 319L9 290C5 274 14 257 30 253L81 239L15 201C1 193 -4 174 4 160L34 107C42 93 61 88 75 96L141 134L128 83C124 67 133 50 149 46L178 39C194 35 211 44 215 60L252 198L375 269V118L270 13C258 1 258 -19 270 -31L292 -54C304 -66 324 -66 336 -54L375 -15V-94C375 -111 389 -125 406 -125H468C485 -125 500 -111 500 -94V-15L538 -53C550 -65 570 -65 582 -53L604 -31C616 -19 616 1 604 13L500 118V269L623 198L660 60C664 44 681 35 697 39L726 47C742 51 751 68 747 84L733 134L799 96C813 88 833 93 841 107L871 160C879 174 874 193 860 201Z" fill="#2B8CC4" transform="translate(151.183,51.068) scale(0.00231,-0.00231)"/>
+</g>
+<g inkscape:label="when: fixed lead">
+<rect x="136.142" y="54.620" width="18.938" height="9.770" rx="1.3" fill="white" stroke="#0F9F6E" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="141.818" y="58.603" font-family="Fira Sans" font-size="2.820" font-weight="600">when:</tspan></text>
+<text fill="#1F2937" xml:space="preserve"><tspan x="139.280" y="62.438" font-family="Fira Sans" font-size="2.820">fixed lead</tspan></text>
+</g>
+</g>
+<polyline points="130.542,53.820 132.842,53.820" fill="none" stroke="#1F2937" stroke-width="0.3"/>
+<circle cx="132.842" cy="53.820" r="0.45" fill="#1F2937"/>
+<polyline points="132.842,53.820 132.842,48.135 135.017,48.135" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="136.142,48.135 134.642,48.710 135.092,48.135 134.642,47.560" fill="#1F2937"/>
+<polyline points="132.842,53.820 132.842,59.506 135.017,59.506" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="136.142,59.506 134.642,60.081 135.092,59.506 134.642,58.931" fill="#1F2937"/>
+<g inkscape:label="OCS2 (NMPC + WBC)">
+<rect x="169.334" y="43.250" width="9.619" height="21.141" rx="1.3" fill="white" stroke="#8A9099" stroke-width="0.3"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="170.912" y="51.908" font-family="Fira Sans" font-size="2.820">OCS2</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="171.021" y="54.941" font-family="Fira Sans" font-size="2.400">NMPC</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="170.834" y="57.869" font-family="Fira Sans" font-size="2.400">+ WBC</tspan></text>
+</g>
+<polyline points="155.080,48.135 168.209,48.135" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="169.334,48.135 167.834,48.710 168.284,48.135 167.834,47.560" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="162.356" y="47.100" font-family="Latin Modern Math" font-size="3.328">𝐮</tspan></text>
+<polyline points="155.080,59.506 168.209,59.506" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="169.334,59.506 167.834,60.081 168.284,59.506 167.834,58.931" fill="#1F2937"/>
+<text fill="#4B5563" xml:space="preserve"><tspan x="158.104" y="58.520" font-family="Fira Sans" font-size="2.400">start time</tspan></text>
+<polyline points="174.143,64.391 174.143,71.687 102.642,71.687 102.642,59.695" fill="none" stroke="#1F2937" stroke-width="0.3" stroke-linejoin="round"/>
+<polygon points="102.642,58.570 103.217,60.070 102.642,59.620 102.067,60.070" fill="#1F2937"/>
+<text fill="#1F2937" xml:space="preserve"><tspan x="140.260" y="70.070" font-family="Latin Modern Math" font-size="3.328">𝐱</tspan><tspan x="142.280" y="70.662" font-family="Latin Modern Math" font-size="2.396">𝑔</tspan><tspan x="143.423" y="70.070" font-family="Latin Modern Math" font-size="3.328">, 𝐡, 𝒞</tspan></text>
+<g inkscape:label="note: terrain source">
+<text fill="#4B5563" xml:space="preserve"><tspan x="94.646" y="42.064" font-family="Fira Sans" font-size="2.400">terrain: exact or depth camera</tspan></text>
+</g>
+</g>
+</svg>
