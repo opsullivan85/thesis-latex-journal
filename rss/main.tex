@@ -1,0 +1,128 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{times}
+\usepackage[numbers]{natbib}
+\usepackage{multicol}
+
+\input{constants}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\graphicspath{{../}{./}}
+% Prefer the vector PDF; fall back to PNG if only that was uploaded.
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\usepackage[bookmarks=true,hypertexnames=false]{hyperref}
+\usepackage[table,xcdraw]{xcolor}
+% Clickable citations and cross-references as coloured text, no boxes
+% (same style as the SCRUB paper).
+\definecolor{linkgreen}{HTML}{1E7B4F}
+\hypersetup{colorlinks=true,linkcolor=linkgreen,citecolor=linkgreen,
+  urlcolor=linkgreen}
+% Figs. 1 and 2 are drawn in TikZ (fig_overview.tex, fig_architecture.tex).
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning}
+\usepackage{fontawesome5}
+\input{fig_style}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{fmtcount}
+\usepackage{array}
+
+% ---- table styling (after the SCRUB paper; content-level, not template) ---
+\definecolor{tabink}{HTML}{111111}
+\definecolor{tabmuted}{HTML}{454C55}
+\definecolor{tabaccent}{HTML}{1A5FB4}
+\setlength{\heavyrulewidth}{0.9pt}
+\setlength{\lightrulewidth}{0.35pt}
+\setlength{\cmidrulewidth}{0.35pt}
+\setlength{\aboverulesep}{1.0pt}
+\setlength{\belowrulesep}{1.0pt}
+\newcommand{\thd}[1]{\textcolor{tabink}{\bfseries #1}}      % column header
+\newcommand{\grouprow}[2]{\multicolumn{#1}{@{}l}{\itshape #2}\\} % group label row
+\newcommand{\mc}[1]{\multicolumn{1}{c}{#1}}                 % centred cell
+\newcommand{\unit}[1]{{\color{tabmuted}#1}}                 % muted unit text
+\newcommand{\best}[1]{\textcolor{tabaccent}{\bfseries #1}}  % best entry
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% ---- revision markup ---------------------------------------------------
+% \changed{...} / \begin{changedblock}  RED: kept for compatibility with the
+%   CoRL-era sources. The 2026-10-13 rewrite (SC-idm@1590, from
+%   gaitnet-docs/) replaced every section, so it is not marked.
+% \pending{...}                       ORANGE: a claim, number, or figure
+%   that depends on runs not finished yet (seeds, newer Gazebo rounds,
+%   hardware) or on a figure still to be redrawn.
+% \verify{...}                        MAGENTA: taken from gaitnet-docs, whose
+%   checkpoint or eval provenance must be confirmed against the raw
+%   summary.json / sweep output before submission.
+% All are revision aids only. Set \revmarkupfalse below to render the
+% whole paper in plain black for submission.
+\newif\ifrevmarkup
+\revmarkupfalse
+\newcommand{\changed}[1]{\ifrevmarkup\textcolor{red}{#1}\else#1\fi}
+\newenvironment{changedblock}{\ifrevmarkup\color{red}\fi}{}
+\newcommand{\pending}[1]{\ifrevmarkup\textcolor{orange}{#1}\else#1\fi}
+\newcommand{\verify}[1]{\ifrevmarkup\textcolor{magenta}{#1}\else#1\fi}
+% \xx: placeholder for a result number until the updated runs arrive.
+\newcommand{\xx}{\pending{\text{xx}}}
+
+% Leave spare space at the bottom of a column instead of stretching the
+% gaps between paragraphs (IEEEtran is \flushbottom by default, which
+% spread paragraphs apart when an unbreakable block or a float moved on).
+\raggedbottom
+
+\pdfinfo{
+  /Author (Anonymous)
+  /Title (GaitNet: Where Do I Step?)
+  /Subject (Robotics: Science and Systems submission)
+  /Keywords (Quadruped Locomotion; Footstep Planning; Reinforcement Learning; Sim-to-Sim Transfer)
+}
+
+\begin{document}
+
+\title{GaitNet: Where Do I Step?}
+
+\author{Author Names Omitted for Anonymous Review. Paper-ID [add your ID here]}
+
+\maketitle
+
+\begin{abstract}
+  Quadruped robots that cross ground with holes must decide, step by
+  step, which leg to lift, where to place it, and when. Learned
+  footstep planners can make these decisions online, but they are
+  trained on one low-level controller, and a controller does not always
+  place the foot where it is told; different controllers miss in
+  different ways. We present GaitNet, which separates choosing a step
+  from executing it. Every \corlControlTickMs\,ms, GaitNet picks one
+  step (a leg, a landing point, and a swing time) or no step from
+  sampled safe footholds; it is given no gait. An inverse footstep model
+  (IDM), fitted from the controller's own logged steps, then turns
+  where GaitNet wants the foot into the command that lands it there. On
+  the training controller, this correction alone raises an earlier
+  learned planner from \xx\% to \xx\% success at
+  \corlSimSpeedFast\,m/s. For a new controller, OCS2's nonlinear MPC and
+  whole-body controller in simulation, the IDM is refit on that
+  controller's own steps. With the training controller's IDM reused,
+  the frozen GaitNet already succeeds in \xx\% [\xx, \xx] of trials on
+  held-out worlds with exact terrain, against \xx\% [\xx, \xx] for
+  OCS2's own trot, a difference our sample cannot resolve, and in
+  \xx\% [\xx, \xx] with a simulated depth camera, on worlds that
+  include those used to develop the camera pipeline.
+  \pending{Results with the OCS2-fitted IDM will follow.}
+\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+% Each file below starts its own \section.
+\input{introduction}
+\input{setup}
+\input{methodology}
+\input{results}
+\input{conclusions}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}
+

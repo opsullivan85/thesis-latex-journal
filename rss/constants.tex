@@ -1,0 +1,228 @@
+% Constants for the RSS paper (rss/*.tex).
+% The "corl" prefix is kept from the CoRL version of this paper.
+%
+% Source of truth: gaitnet-docs/ (methodology.md, training-setup.md,
+% experiment-setup.md, results.md, runs.md), state of 2026-10-13. Each block
+% names the file and section it comes from. The policy is SC-idm@1590
+% (inverse footstep model in the loop). The paper calls the method GaitNet;
+% gaitnet-docs calls the same network GaitNet-T.
+%
+% Convention: every macro below holds a bare value (a number, or a short
+% math expression like 10^{-3}) with NO unit, %, or $ baked in. Units,
+% percent signs, and math-mode delimiters are added at the call site, so a
+% macro can be dropped into either running text or an equation unchanged.
+% Numbers that appear only inside one table are written in that table, with
+% a comment naming the eval they come from.
+
+% --- Rates and action timing (methodology.md 1-2, README conventions) ---
+\newcommand{\corlPhysicsHz}{250}
+\newcommand{\corlControlHz}{25}
+\newcommand{\corlControlTickMs}{40}
+\newcommand{\corlMpcHz}{50}
+\newcommand{\corlSwingDurationMin}{0.1}
+\newcommand{\corlSwingDurationMax}{0.3}
+\newcommand{\corlMinTicksPerSwing}{3}
+\newcommand{\corlMaxTicksPerSwing}{8}
+\newcommand{\corlMaxConcurrentSwingLegs}{2}
+\newcommand{\corlMinContactLegs}{3}
+
+% --- Footstep candidates (methodology.md 3) ---
+\newcommand{\corlScanRays}{41}
+\newcommand{\corlScanResCm}{1}
+\newcommand{\corlPoolKernel}{5}
+\newcommand{\corlGridCells}{37}
+\newcommand{\corlGridReachCm}{18}
+\newcommand{\corlMarginCm}{2}
+\newcommand{\corlHipDropMax}{0.5}
+\newcommand{\corlNumLegs}{4}
+\newcommand{\corlTrainCandidatesPerLeg}{16}
+\newcommand{\corlTotalCandidates}{65}
+
+% --- Observation (methodology.md 4) ---
+\newcommand{\corlStateDim}{25}
+\newcommand{\corlFootPosDim}{8}
+\newcommand{\corlVelDim}{3}
+\newcommand{\corlAngVelDim}{3}
+\newcommand{\corlGravityDim}{3}
+\newcommand{\corlContactDim}{4}
+\newcommand{\corlCandFeatDim}{8}
+\newcommand{\corlHistTicks}{25}
+\newcommand{\corlHistFeatDim}{26}
+\newcommand{\corlHistSeconds}{1}
+\newcommand{\corlObsDim}{1195}
+
+% --- Networks (methodology.md 5) ---
+\newcommand{\corlStateEncoderLayers}{3}
+\newcommand{\corlStateEncoderHidden}{128}
+\newcommand{\corlFootstepEncoderLayers}{2}
+\newcommand{\corlFootstepEncoderHidden}{64}
+\newcommand{\corlTrunkLayers}{3}
+\newcommand{\corlMixerLayers}{2}
+\newcommand{\corlMixerDim}{128}
+\newcommand{\corlMixerHeads}{4}
+\newcommand{\corlMixerFF}{256}
+\newcommand{\corlParamsPerCandidateK}{99}   % thousands of parameters
+\newcommand{\corlParamsGaitNetK}{464} % thousands of parameters
+\newcommand{\corlDurationExploreStd}{0.01}
+
+% --- Training controller (methodology.md 2) ---
+\newcommand{\corlMpcHorizonSteps}{10}
+\newcommand{\corlMpcHorizon}{0.2}
+\newcommand{\corlFrictionMu}{0.8}
+\newcommand{\corlAdmmIters}{80}
+\newcommand{\corlGpuTorqueErrMax}{0.20}
+\newcommand{\corlGpuTorqueErrPct}{0.6}
+% Landing overshoot along the walking direction, training controller, no
+% IDM (results.md 2; DEC 2026-10-12 17:30). Centimetres.
+\newcommand{\corlOvershootSlowMin}{1.3}
+\newcommand{\corlOvershootSlowMax}{1.9}
+\newcommand{\corlOvershootFastMin}{2.9}
+\newcommand{\corlOvershootFastMax}{3.9}
+
+% --- Inverse footstep model (methodology.md 6) ---
+\newcommand{\corlIdmInputDim}{33}
+\newcommand{\corlIdmHidden}{256}
+\newcommand{\corlIdmFootsteps}{180{,}681}
+\newcommand{\corlIdmPerturbCm}{3}
+\newcommand{\corlIdmHeldOutPct}{10}
+\newcommand{\corlIdmRmsCm}{0.89}
+\newcommand{\corlIdmIdentityRmsCm}{2.61}
+
+% --- Training (training-setup.md 2-12) ---
+\newcommand{\corlParallelEnvs}{1024}
+\newcommand{\corlRolloutSteps}{100}
+\newcommand{\corlPpoEpochs}{8}
+\newcommand{\corlMiniBatches}{8}
+\newcommand{\corlLearningRate}{3 \times 10^{-4}}
+\newcommand{\corlClip}{0.3}
+\newcommand{\corlEntropyCoef}{0.02}
+\newcommand{\corlGamma}{0.99}
+\newcommand{\corlLambda}{0.95}
+\newcommand{\corlEpisodeSeconds}{20}
+\newcommand{\corlAliveWeight}{0.4}
+\newcommand{\corlTrackXyStd}{0.1}
+\newcommand{\corlTrackYawStd}{0.2}
+\newcommand{\corlActionPenalty}{0.4}      % magnitude; the sign is in the reward equation
+\newcommand{\corlTerminationPenalty}{200} % magnitude; the sign is in the reward equation
+\newcommand{\corlTiltLimitDeg}{20}
+\newcommand{\corlMinBaseHeight}{0.15}
+\newcommand{\corlFootDepthLimit}{0.05}
+\newcommand{\corlCmdVxMax}{0.2}
+\newcommand{\corlCmdYawMax}{0.2}
+\newcommand{\corlTerrainCellCm}{12.5}
+\newcommand{\corlVoidDepth}{0.5}
+\newcommand{\corlTileSize}{4}
+\newcommand{\corlNumLevels}{12}
+\newcommand{\corlMaxVoidPct}{50}
+\newcommand{\corlCurriculumProgress}{0.3}
+\newcommand{\corlWalkPUp}{0.1}
+\newcommand{\corlWalkPDown}{0.3}
+\newcommand{\corlWalkRandomPct}{25}
+% Step-recipe controller randomisation (training-setup.md 8).
+\newcommand{\corlRandTrackMin}{0.3}
+\newcommand{\corlRandPlanarMin}{0.5}
+\newcommand{\corlRandApexMin}{0.07}
+\newcommand{\corlRandApexMax}{0.12}
+\newcommand{\corlRandBiasCm}{2}
+\newcommand{\corlRandNoiseCm}{1}
+% History of the deployed checkpoint (runs.md, training-setup.md 11).
+\newcommand{\corlTrainingIterations}{1590}
+\newcommand{\corlOmniIterations}{645}
+\newcommand{\corlIdmStartIteration}{890}
+\newcommand{\corlTotalTransitions}{1.63 \times 10^{8}}
+\newcommand{\corlTrainHours}{14.9}
+\newcommand{\corlNumSeeds}{4}
+
+% --- Isaac Lab evaluation protocol (experiment-setup.md 1) ---
+\newcommand{\corlSimRobotsPerCell}{150}
+\newcommand{\corlSimStripLength}{10}
+\newcommand{\corlSimEpisodeDuration}{20}
+\newcommand{\corlSimSpeedSlow}{0.1}
+\newcommand{\corlSimSpeedFast}{0.2}
+
+% --- Isaac Lab results (results.md 2; evals/idm_A_literal) ---
+% Success (%) over the 10-30 % void cells at 0.1 / 0.2 m/s.
+\newcommand{\corlResPriorNoIdmSlow}{82}
+\newcommand{\corlResPriorNoIdmFast}{17}
+\newcommand{\corlResPriorNoIdmBand}{50}
+\newcommand{\corlResPriorIdmSlow}{94}
+\newcommand{\corlResPriorIdmFast}{93}
+% IDM in training (SC-idm) vs IDM only at evaluation (SC-r3), DEC 21:00.
+\newcommand{\corlResTrainIdmBandSlow}{99}
+\newcommand{\corlResTrainIdmBandFast}{98}
+\newcommand{\corlResTrainIdmFortySlow}{95}
+\newcommand{\corlResTrainIdmFortyFast}{87}
+\newcommand{\corlResEvalIdmBandSlow}{99}
+\newcommand{\corlResEvalIdmBandFast}{97}
+\newcommand{\corlResEvalIdmFortySlow}{93}
+\newcommand{\corlResEvalIdmFortyFast}{84}
+\newcommand{\corlResTrainIdmDistGain}{0.06}
+
+% --- Gazebo + OCS2 protocol (experiment-setup.md 2) ---
+\newcommand{\corlGzTileCm}{24}
+\newcommand{\corlGzPillarHeight}{0.30}
+\newcommand{\corlGzStripLength}{6}
+\newcommand{\corlGzTrialSeconds}{30}
+\newcommand{\corlGzSpeed}{0.1}
+\newcommand{\corlGzFlatSpeed}{0.2}
+\newcommand{\corlGzTrialsPerArm}{60}
+\newcommand{\corlGzProbeMarginCm}{3}
+\newcommand{\corlGzLead}{0.20}
+\newcommand{\corlGzAuthorityRadius}{0.03}
+\newcommand{\corlGzAuthorityRadiusDefault}{0.10}
+\newcommand{\corlGzRefCap}{0.15}
+\newcommand{\corlOcsDt}{0.015}
+\newcommand{\corlOcsHorizon}{0.8}
+\newcommand{\corlOcsHz}{100}
+
+% --- Gazebo + OCS2 results (results.md 6) ---
+% Deployment gap before the interface fixes (DEC 18:15-21:30). Centimetres
+% and milliseconds.
+\newcommand{\corlGzLandShortMin}{2}
+\newcommand{\corlGzLandShortMax}{4}
+\newcommand{\corlGzLandOutboard}{2}
+\newcommand{\corlGzLandScatterMin}{4}
+\newcommand{\corlGzLandScatterMax}{5}
+\newcommand{\corlTrainLandScatter}{1.1}
+\newcommand{\corlGzLiftLateMin}{40}
+\newcommand{\corlGzLiftLateMax}{50}
+\newcommand{\corlGzTrotBrokenSurvived}{4}
+\newcommand{\corlGzTrotTrials}{40}
+% Gait comparison, held-out seeds 1-20, exact terrain (inv_gaits_1).
+\newcommand{\corlGzFullSuccess}{82}
+\newcommand{\corlGzFullCiLow}{70}
+\newcommand{\corlGzFullCiHigh}{89}
+\newcommand{\corlGzOcsSuccess}{77}
+\newcommand{\corlGzOcsCiLow}{65}
+\newcommand{\corlGzOcsCiHigh}{86}
+\newcommand{\corlGzDiagonalPairs}{2874}
+\newcommand{\corlGzRearPairs}{15}
+\newcommand{\corlGzSidePairs}{8}
+\newcommand{\corlGzNoopPct}{83}
+% Tuning seeds 51-60, exact terrain (inv_voids_3), n = 30 per arm.
+\newcommand{\corlGzTuneTrials}{30}
+\newcommand{\corlGzTuneIdm}{93}
+\newcommand{\corlGzTuneNoIdm}{87}
+% Camera, frozen benchmark (results.md 6, "Camera").
+\newcommand{\corlCamTrials}{330}
+\newcommand{\corlCamFinalSuccess}{80.3}
+\newcommand{\corlCamFinalCiLow}{76}
+\newcommand{\corlCamFinalCiHigh}{84}
+\newcommand{\corlCamTenPct}{92}
+\newcommand{\corlCamTwentyPct}{81}
+\newcommand{\corlCamThirtyPct}{68}
+\newcommand{\corlCamFinalFlat}{96}
+\newcommand{\corlCamFinalFlatTrials}{110}
+\newcommand{\corlCamDefaultSuccess}{8}
+\newcommand{\corlCamTrackSuccess}{85}
+\newcommand{\corlCamTrackCiLow}{80}
+\newcommand{\corlCamTrackCiHigh}{88}
+\newcommand{\corlCamExactSuccess}{87}
+\newcommand{\corlOdomErrBefore}{2.84}
+\newcommand{\corlOdomErrAfter}{0.08}
+
+% --- Two-sided Fisher exact tests on trial counts (computed 2026-10-13 from
+% the counts in results.md 6: 49/60 vs 46/60, 28/30 vs 26/30, 0/60 vs 49/60).
+\newcommand{\corlGzFullVsOcsP}{0.65}
+\newcommand{\corlGzTuneP}{0.67}
+\newcommand{\corlGzSingleP}{10^{-22}}
