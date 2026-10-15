@@ -69,7 +69,7 @@ controller's \emph{scheduled} contact rather than a sensed one
 except $p_{b,z}$ are in the trunk frame. The second input is the
 set of $N$ candidates and the no-step option $\varnothing$. Candidate
 $i$ is described by a vector $\mathbf q_i$: a one-hot code for its leg
-and its offset from the hip; the no-step option has its own code. A last entry, a cost from a separate network in
+and its offset from the hip; the no-step option uses a fixed embedding. A last entry, a cost from a separate network in
 \cite{Sullivan2025}, is kept at zero, because zeroing it improved
 survival there. The third input is the
 history $\mathbf h$ of the last second of motion. Each of its ticks
@@ -199,11 +199,11 @@ GaitNet, run on OCS2 with the training controller's IDM, on world seeds
 
 We train GaitNet, as the actor, with Proximal Policy Optimization (PPO)
 \cite{Schulman_proximal_2017} in Isaac Lab \cite{mittal_orbit_2023},
-with many robots in parallel and the training controller's IDM, fixed,
+with 1024 robots in parallel and the training controller's IDM, fixed,
 between GaitNet and the controller. The critic is
 a separate, smaller network that reads the state and the candidates,
 but not the history, and shares no weights with the actor; it scores
-each choice, and a small MLP maps these scores to one state value.
+each choice, with a small MLP mapping the scores to one state value.
 
 \begin{table}[t]
   \centering

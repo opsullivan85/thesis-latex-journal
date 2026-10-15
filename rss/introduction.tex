@@ -4,19 +4,18 @@
 \input{fig_overview}
 
 Legged robots can cross broken or narrow terrain that stops wheels
-and tracks, as long as they find a usable foothold for every step.
+and tracks, as long as they find where to place their feet.
 Choosing those footholds is only part of the problem: the robot must
-also decide which leg to move, when to lift it, and how long its swing
+also decide which legs to move, when to lift them, and how long its swings
 should last. Together, these decisions are called
 \emph{contact planning}. Most controllers simplify contact planning
-with a fixed gait, which sets the leg timing in advance but cannot
+with a fixed gait, which sets the leg timing and ordering in advance but cannot
 react when safe footholds appear at irregular places and times.
-Learned footstep planners can make these choices online, and
-simulation lets them practise on large amounts of terrain. Yet a learned planner is trained on top of one low-level controller and
+Learned footstep planners can make these choices implicitly, and
+simulation lets them practice on large amounts of terrain. Yet a learned planner is trained on top of one low-level controller and
 then deployed on another, and a controller does not always place the
 foot where it is told. Our \emph{training controller}, for example,
-lands the foot a few centimetres past the commanded point, which at
-our faster speed is more than the safety margin around a hole.
+lands the foot a few centimeters off of the commanded target, which is more than the safety margin around terrain elements.
 \emph{OCS2} \cite{ocs2}, a nonlinear model predictive controller
 (NMPC) with whole-body control (WBC), misses in a different way and
 also starts each step on its own schedule. When a learned planner fails
@@ -32,6 +31,13 @@ reduce the search by limiting footholds to convex terrain regions
 \cite{deits_footstep_2014}, and others optimize contact schedules and
 timing together \cite{winkler_gait_2018}. Gait-free planners remove the
 periodic schedule altogether, choosing contact timing online from
+% placeholder image
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{example-image-a}
+    \caption{Robot navigating challenging terrain.}
+    \label{fig:placeholder}
+\end{figure}
 per-leg feasibility rules \cite{bjelonic_whole-body_2021} or by tree
 search \cite{amatucci_monte_2022}, and recent work speeds up this
 search by learning its cost-to-go \cite{taouil_non-gaited_2024} or by
@@ -85,7 +91,8 @@ execution layer, the second controller, and all results are new here,
 and all results are in simulation.
 
 % Kept in one block so the list never breaks across columns or pages.
-\noindent\begin{minipage}{\linewidth}
+% NOTE (owen): we'll want to re-condiser this later. as of now, it left a huge gap on pg2
+% \noindent\begin{minipage}{\linewidth}
 Our contributions are:
 \begin{itemize}
   \item GaitNet, a footstep planner that is given no gait. Every tick, it
@@ -103,4 +110,4 @@ Our contributions are:
     at faster commands, and ablations of overlapping swings, the IDM,
     and the candidate comparison (Sec.~\ref{sec:experiments}).
 \end{itemize}
-\end{minipage}
+% \end{minipage}

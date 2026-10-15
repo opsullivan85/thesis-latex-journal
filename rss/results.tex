@@ -81,7 +81,7 @@ larger or consistent differences as real.
 \subsection{Comparison with OCS2's Own Trot}
 \label{subsec:exp-transfer}
 
-GaitNet matches OCS2's own trot on sparse voids and does better as the
+GaitNet matches OCS2's own trot on sparse voids and gains a lead as the
 voids get denser (Fig.~\ref{fig:ocs2-results}a). Both succeed in every
 trial up to 10\% voids and are within two points at 20\%. From 30\%
 voids on, GaitNet leads at every void fraction, with
@@ -93,7 +93,7 @@ trained on, yet it still succeeds in 50--80\% of the trials, and at
 trot.
 
 Because both see the same terrain and run on the same tracker, this
-gap comes from how steps are chosen. OCS2's trot lifts each diagonal
+gap comes from how the steps and gait are chosen. OCS2's trot lifts each diagonal
 pair on a fixed schedule and must then find a foothold for it, while
 GaitNet chooses at every tick which leg to move, if any, and where.
 On sparse voids, a safe foothold is almost always close to where the
