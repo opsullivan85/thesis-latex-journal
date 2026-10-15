@@ -16,7 +16,7 @@ at most one step for one leg, while the other legs keep their current
 commands. A swing lasts several ticks, so GaitNet may start a second
 swing before the first one ends. Two feasibility rules decide which
 legs may step: a leg that is already swinging cannot be chosen, and at
-least two legs must remain in stance after the new step starts, where
+least \numberstringnum{\corlMinStanceLegs} legs must remain in stance after the new step starts, where
 a leg that is waiting to lift off counts as lifted. At most
 \numberstringnum{\corlMaxConcurrentSwingLegs} legs therefore swing at
 once. Beyond these rules, GaitNet never chooses a gait phase, leg pair,
@@ -85,7 +85,7 @@ sum is a context vector shared by all choices,
 \end{equation}
 where $W_h$ is a linear projection. A candidate encoder $f_c$, shared by
 all candidates, embeds each candidate as $\mathbf e_i = f_c(\mathbf q_i)$,
-and the no-step option has a learned embedding $\mathbf e_\varnothing$
+and the no-step option has a fixed embedding $\mathbf e_\varnothing$
 instead. Each choice $i$ then becomes a token
 $\mathbf t_i = \mathrm{ReLU}(W_t [\mathbf z; \mathbf e_i])$, with $W_t$
 a linear layer, that combines the shared context with that choice.
@@ -293,8 +293,7 @@ and there are no pushes.
 
 To make this task gradually harder, difficulty levels
 raise the void fraction step by step. A robot progresses if it
-walks a set share of the commanded distance; a fixed distance
-threshold kept every robot on the lowest level at our speeds.
+walks a set share of the commanded distance.
 It moves up with probability $p_{\text{up}}$ after a progressing
 time-out and down with probability $p_{\text{down}}$ after a failure
 or a stalled time-out, so the share of failed or stalled episodes

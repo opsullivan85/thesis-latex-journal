@@ -9,7 +9,7 @@
 \caption{GaitNet overview. (a)~A safe-cell sampler draws candidate
   footholds $\mathbf q_i$ from the terrain. GaitNet encodes the state
   $\mathbf x_g$ and the last second of motion $\mathbf h$ into a context
-  $\mathbf z$, forms one token per candidate and for a learned no-step
+  $\mathbf z$, forms one token per candidate and for the no-step
   option $\varnothing$, lets the tokens attend to each other in a
   candidate mixer, and gives each choice a score and a swing time; the
   masked categorical over the choices is sampled in training, and its
