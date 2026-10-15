@@ -13,9 +13,9 @@
 \section{Simulation Experiments}
 \label{sec:experiments}
 
-We ask three questions. (Q1)~Does the frozen GaitNet succeed on OCS2 as
-often as OCS2's own trot as voids get denser and commands faster?
-(Q2)~Does GaitNet need to swing more than one leg at a time?
+We ask three questions. (Q1)~Does the frozen GaitNet outperform OCS2's own trot on OCS2 as
+voids get denser and commands faster?
+(Q2)~Does GaitNet benefit from swinging more than one leg at a time?
 (Q3)~How much do the IDM and the comparison between candidates
 contribute?
 
@@ -24,7 +24,7 @@ contribute?
 
 We run GaitNet on OCS2 in Gazebo (Sec.~\ref{subsec:method-deployment}),
 with the IDM fitted on OCS2's own steps (Sec.~\ref{subsec:method-idm}).
-All GaitNet conditions use iteration \corlOcsCheckpoint{} of one
+All GaitNet variants use iteration \corlOcsCheckpoint{} of one
 training run, frozen after training; the run was not seeded and had the
 IDM in the loop from iteration \corlIdmStartIteration. Each world is a strip of
 pillars in which each tile is a real drop with probability equal to
@@ -43,10 +43,10 @@ of a \corlOcsTrackM\,m track without falling or leaving the strip,
 within \corlOcsTimeFactor{} times the time the command needs, from
 90\,s at \corlOcsSpeedMin\,m/s to 18\,s at \corlOcsSpeedMax\,m/s.
 
-Every condition gets its terrain from the same depth-vote map, built
-from the simulated depth camera, and runs on the same NMPC and WBC.
-The conditions therefore differ only in how steps are chosen and
-executed:
+We compare five methods. Every method gets its terrain from the same
+depth-vote map, built from the simulated depth camera, and runs on the
+same NMPC and WBC, so the methods differ only in how steps are chosen
+and executed:
 \begin{enumerate}
   \item GaitNet: as deployed; up to two legs may swing at once.
   \item OCS2's own trot: OCS2's perceptive trot, with its own gait
@@ -86,11 +86,10 @@ voids get denser (Fig.~\ref{fig:ocs2-results}a). Both succeed in every
 trial up to 10\% voids and are within two points at 20\%. From 30\%
 voids on, GaitNet leads at every void fraction, with
 \corlOcsDenseFull\% against \corlOcsDenseTrot\% success over
-40--\corlOcsMaxVoidPct\% voids, and the gap is largest from 50\% voids
-on. From 50\% voids on, GaitNet runs on denser voids than it was
-trained on, yet it still succeeds in 50--80\% of the trials, and at
-\corlOcsMaxVoidPct\% voids in half of them, against few for OCS2's own
-trot.
+40--\corlOcsMaxVoidPct\% voids. The gap is largest from 50\% voids on,
+beyond the densest voids GaitNet was trained on: there it still
+succeeds in 50--80\% of the trials, and at \corlOcsMaxVoidPct\% voids
+in half of them, against few for OCS2's own trot.
 
 Because both see the same terrain and run on the same tracker, this
 gap comes from how the steps and gait are chosen. OCS2's trot lifts each diagonal

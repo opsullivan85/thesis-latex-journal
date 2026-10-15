@@ -89,16 +89,18 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \begin{abstract}
   Quadruped robots that cross ground with holes must decide, step by
-  step, which leg to lift, where to place it, and when. Learned
-  footstep planners can make these decisions online, but they are
-  trained on one low-level controller, and a controller does not always
-  place the foot where it is told; different controllers miss in
-  different ways. We present GaitNet, which separates choosing a step
-  from executing it. Every \corlControlTickMs\,ms, GaitNet picks one
-  step (a leg, a landing point, and a swing time) or no step from
-  sampled safe footholds; it is given no gait. An inverse footstep model
-  (IDM), fitted from the controller's own logged steps, then turns
-  where GaitNet wants the foot into the command that lands it there. For a new controller, OCS2's nonlinear MPC and
+  step, which leg to lift, where to place it, and when. A fixed gait
+  settles the timing and order of the legs in advance; we present
+  GaitNet, a learned footstep planner that is given no gait and
+  produces acyclic contact sequences. Every \corlControlTickMs\,ms,
+  GaitNet picks one step (a leg, a landing point, and a swing time) or
+  no step from sampled safe footholds, and it may start a step while
+  another leg is still swinging. Because a controller does not always
+  place the foot where it is told, and different controllers miss in
+  different ways, GaitNet separates choosing a step from executing it:
+  an inverse footstep model (IDM), fitted from the controller's own
+  logged steps, turns where GaitNet wants the foot into the command
+  that lands it there. For a new controller, OCS2's nonlinear MPC and
   whole-body controller in simulation, the IDM is refit on that
   controller's own steps while GaitNet stays frozen. With terrain from
   a simulated depth camera, over 0--\corlOcsMaxVoidPct\% voids and

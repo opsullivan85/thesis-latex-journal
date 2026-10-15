@@ -6,21 +6,28 @@
 Legged robots can cross broken or narrow terrain that stops wheels
 and tracks, as long as they find where to place their feet.
 Choosing those footholds is only part of the problem: the robot must
-also decide which legs to move, when to lift them, and how long its swings
+also decide which legs to move, when to lift them, and how long their swings
 should last. Together, these decisions are called
 \emph{contact planning}. Most controllers simplify contact planning
-with a fixed gait, which sets the leg timing and ordering in advance but cannot
-react when safe footholds appear at irregular places and times.
+with a fixed gait \cite{dicarlo_dynamic_2018, ocs2}, which sets the leg
+timing and ordering in advance. This restricts the motions available to
+the robot, and a fixed schedule cannot react when safe footholds appear
+at irregular places and times. Without a gait, a planner can instead
+produce \emph{acyclic} contact sequences, which follow neither a gait
+cycle nor a gait library; the literature also calls them non-gaited or
+free-gait.
+
 Learned footstep planners can make these choices implicitly, and
-simulation lets them practice on large amounts of terrain. Yet a learned planner is trained on top of one low-level controller and
-then deployed on another, and a controller does not always place the
-foot where it is told. Our \emph{training controller}, for example,
-lands the foot a few centimeters off of the commanded target, which is more than the safety margin around terrain elements.
-\emph{OCS2} \cite{ocs2}, a nonlinear model predictive controller
-(NMPC) with whole-body control (WBC), misses in a different way and
-also starts each step on its own schedule. When a learned planner fails
-on a new controller, the fault therefore need not lie in choosing a
-safe foothold; it can lie in landing on it.
+simulation lets them practice on large amounts of terrain. A learned
+footstep planner, however, is trained on top of one low-level
+controller, and if it is deployed on another, it meets a different
+mapping from command to landing: a controller does not always place the
+foot where it is told, and each controller misses in its own way. Even
+a miss of a few centimeters can exceed the safety margin a planner keeps
+around terrain hazards, and a new controller may also start each step
+on its own schedule. When a learned footstep planner fails on a new
+controller, the fault therefore need not lie in choosing a safe
+foothold; it can lie in landing on it.
 
 Model-based planners place
 foothold choice, contact timing, and whole-body motion inside one
@@ -45,16 +52,16 @@ learning per-foot flight phases inside an MPC horizon
 \cite{patrizi_rl-augmented_2026}. These planners decide contact
 timing, but not footholds chosen from a perceived map of safe cells.
 
-Learned planners make the contact decision instead. End-to-end
-policies put it inside one neural controller and cross hard terrain
-reliably \cite{lee_learning_2020, zhang_learning_2023}; trained
+Learning-based methods take a different route. End-to-end policies
+make the contact decision inside one neural controller and cross hard
+terrain reliably \cite{lee_learning_2020, zhang_learning_2023}; trained
 without an explicit schedule, they can even develop gaits on their own
-\cite{fu_minimizing_2021}. Their contact decision, however, is hidden
-inside the joint targets, so it cannot be checked before execution or
-handed to a model-based controller. Perceptive model-based stacks
-instead project an explicit foothold onto a convex terrain region
-\cite{grandia_perceptive_2022}, and hybrid methods learn that foothold
-while a gait generator still fixes the timing
+\cite{fu_minimizing_2021}. Their contact decision, however, is only
+implicit in the joint targets, so it cannot be handed to a model-based
+controller. Other methods keep an explicit foothold. Perceptive
+model-based stacks project it onto a convex terrain region
+\cite{grandia_perceptive_2022}, and hybrid methods learn it while a gait
+generator still fixes the timing
 \cite{gangapurwala_rloc_2022, tsounis_deepgait_2020}. The closest
 work, ContactNet \cite{bratta_contactnet_2024}, ranks discretized
 foothold candidates with a network without prescribing which leg
@@ -73,31 +80,31 @@ motion, and an inverse dynamics model, which turns it into actions,
 and then adapt only the inverse model to a new domain.
 
 We present GaitNet (Fig.~\ref{fig:overview}), which separates choosing
-a step from executing it. Every \emph{tick}, the planner picks one step
-or a \emph{no-step option} from a few safe \emph{candidate} footholds
-per leg, kept away from \emph{voids}, the holes in the ground. Because
-a controller may not place the foot where it is told, an execution
-layer then makes the controller land each step where and when the
-planner meant. On the training controller, this layer is an
-\emph{inverse footstep model} (IDM), fitted from the controller's own
-logged steps, which turns where GaitNet wants the foot into the command
-that lands it there. For a new controller, the IDM is refit on that
-controller's own logged steps, and on OCS2 steps are also delivered on
-OCS2's own schedule. GaitNet is trained in Isaac Lab
-\cite{mittal_orbit_2023} and is never retrained. It builds on the
-one-step-per-tick action space of \cite{Sullivan2025}, which was tested
-on one controller; the candidate attention, the motion history, the
-execution layer, the second controller, and all results are new here,
-and all results are in simulation.
+a step from executing it. At every control tick, the planner picks one
+step, or no step, from a few safe candidate footholds per leg, kept
+away from voids, the holes in the ground. An execution layer then has
+the controller land each step where and when the planner meant. Its
+core is an inverse footstep model (IDM, named after the inverse
+dynamics model of \cite{xie_fada_2026}), fitted from the controller's
+own logged steps, which turns where GaitNet wants the foot into the
+command that lands it there. GaitNet is trained in Isaac Lab
+\cite{mittal_orbit_2023} with the IDM of its training controller in the loop,
+and then runs frozen on OCS2 \cite{ocs2}, a nonlinear model
+predictive controller (NMPC) with whole-body control (WBC); only the
+IDM is refit, on OCS2's own logged steps, and steps are delivered on
+OCS2's own schedule. GaitNet builds on the one-step-per-tick action
+space of \cite{Sullivan2025}, tested there on one controller, and adds
+candidate attention, a motion history, and the execution layer. All
+results are in simulation.
 
 % Kept in one block so the list never breaks across columns or pages.
 % NOTE (owen): we'll want to re-condiser this later. as of now, it left a huge gap on pg2
 % \noindent\begin{minipage}{\linewidth}
 Our contributions are:
 \begin{itemize}
-  \item GaitNet, a footstep planner that is given no gait. Every tick, it
-    picks one step or none from sampled safe footholds, comparing the
-    candidates with attention and using a short motion history
+  \item GaitNet, a footstep planner that is given no gait. Every tick,
+    it picks one step or none from sampled safe footholds, comparing
+    the candidates with attention and drawing on a short motion history
     (Secs.~\ref{subsec:method-step} and~\ref{subsec:method-network}).
   \item An execution layer that lets the frozen GaitNet run on a new
     controller, with an inverse footstep model per controller fitted by
@@ -107,7 +114,8 @@ Our contributions are:
     0--\corlOcsMaxVoidPct\% voids and
     \corlOcsSpeedMin--\corlOcsSpeedMax\,m/s, in which GaitNet matches
     OCS2's own trot on sparse voids and exceeds it on dense voids and
-    at faster commands, and ablations of overlapping swings, the IDM,
-    and the candidate comparison (Sec.~\ref{sec:experiments}).
+    at faster commands (Sec.~\ref{subsec:exp-transfer}).
+  \item Ablations of overlapping swings, the IDM, and the candidate
+    comparison (Sec.~\ref{subsec:exp-why}).
 \end{itemize}
 % \end{minipage}
