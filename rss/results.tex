@@ -4,7 +4,9 @@
 % Plots: figures/ocs2_results.pdf, made by figures/plot_ocs2_results.py,
 % which holds the per-cell data. Pooled values: \corlOcs* macros in
 % constants.tex. Facts confirmed by the author on 2026-10-14: GaitNet,
-% GaitNet-Single and GaitNet-no-IDM share checkpoint SC-idm@1000; the
+% GaitNet-Single and GaitNet-no-IDM share one checkpoint (author,
+% 2026-10-16: a ~600-iteration seeded run of the final preset, replacing
+% SC-idm@1000; see \corlOcsCheckpoint in constants.tex); the
 % per-candidate network was trained with GaitNet's recipe, IDM in the
 % loop, first of several seeds; OCS2's own trot uses the same depth-vote
 % terrain; mean speed is over successful trials only; 3 m track with a
@@ -24,9 +26,10 @@ contribute?
 
 We run GaitNet on OCS2 in Gazebo (Sec.~\ref{subsec:method-deployment}),
 with the IDM fitted on OCS2's own steps (Sec.~\ref{subsec:method-idm}).
-All GaitNet variants use iteration \corlOcsCheckpoint{} of one
-training run, frozen after training; the run was not seeded and had the
-IDM in the loop from iteration \corlIdmStartIteration. Each world is a strip of
+All GaitNet variants use one checkpoint, iteration
+\verify{\corlOcsCheckpoint} of a seeded run trained from scratch with the
+IDM in the loop (Sec.~\ref{subsec:method-training}), frozen after
+training. Each world is a strip of
 pillars in which each tile is a real drop with probability equal to
 the void fraction. We test eight void fractions, from 0 to
 \corlOcsMaxVoidPct\%, and five forward speeds, from \corlOcsSpeedMin{}

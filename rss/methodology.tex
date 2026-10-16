@@ -205,15 +205,16 @@ evaluation (Sec.~\ref{subsec:exp-setup}).
 
 We train GaitNet, as the actor, with Proximal Policy Optimization (PPO)
 \cite{Schulman_proximal_2017} in Isaac Lab \cite{mittal_orbit_2023},
-with 1024 robots in parallel. The critic is a separate, smaller network
+with 1024 robots in parallel. The checkpoint we evaluate was trained
+from scratch for about \verify{\corlOcsCheckpoint} iterations, which took
+about \corlTrainHours\,h on one NVIDIA RTX PRO 6000 Blackwell GPU
+(about \corlTrainSecPerIter\,s per iteration). The critic is a separate, smaller network
 that reads the state and the candidates, but not the history, and
 shares no weights with the actor; it scores each choice, and a small
 MLP maps these scores to a single value estimate.
 
 During training, the training controller's IDM sits between GaitNet
-and the controller; in the run we evaluate, it was in the loop from
-iteration \corlIdmStartIteration{} on (Sec.~\ref{subsec:exp-setup}).
-It is fitted first, offline
+and the controller from the first iteration on. It is fitted first, offline
 (Sec.~\ref{subsec:method-idm}), and then held fixed, so GaitNet and the
 IDM are not trained concurrently. Each robot's controller is redrawn at
 every reset, so GaitNet sees a spread of tracking quality, swing

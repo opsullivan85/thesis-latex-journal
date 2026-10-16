@@ -4,7 +4,8 @@
 % Source of truth: gaitnet-docs/ (methodology.md, training-setup.md,
 % experiment-setup.md, results.md, runs.md), state of 2026-10-13. Each block
 % names the file and section it comes from. The policy is SC-idm@1590
-% (inverse footstep model in the loop). The paper calls the method GaitNet;
+% (inverse footstep model in the loop); the OCS2 benchmark instead uses a
+% ~600-iteration seeded run of the final preset (author, 2026-10-16). The paper calls the method GaitNet;
 % gaitnet-docs calls the same network GaitNet-T.
 %
 % Convention: every macro below holds a bare value (a number, or a short
@@ -129,12 +130,17 @@
 \newcommand{\corlRandApexMax}{0.12}
 \newcommand{\corlRandBiasCm}{2}
 \newcommand{\corlRandNoiseCm}{1}
-% History of the deployed checkpoint (runs.md, training-setup.md 11).
+% History of the SC-idm@1590 lineage (runs.md, training-setup.md 11). Not
+% the OCS2 checkpoint, which is a seeded from-scratch run (\corlOcsCheckpoint).
 \newcommand{\corlTrainingIterations}{1590}
 \newcommand{\corlOmniIterations}{645}
 \newcommand{\corlIdmStartIteration}{890}
 \newcommand{\corlTotalTransitions}{1.63 \times 10^{8}}
-\newcommand{\corlTrainHours}{14.9}
+% Author, 2026-10-16: training the OCS2 checkpoint (~600 iterations) took
+% about 5.5 h on one RTX PRO 6000 Blackwell (600 x 33.4 s = 5.6 h).
+\newcommand{\corlTrainHours}{5.5}
+% Seconds per PPO iteration on one RTX PRO 6000 Blackwell (training-setup.md 11: 33-35 s; r3 rerun 33.4 s).
+\newcommand{\corlTrainSecPerIter}{33}
 \newcommand{\corlNumSeeds}{4}
 
 % --- Isaac Lab evaluation protocol (experiment-setup.md 1) ---
@@ -243,12 +249,16 @@
 % the two tables pool different trials. Its 12 % at 70 %
 % (n=10) was confirmed by the author on 2026-10-14; the n=5 row is not used.
 \newcommand{\corlOcsTrialsPerCell}{10}
-% Author, 2026-10-14: checkpoint SC-idm@1000 (unseeded run, IDM in the loop
-% from iteration 890); per-candidate = first of several seeded runs of the
+% Author, 2026-10-16: the GaitNet checkpoint is a seeded run of the final
+% preset (--preset sc_idm: from scratch, IDM in the loop from iteration 0,
+% forward commands), at about 600 iterations, where it peaked; seed and
+% exact iteration still to confirm. This replaces the 2026-10-14 statement
+% "SC-idm@1000 (unseeded run, IDM in the loop from iteration 890)".
+% Author, 2026-10-14: per-candidate = first of several seeded runs of the
 % same recipe; track 3 m, time limit 1.5 x (3 m / commanded speed); world
 % seeds disjoint from tuning, IDM-data and camera-development seeds; OCS2
 % landing error RMS 6 cm without the IDM, 2 cm with it.
-\newcommand{\corlOcsCheckpoint}{1000}
+\newcommand{\corlOcsCheckpoint}{600}
 \newcommand{\corlOcsTrackM}{3}
 \newcommand{\corlOcsTimeFactor}{1.5}
 \newcommand{\corlOcsLandRmsNoIdm}{6}
