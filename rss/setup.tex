@@ -1,10 +1,9 @@
 \section{Problem Setup}
 \label{sec:setup}
 
-We study footstep planning for a quadruped, a Unitree Go1, that walks
-forward over ground with voids. A planner decides at a fixed rate
-which step, if any, the robot starts next, and a low-level controller
-executes it.
+We study footstep planning for a Unitree Go1 quadruped walking forward
+over ground with voids. At a fixed rate, a planner decides whether to
+start a step and which one, and a low-level controller executes it.
 
 At each tick, the planner observes the
 robot's state, a set
@@ -12,28 +11,29 @@ $\mathcal C$ of candidate footholds, and a short history of the
 robot's motion. It returns either the no-step option or a step
 $(\ell, \mathbf u^\star, T)$: a leg $\ell$, a landing point
 $\mathbf u^\star \in \mathcal C$, and a swing time $T$. The landing
-point is an offset from the leg's hip in the \emph{yaw frame}, the
+point is an offset from the leg's hip in the yaw frame, the
 gravity-aligned frame that turns with the robot's heading, taken at
 the moment of the decision.
 
-A controller $c$ then executes the step from a
-\emph{command} $\mathbf u$, an offset in the same frame, and from the
-time at which the step is scheduled to start. Sent $\mathbf u$ for leg
-$\ell$ and swing time $T$ in robot state $\mathbf s$, it lands the foot
-at
+To execute the step, a controller $c$ receives a command $\mathbf u$,
+also an offset from the hip in this yaw frame, and a start time. Sent
+$\mathbf u$ for leg $\ell$ and swing time $T$ in robot state
+$\mathbf s$, it lands the foot at
 \begin{equation}
-  \mathbf o = F_c(\mathbf s, \ell, T, \mathbf u).
+  \mathbf o = F_c(\mathbf s, \ell, T, \mathbf u)
+    = \mathbf u + \boldsymbol\delta_c(\mathbf s, \ell, T, \mathbf u),
   \label{eq:forward}
 \end{equation}
-Both $F_c$ and the controller's timing differ between controllers, and
-in general $\mathbf o \neq \mathbf u$ (Sec.~\ref{subsec:method-idm}). Between
-the planner and the controller therefore sits an \emph{execution
-layer}, which turns each step into a command and a start time for
-controller $c$.
+where $\boldsymbol\delta_c$ is the controller's landing error. Both
+$\boldsymbol\delta_c$ and the controller's step timing differ between
+controllers, and in general $\boldsymbol\delta_c \neq \mathbf 0$
+(Sec.~\ref{subsec:method-idm}). An execution layer therefore sits
+between the planner and the controller and turns each step into a
+command and a start time for controller $c$.
 
 We train the planner in
-Isaac Lab with the training controller, the convex MPC of Di Carlo et
-al.\ \cite{dicarlo_dynamic_2018}, to follow a
+Isaac Lab with the \emph{training controller}, the convex MPC of Di
+Carlo et al.\ \cite{dicarlo_dynamic_2018}, to follow a
 forward velocity command over terrain with voids without falling
 (Sec.~\ref{subsec:method-training}). We then freeze the planner's
 weights and run it with OCS2

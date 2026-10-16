@@ -1,32 +1,29 @@
 \section{GaitNet}
 \label{sec:method}
 
-GaitNet has two parts (Fig.~\ref{fig:overview}). A planner chooses, at
-every tick, which step to take, if any, and an execution layer turns
-that step into a command that the controller in use lands where and
-when the planner meant. Table~\ref{tab:settings} lists the main
-settings.
+Our method has two parts (Fig.~\ref{fig:overview}): GaitNet, a planner
+that chooses at every tick which step to take, if any, and an execution
+layer that turns that step into a command that the controller in use
+lands where and when the planner meant. Table~\ref{tab:settings} lists
+the main settings.
 
 \subsection{Choosing One Step per Tick}
 \label{subsec:method-step}
 
-GaitNet chooses steps one at a time, and often enough to change its
-plan while a leg is still in the air. At every tick it may start at
-most one step for one leg, while the other legs keep their current
+GaitNet chooses steps one at a time, and often enough to start a new
+step while another leg is still in the air. At every tick it may start
+at most one step for one leg, while the other legs keep their current
 commands. A swing lasts several ticks, so GaitNet may start a second
 swing before the first one ends. Two feasibility rules decide which
-legs may step: a leg that is already swinging cannot be chosen, and a
-new step needs at least \numberstringnum{\corlMinContactLegs} legs in
-scheduled stance, where a leg that is waiting to lift off counts as
-lifted. At most \numberstringnum{\corlMaxConcurrentSwingLegs} legs
-therefore swing at once. Beyond these rules, GaitNet never chooses a
-gait phase, leg pair, or contact sequence. It is \emph{greedy},
-committing only to the next step, and the contact sequences it
-produces are \emph{acyclic}, following neither a gait cycle nor a gait
-library; the literature also calls them \emph{non-gaited} or
-\emph{free-gait}. At each tick, it simply asks whether any available
-step is better than doing nothing. If one is and another leg is
-already in the air, the swings overlap; if the no-step option wins,
+legs may step: a leg that is already swinging cannot be chosen, and at
+least \numberstringnum{\corlMinStanceLegs} legs must remain in stance after the new step starts, where
+a leg that is waiting to lift off counts as lifted. At most
+\numberstringnum{\corlMaxConcurrentSwingLegs} legs therefore swing at
+once. Beyond these rules, GaitNet never chooses a gait phase, leg pair,
+or contact sequence. It is greedy, committing only to the next step,
+and the contact sequences it produces are acyclic. At each tick, it simply asks whether any
+available step is better than doing nothing. If one is and another leg
+is already in the air, the swings overlap; if the no-step option wins,
 the robot waits.
 
 The candidates are safe cells near each hip. A grid of terrain rays around the hip marks a cell as safe
@@ -37,7 +34,7 @@ cell lies within \corlMarginCm\,cm of a void; no other reach, edge, or
 kinematic rule is applied. For each leg that may step, GaitNet draws a
 fixed number of safe cells at random, without repeats, and masks the
 empty slots when a leg has fewer. Together with the no-step option,
-these candidates form the \emph{choices} of a tick, the same set in
+these candidates form the choices of a tick, the same set in
 training and at deployment.
 
 \subsection{GaitNet Architecture}
@@ -64,22 +61,23 @@ which holds the $xy$ positions of the four feet relative to the trunk
 ($\mathbf p_{f,xy}^{b}$), the base height in the world frame
 ($p_{b,z}$), the base linear and angular velocity ($\mathbf v_b$,
 $\boldsymbol\omega_b$), the velocity command ($\mathbf v^{usr}$), the
-controller's \emph{scheduled} contact rather than a sensed one
+controller's scheduled contact rather than a sensed one
 ($\mathbf c$), and projected gravity ($\mathbf g_b$); all vectors
 except $p_{b,z}$ are in the trunk frame. The second input is the
-set of $N$ candidates and the no-step option $\varnothing$. Candidate
+candidate set $\mathcal C$ of Sec.~\ref{sec:setup}, with $N$ candidates,
+together with the no-step option $\varnothing$. Candidate
 $i$ is described by a vector $\mathbf q_i$: a one-hot code for its leg
-and its offset from the hip; the no-step option has its own code. A last entry, a cost from a separate network in
-\cite{Sullivan2025}, is kept at zero, because zeroing it improved
-survival there. The third input is the
-history $\mathbf h$ of the last second of motion. Each of its ticks
-holds the base velocities, each foot's position relative to its hip
-from the joint encoders, the scheduled contact, and each leg's last
-\emph{touchdown error}, which is where the foot was at its scheduled
+and its offset from the hip; the no-step option is instead represented by a learned embedding.
+The third input is the history $\mathbf h$, which stacks the last
+\corlHistSeconds\,s of motion (\corlHistTicks{} ticks). Each of its
+ticks holds the base velocities, each foot's position relative to its
+hip from the joint encoders, the scheduled contact, and each leg's last
+touchdown error, which is where the foot was at its scheduled
 touchdown minus the command. All inputs are available on a real robot.
 
-GaitNet first combines these inputs. A state encoder $f_s$ and a
-history encoder $f_h$ build a context vector
+GaitNet first combines these inputs. A state encoder $f_s$ embeds the
+tracking state, a history encoder $f_h$ embeds the history, and their
+sum is a context vector shared by all choices,
 \begin{equation}
   \mathbf z = f_s(\mathbf x_g) + W_h\, f_h(\mathbf h),
   \label{eq:context}
@@ -87,13 +85,14 @@ history encoder $f_h$ build a context vector
 where $W_h$ is a linear projection. A candidate encoder $f_c$, shared by
 all candidates, embeds each candidate as $\mathbf e_i = f_c(\mathbf q_i)$,
 and the no-step option has a learned embedding $\mathbf e_\varnothing$
-instead. Each choice then becomes a token
-$\mathbf t_i = \mathrm{ReLU}(W_t [\mathbf z; \mathbf e_i])$ that
-combines the shared context with that choice.
+instead. Each choice $i$ then becomes a token
+$\mathbf t_i = \mathrm{ReLU}(W_t [\mathbf z; \mathbf e_i])$, with $W_t$
+a linear layer, that combines the shared context with that choice.
 
-So that a choice can be judged
-against the alternatives, a \emph{candidate mixer} $M$ lets the tokens
-attend to each other. It is a small pre-norm transformer encoder
+So that a choice can be judged against the alternatives, a candidate
+mixer $M$ (Table~\ref{tab:settings}) lets the tokens attend to each
+other and returns one mixed token $\tilde{\mathbf t}_i$ per choice. It
+is a small pre-norm transformer encoder
 \cite{vaswani_attention_2017}: each layer updates every token as
 $\mathbf t \leftarrow \mathbf t + \mathrm{MHA}(\mathrm{LN}(\mathbf t))$
 and then $\mathbf t \leftarrow \mathbf t + \mathrm{FF}(\mathrm{LN}(\mathbf
@@ -103,7 +102,8 @@ attends to them, while the no-step option is visible to all.
 
 After the mixer, a readout $g$ maps each mixed token
 $\tilde{\mathbf t}_i$ to a feature $\mathbf y_i = g(\tilde{\mathbf t}_i)$,
-from which two linear heads give a score and a swing time,
+from which two linear heads give the choice's score $\alpha_i$ and
+swing time $T_i$,
 \begin{equation}
   \alpha_i = \mathbf w_\alpha^\top \mathbf y_i, \qquad
   T_i = T_{\min} + (T_{\max} - T_{\min})\,
@@ -111,9 +111,9 @@ from which two linear heads give a score and a swing time,
   \label{eq:heads}
 \end{equation}
 where $\sigma$ is the logistic function and $[T_{\min}, T_{\max}]$ is
-the allowed swing-time range.
+the allowed swing-time range (Table~\ref{tab:settings}).
 
-The scores of the valid choices are the
+The scores $\alpha_i$ of the valid choices are the
 logits of a categorical distribution $\pi(i) \propto \exp(\alpha_i)$;
 empty slots get zero probability, and the no-step option is always
 allowed. In training, GaitNet samples a choice $i$ and then a swing
@@ -127,18 +127,21 @@ GaitNet starts training as a simpler network. The projection $W_h$, the attentio
 of each feed-forward block start at zero. At initialization, the mixer
 is therefore the identity and the context ignores the history, so every
 choice is scored on its own from $\mathbf x_g$ and $\mathbf q_i$.
-GaitNet then computes exactly the \emph{per-candidate network} of
-\cite{Sullivan2025}, whose trunk corresponds to our token layer and readout. During training, GaitNet
-learns to use the history and to compare candidates; afterwards, a
-candidate's score depends on the whole candidate set, so GaitNet runs
-on the same sampled set at deployment as in training.
+GaitNet then computes exactly the per-candidate network of
+\cite{Sullivan2025}, whose trunk corresponds to our token layer and
+readout. As in that network, $\mathbf q_i$ also has a last entry for a
+cost from a separate network of \cite{Sullivan2025}; we keep it at
+zero, because zeroing it improved survival there. During training,
+GaitNet learns to use the history and to compare candidates;
+afterwards, a candidate's score depends on the whole candidate set, so
+GaitNet runs on the same sampled set at deployment as in training.
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}
 
 The execution layer is needed because a controller does not always
 place the foot where it is told, and each controller misses in its own
-way. Our training controller keeps re-aiming each swing at the moving
+way. Our training controller (Sec.~\ref{sec:setup}) keeps re-aiming each swing at the moving
 hip, so the foot lands past the commanded point, and the faster the
 robot walks, the farther past it lands. Without correction, we measure
 a shift of +\corlOvershootSlowMin{} to +\corlOvershootSlowMax\,cm along
@@ -151,8 +154,10 @@ world when the step is commanded.
 We therefore fit one inverse footstep model (IDM) per controller. For
 controller $c$, the IDM $I^c$ approximates the inverse of $F_c$ in
 Eq.~\eqref{eq:forward}, $\mathbf u \approx I^c(\mathbf s, \ell, T,
-\mathbf o)$. GaitNet's chosen candidate $\mathbf u^\star$ is a cell it
-judged safe to land on, so we treat it as the desired landing and send
+\mathbf o)$. GaitNet does not decide what is safe: every candidate,
+including the chosen $\mathbf u^\star$, already lies in a cell that the
+safety mask marks as safe, and GaitNet only picks the best of them. We
+therefore treat $\mathbf u^\star$ as the desired landing and send
 \begin{equation}
   \mathbf u = I^c(\mathbf s, \ell, T, \mathbf u^\star),
   \qquad\text{so that}\qquad
@@ -191,19 +196,33 @@ from two earlier policies without randomization, at up to 30\% voids
 and across our speed range; a policy's own commands cover only the
 footholds it prefers, so we add Gaussian noise to every command to
 widen the data around them. For OCS2, we log the steps of the frozen
-GaitNet, run on OCS2 with the training controller's IDM, on world seeds
-61--110, fewer than 20{,}000 steps in all.
+GaitNet, run on OCS2 with the training controller's IDM, fewer than
+20{,}000 steps in all, on worlds kept separate from those of the
+evaluation (Sec.~\ref{subsec:exp-setup}).
 
 \subsection{Training GaitNet with the IDM}
 \label{subsec:method-training}
 
 We train GaitNet, as the actor, with Proximal Policy Optimization (PPO)
 \cite{Schulman_proximal_2017} in Isaac Lab \cite{mittal_orbit_2023},
-with many robots in parallel and the training controller's IDM, fixed,
-between GaitNet and the controller. The critic is
-a separate, smaller network that reads the state and the candidates,
-but not the history, and shares no weights with the actor; it scores
-each choice, and a small MLP maps these scores to one state value.
+with 1024 robots in parallel. The critic is a separate, smaller network
+that reads the state and the candidates, but not the history, and
+shares no weights with the actor; it scores each choice, and a small
+MLP maps these scores to a single value estimate.
+
+During training, the training controller's IDM sits between GaitNet
+and the controller; in the run we evaluate, it was in the loop from
+iteration \corlIdmStartIteration{} on (Sec.~\ref{subsec:exp-setup}).
+It is fitted first, offline
+(Sec.~\ref{subsec:method-idm}), and then held fixed, so GaitNet and the
+IDM are not trained concurrently. Each robot's controller is redrawn at
+every reset, so GaitNet sees a spread of tracking quality, swing
+heights, landing errors, and lift-off delays. Every chosen candidate is
+first corrected by the IDM and then executed by this randomized
+controller, although the IDM itself was fitted on steps logged without
+the randomization. GaitNet still sees the raw candidates, and its
+touchdown errors are measured against the IDM's output, so its history
+reports how far the controller missed the corrected command.
 
 \begin{table}[t]
   \centering
@@ -250,10 +269,10 @@ each choice, and a small MLP maps these scores to one state value.
 
 
 The training task is to walk over ground with voids. The terrain is a grid of cells, a
-fraction of which, the \emph{void fraction}, are deep voids. The robot
+fraction of which, the void fraction, are deep voids. The robot
 must follow a forward velocity command until a time-out; it fails
 earlier if the trunk tilts or drops too far, or if a foot drops below
-the ground, which means a foot in a void. Commands are forward-only
+the ground. Commands are forward-only
 because the deployed robot maps terrain with a forward-facing camera.
 The reward per tick is
 \begin{multline}
@@ -267,32 +286,19 @@ The reward per tick is
 where $\Delta t$ is the tick, superscript $usr$ marks the commanded
 planar and yaw velocities, and subscript $b$ the matching base
 velocities. There are no gait, clearance, posture, or smoothness
-terms. The tracking widths $\sigma_v$ and $\sigma_\omega$ are narrow
-on purpose: with Isaac Lab's default width, a robot standing still
-would still earn most of the tracking reward at our speeds.
-Observations are not normalized and carry no added noise, and there
-are no pushes.
+terms. The tracking widths $\sigma_v$ and $\sigma_\omega$
+(Table~\ref{tab:settings}) are narrow on purpose: with wider widths, a
+robot standing still would still earn most of the tracking reward at
+our speeds. Observations are not normalized and carry no added noise,
+and there are no pushes.
 
 To make this task gradually harder, difficulty levels
-raise the void fraction step by step. Isaac Lab's default curriculum
-kept every robot on the lowest level at our speeds, so a robot instead
-\emph{progresses} if it walks a set share of the commanded distance.
+raise the void fraction step by step. A robot progresses if it
+walks a set share of the commanded distance.
 It moves up with probability $p_{\text{up}}$ after a progressing
 time-out and down with probability $p_{\text{down}}$ after a failure
 or a stalled time-out, so the share of failed or stalled episodes
 settles near $p_{\text{up}}/(p_{\text{up}} + p_{\text{down}}) = 1/4$.
-Each robot's controller is also redrawn at every reset, so GaitNet sees
-a spread of tracking quality, swing heights, landing errors, and
-lift-off delays.
-
-The IDM is fitted first, offline (Sec.~\ref{subsec:method-idm}), and
-then held fixed, so GaitNet and the IDM are not trained concurrently.
-During GaitNet's training, every chosen candidate passes through the
-training controller's IDM before the controller adds its randomized errors, although
-the IDM itself was fitted without them. GaitNet still sees the raw
-candidates, and its touchdown errors are measured against the IDM's
-output, so its history reports how far the controller missed the
-corrected command.
 
 \subsection{Deployment on OCS2}
 \label{subsec:method-deployment}
@@ -300,11 +306,12 @@ corrected command.
 On OCS2, GaitNet replaces the gait scheduler of the
 \texttt{legged\_control} stack \cite{leggedcontrol,
 grandia_perceptive_2022} in Gazebo, where OCS2's NMPC \cite{ocs2}
-plans the motion and a weighted WBC tracks it. A gait node asks a
-GaitNet service for a decision every tick, also while two legs swing.
-The service builds the same kind of candidate set, with a slightly
-larger margin, rebuilds the history with the training code, and
-applies the IDM fitted on OCS2's own steps (Sec.~\ref{subsec:method-idm}).
+plans the motion and a weighted WBC tracks it. GaitNet is queried for
+a decision every tick, also while two legs swing. Its candidate set is
+built the same way as in training, with a slightly larger margin, its
+history is computed by the same code as in training, and the IDM
+fitted on OCS2's own steps (Sec.~\ref{subsec:method-idm}) corrects its
+choices.
 
 The IDM fixes where the foot lands; when a step starts is set by how
 steps are delivered to OCS2, which also starts each step on its own
@@ -315,10 +322,10 @@ body, and OCS2 runs with its stock task settings.
 
 On OCS2, GaitNet and the controller get terrain either from
 the world's exact geometry or from a simulated RealSense D435 depth
-camera. For the camera, we build a \emph{depth-vote terrain}: a fine
+camera. For the camera, we build a depth-vote terrain: a fine
 grid in which each depth frame votes hit or miss for the cells it
 sees. A cell is walkable while its fading votes are positive and it is
 far enough from unwalkable cells, a distance that grows with how far
 the robot has walked since it last saw the cell. The simulated depth images carry no noise. Odometry comes from OCS2's leg-based
-state estimator with a \emph{slip gate}, which ignores feet whose
+state estimator with a slip gate, which ignores feet whose
 velocity disagrees with the estimate.
