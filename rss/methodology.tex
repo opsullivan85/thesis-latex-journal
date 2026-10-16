@@ -21,8 +21,7 @@ a leg that is waiting to lift off counts as lifted. At most
 \numberstringnum{\corlMaxConcurrentSwingLegs} legs therefore swing at
 once. Beyond these rules, GaitNet never chooses a gait phase, leg pair,
 or contact sequence. It is greedy, committing only to the next step,
-and the contact sequences it produces are acyclic
-(Sec.~\ref{sec:introduction}). At each tick, it simply asks whether any
+and the contact sequences it produces are acyclic. At each tick, it simply asks whether any
 available step is better than doing nothing. If one is and another leg
 is already in the air, the swings overlap; if the no-step option wins,
 the robot waits.
@@ -68,7 +67,7 @@ except $p_{b,z}$ are in the trunk frame. The second input is the
 candidate set $\mathcal C$ of Sec.~\ref{sec:setup}, with $N$ candidates,
 together with the no-step option $\varnothing$. Candidate
 $i$ is described by a vector $\mathbf q_i$: a one-hot code for its leg
-and its offset from the hip; the no-step option uses a fixed embedding.
+and its offset from the hip; the no-step option is instead represented by a learned embedding.
 The third input is the history $\mathbf h$, which stacks the last
 \corlHistSeconds\,s of motion (\corlHistTicks{} ticks). Each of its
 ticks holds the base velocities, each foot's position relative to its
@@ -85,7 +84,7 @@ sum is a context vector shared by all choices,
 \end{equation}
 where $W_h$ is a linear projection. A candidate encoder $f_c$, shared by
 all candidates, embeds each candidate as $\mathbf e_i = f_c(\mathbf q_i)$,
-and the no-step option has a fixed embedding $\mathbf e_\varnothing$
+and the no-step option has a learned embedding $\mathbf e_\varnothing$
 instead. Each choice $i$ then becomes a token
 $\mathbf t_i = \mathrm{ReLU}(W_t [\mathbf z; \mathbf e_i])$, with $W_t$
 a linear layer, that combines the shared context with that choice.
@@ -211,8 +210,10 @@ that reads the state and the candidates, but not the history, and
 shares no weights with the actor; it scores each choice, and a small
 MLP maps these scores to a single value estimate.
 
-The training controller's IDM sits between GaitNet and the controller
-throughout training. It is fitted first, offline
+During training, the training controller's IDM sits between GaitNet
+and the controller; in the run we evaluate, it was in the loop from
+iteration \corlIdmStartIteration{} on (Sec.~\ref{subsec:exp-setup}).
+It is fitted first, offline
 (Sec.~\ref{subsec:method-idm}), and then held fixed, so GaitNet and the
 IDM are not trained concurrently. Each robot's controller is redrawn at
 every reset, so GaitNet sees a spread of tracking quality, swing

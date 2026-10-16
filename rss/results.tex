@@ -43,9 +43,9 @@ of a \corlOcsTrackM\,m track without falling or leaving the strip,
 within \corlOcsTimeFactor{} times the time the command needs, from
 90\,s at \corlOcsSpeedMin\,m/s to 18\,s at \corlOcsSpeedMax\,m/s.
 
-We compare five methods. Every method gets its terrain from the same
-depth-vote map, built from the simulated depth camera, and runs on the
-same NMPC and WBC, so the methods differ only in how steps are chosen
+We compare five methods. Every method is tested on the same terrain,
+with the same simulated depth pipeline, and runs on the
+same NMPC and WBC. The methods differ only in how steps are chosen
 and executed:
 \begin{enumerate}
   \item GaitNet: as deployed; up to two legs may swing at once.
