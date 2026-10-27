@@ -1,42 +1,59 @@
-\section{Problem Setup}
+\section{Problem Formulation}
 \label{sec:setup}
 
-We study footstep planning for a Unitree Go1 quadruped walking forward
-over ground with voids. At a fixed rate, a planner decides whether to
-start a step and which one, and a low-level controller executes it.
+A Unitree Go1 walks forward over ground with voids, following a
+commanded velocity. All footholds, commands and landings below are
+planar offsets from the leg's hip in the \emph{yaw frame}, the gravity-aligned frame that turns
+with the robot's heading, taken at the moment of the decision.
 
-At each tick, the planner observes the
-robot's state, a set
-$\mathcal C$ of candidate footholds, and a short history of the
-robot's motion. It returns either the no-step option or a step
-$(\ell, \mathbf u^\star, T)$: a leg $\ell$, a landing point
-$\mathbf u^\star \in \mathcal C$, and a swing time $T$. The landing
-point is an offset from the leg's hip in the yaw frame, the
-gravity-aligned frame that turns with the robot's heading, taken at
-the moment of the decision.
+\paragraph{Decisions.}
+At ticks $t_k = k\,\Delta t$, $\Delta t = \corlControlTickMs$\,ms, a planner
+$\pi$ observes the robot's state, a short history of its motion, and a
+finite set $\mathcal C_k$ of candidate footholds that a safety mask
+keeps, with exact terrain, at least 1.5\,cm from voids, and $m = \corlMarginCm$\,cm when the
+void edges are parallel to its grid axes
+(Secs.~\ref{subsec:method-step} and~\ref{subsec:idm-theory}). It returns either the no-step option
+$\varnothing$ or a step $a_k = (\ell, \mathbf u^\star, T)$: a leg
+$\ell$ that is not already swinging, a desired landing point
+$\mathbf u^\star \in \mathcal C_k$, and a swing time
+$T \in [T_{\min}, T_{\max}]$. At least
+\numberstringnum{\corlMinStanceLegs} legs must stay in stance, so at
+most \numberstringnum{\corlMaxConcurrentSwingLegs} legs swing at once.
+A swing lasts several ticks, so the decision process is semi-Markov,
+and it is partially observed: the planner sees the terrain only through
+$\mathcal C_k$.
 
-To execute the step, a controller $c$ receives a command $\mathbf u$,
-also an offset from the hip in this yaw frame, and a start time. Sent
-$\mathbf u$ for leg $\ell$ and swing time $T$ in robot state
-$\mathbf s$, it lands the foot at
+\paragraph{Controllers.}
+A step is executed by a low-level controller $c$, here a model
+predictive controller that tracks the body and swings the feet. It
+receives a command $\mathbf u$ for leg $\ell$, a swing time $T$ and a
+start time. From the planner's point of view, $c$ is a closed-loop map
+from command to landing,
 \begin{equation}
   \mathbf o = F_c(\mathbf s, \ell, T, \mathbf u)
     = \mathbf u + \boldsymbol\delta_c(\mathbf s, \ell, T, \mathbf u),
   \label{eq:forward}
 \end{equation}
-where $\boldsymbol\delta_c$ is the controller's landing error. Both
-$\boldsymbol\delta_c$ and the controller's step timing differ between
-controllers, and in general $\boldsymbol\delta_c \neq \mathbf 0$
-(Sec.~\ref{subsec:method-idm}). An execution layer therefore sits
-between the planner and the controller and turns each step into a
-command and a start time for controller $c$.
+where $\mathbf u, \mathbf o \in \mathbb R^2$, $\mathbf s$ is everything that affects the swing (the robot's
+state, the other legs, the terrain and the controller's internal state)
+and $\boldsymbol\delta_c$ is the controller's landing error. Both
+$\boldsymbol\delta_c$ and how the controller schedules a step differ
+between controllers, and in general $\boldsymbol\delta_c \neq
+\mathbf 0$ (Sec.~\ref{subsec:method-idm}). Sending $\mathbf u =
+\mathbf u^\star$ therefore lands the foot at $\mathbf u^\star +
+\boldsymbol\delta_c$, which can be inside a void although
+$\mathbf u^\star$ is not.
 
-We train the planner in
-Isaac Lab with the \emph{training controller}, the convex MPC of Di
-Carlo et al.\ \cite{dicarlo_dynamic_2018}, to follow a
-forward velocity command over terrain with voids without falling
-(Sec.~\ref{subsec:method-training}). We then freeze the planner's
-weights and run it with OCS2
-(Sec.~\ref{subsec:method-deployment}). Only the execution layer is
-refit for the new controller. The goal is success on held-out
-worlds comparable to that of OCS2's own gait.
+\paragraph{Objective and transfer.}
+A trial succeeds if the robot reaches the end of a track without
+falling or leaving it, within a time limit. The planner is trained with a
+\emph{training controller} $c_0$, the convex MPC of
+\citet{dicarlo_dynamic_2018}, by reinforcement learning
+(Sec.~\ref{subsec:method-training}). It is then deployed with a
+\emph{target controller} $c_1$, OCS2's nonlinear MPC and whole-body
+controller \citep{ocs2, leggedcontrol}, under one constraint: the
+planner's weights are frozen, and the only learned part fitted for
+$c_1$ is a map from desired landings to commands, learned from steps
+that $c_1$ has executed; a few interface constants, such as the step
+lead and the candidate margin, are set by hand. We ask whether the frozen planner then reaches, on held-out
+worlds, a success rate comparable to or above that of $c_1$'s own gait.

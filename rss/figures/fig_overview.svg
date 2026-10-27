@@ -294,7 +294,7 @@
 <polygon points="102.642,58.570 103.217,60.070 102.642,59.620 102.067,60.070" fill="#1F2937"/>
 <text fill="#1F2937" xml:space="preserve"><tspan x="140.260" y="70.070" font-family="Latin Modern Math" font-size="3.328">𝐱</tspan><tspan x="142.280" y="70.662" font-family="Latin Modern Math" font-size="2.396">𝑔</tspan><tspan x="143.423" y="70.070" font-family="Latin Modern Math" font-size="3.328">, 𝐡, 𝒞</tspan></text>
 <g inkscape:label="note: terrain source">
-<text fill="#4B5563" xml:space="preserve"><tspan x="94.646" y="42.064" font-family="Fira Sans" font-size="2.400">terrain: exact or depth camera</tspan></text>
+<text fill="#4B5563" xml:space="preserve"><tspan x="94.646" y="42.064" font-family="Fira Sans" font-size="2.400">terrain: depth camera</tspan></text>
 </g>
 </g>
 </svg>

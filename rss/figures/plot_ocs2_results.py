@@ -1,9 +1,10 @@
 """Plot the OCS2 benchmark results for Sec. IV (Fig. 2 of the RSS paper).
 
 Data: the author's OCS2 benchmark of 2026-10-14 (OCS2-fitted IDM,
-depth-camera terrain, 10 trials per (void fraction, commanded speed) cell).
-Left: success by void fraction, pooled over the five speeds.
-Right: success by commanded speed, pooled over the eight void fractions.
+depth-camera terrain). Every point is 80 trials, and the void sweep and the
+speed sweep are separate sets of trials (author, 2026-10-27).
+Left: success by void fraction.
+Right: success by commanded speed.
 
 usage: python3 plot_ocs2_results.py   (writes ocs2_results.pdf next to this file)
 """
@@ -13,13 +14,14 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import font_manager
 
 HERE = Path(__file__).resolve().parent
 
 # ---------------------------------------------------------------- data
 VOIDS = [0, 10, 20, 30, 40, 50, 60, 70]                 # void fraction [%]
-SUCCESS_BY_VOID = {                                     # success [%], 50 trials each
+SUCCESS_BY_VOID = {                                     # success [%], 80 trials each
     "GaitNet": [100, 100, 90, 90, 91, 80, 60, 50],
     # Corrected by the author on 2026-10-14: the first table repeated the
     # 20 % entry at 30 % and shifted the rest one column to the right.
@@ -30,11 +32,11 @@ SUCCESS_BY_VOID = {                                     # success [%], 50 trials
 }
 SPEEDS = [0.05, 0.10, 0.15, 0.20, 0.25]                 # commanded speed [m/s]
 SUCCESS_BY_SPEED = {                                    # success [%], 80 trials each
-    # (112 for OCS2's own trot: 14 trials per cell in this comparison)
     "GaitNet": [84, 89, 86, 81, 66],
     "OCS2's own trot": [79, 79, 74, 64, 51],
     "GaitNet-Single": [74, 68, 62, 54, 40],
 }
+TRIALS_PER_POINT = 80                                   # \corlOcsTrialsPerPoint
 TRAINED_MAX_SPEED = 0.2                                 # \corlCmdVxMax
 TRAINED_MAX_VOID = 40                                  # \corlMaxVoidPct
 
@@ -61,15 +63,33 @@ STYLE = {
     "Per-candidate + IDM": dict(color="#D97706", lw=1.1, marker="D", ms=2.8, ls=(0, (4, 2))),
 }
 
+def wilson(rate_pct, n=TRIALS_PER_POINT, z=1.96):
+    """95 % Wilson interval [%] for a rate given in %, from the count k = round(rate * n)."""
+    k = np.round(np.asarray(rate_pct) / 100 * n)
+    p, d = k / n, 1 + z * z / n
+    c = (p + z * z / (2 * n)) / d
+    h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return 100 * (c - h), 100 * (c + h)
+
+
+# Wilson bands only for GaitNet and OCS2's trot, the main comparison; the
+# ablations would make the plot unreadable and are compared in the text.
+BANDED = ("GaitNet", "OCS2's own trot")
+
 MM = 1 / 25.4
-fig, (ax_v, ax_s) = plt.subplots(1, 2, figsize=(181 * MM, 52 * MM),
+# Width of the PMLR text block (6 in) so the fonts stay at their set size.
+fig, (ax_v, ax_s) = plt.subplots(1, 2, figsize=(152 * MM, 56 * MM),
                                  gridspec_kw=dict(width_ratios=[1.35, 1]))
 
 for name, ys in SUCCESS_BY_VOID.items():
     ax_v.plot(VOIDS, ys, label=name, **STYLE[name])
-ax_v.axvspan(TRAINED_MAX_VOID + 5, 72.5, color="#E5E7EB", zorder=0, lw=0)
-ax_v.text(60, 101, "above training range", ha="center", va="top",
-          fontsize=6.5, color="#4B5563")
+    if name in BANDED:
+        lo, hi = wilson(ys)
+        ax_v.fill_between(VOIDS, lo, hi, color=STYLE[name]["color"], alpha=0.15, lw=0, zorder=1)
+# No "above training range" shading on the void axis: the training cells
+# (12.5 cm) and the Gazebo tiles (24 cm) make the void fractions not
+# directly comparable, and the trained void range of this checkpoint is
+# still to be confirmed (review of 2026-10-27).
 ax_v.set_xlim(-2.5, 72.5)
 ax_v.set_xlabel("Void fraction [%]")
 ax_v.set_ylabel("Success [%]")
@@ -79,13 +99,17 @@ ax_v.set_title("(a) By void fraction, all speeds", loc="left", fontsize=7.5,
 
 for name, ys in SUCCESS_BY_SPEED.items():
     ax_s.plot(SPEEDS, ys, label=name, **STYLE[name])
+    if name in BANDED:
+        lo, hi = wilson(ys)
+        ax_s.fill_between(SPEEDS, lo, hi, color=STYLE[name]["color"], alpha=0.15, lw=0, zorder=1)
 ax_s.axvspan(TRAINED_MAX_SPEED + 0.0125, 0.27, color="#E5E7EB", zorder=0, lw=0)
 ax_s.text(0.2375, 101, "above\ntraining\nrange", ha="center", va="top",
           fontsize=6.5, color="#4B5563", linespacing=1.0)
 ax_s.set_xlabel("Commanded speed [m/s]")
 ax_s.set_xticks(SPEEDS)
 ax_s.set_xlim(0.035, 0.265)
-ax_s.set_title("(b) By commanded speed, all void fractions", loc="left",
+# Void fractions of the speed sweep are still to be confirmed.
+ax_s.set_title("(b) By commanded speed", loc="left",
                fontsize=7.5, fontweight="semibold", color="#1F2937", pad=4)
 
 for ax in (ax_v, ax_s):
@@ -96,8 +120,8 @@ for ax in (ax_v, ax_s):
 
 handles, labels = ax_v.get_legend_handles_labels()
 fig.legend(handles, labels, loc="lower center", ncol=5, frameon=False,
-           bbox_to_anchor=(0.5, -0.01), handlelength=2.6, columnspacing=1.6)
-fig.subplots_adjust(left=0.055, right=0.995, top=0.9, bottom=0.3, wspace=0.14)
+           bbox_to_anchor=(0.5, -0.01), handlelength=2.6, columnspacing=1.2)
+fig.subplots_adjust(left=0.065, right=0.995, top=0.9, bottom=0.27, wspace=0.14)
 fig.savefig(HERE / "ocs2_results.png", dpi=300)
 # Matplotlib embeds the OpenType (CFF) Fira Sans in a way some PDF checkers
 # flag, so the PDF that goes into the paper has its text converted to

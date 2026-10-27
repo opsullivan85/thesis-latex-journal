@@ -1,20 +1,24 @@
-\documentclass[conference]{IEEEtran}
+% L4DC 2027 version of the GaitNet paper (branch l4dc). The RSS version on
+% main keeps the IEEEtran layout; numbers and fixes shared by both live in
+% constants.tex and the section files.
+%
+% Template: l4dc2027.cls v1.0 (2026/10/05), from the L4DC 2027 author page
+% (l4dc2027.control.ee.ethz.ch/author-information). Limit: 10 PMLR pages of
+% main text, references unlimited; the appendix is not reviewed.
+% xcolor is loaded by the class, so its options must be passed first.
+\PassOptionsToPackage{table,xcdraw}{xcolor}
+\documentclass{l4dc2027}
+% Camera-ready: \documentclass[final]{l4dc2027}
 \usepackage{times}
-\usepackage[numbers]{natbib}
-\usepackage{multicol}
 
+% Loaded by the class: amsmath, amssymb, natbib (author-year), graphicx,
+% url, hyperref, xcolor, algorithm2e.
 \input{constants}
-
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{graphicx}
+\usepackage{amsfonts}
 \usepackage{textcomp}
-\graphicspath{{../}{./}}
+\graphicspath{{./}}
 % Prefer the vector PDF; fall back to PNG if only that was uploaded.
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
-\usepackage[bookmarks=true,hypertexnames=false]{hyperref}
-\usepackage[table,xcdraw]{xcolor}
-% Clickable citations and cross-references as coloured text, no boxes
-% (same style as the SCRUB paper).
 \definecolor{linkgreen}{HTML}{1E7B4F}
 \hypersetup{colorlinks=true,linkcolor=linkgreen,citecolor=linkgreen,
   urlcolor=linkgreen}
@@ -23,11 +27,23 @@
 \usetikzlibrary{arrows.meta,calc,positioning}
 \usepackage{fontawesome5}
 \input{fig_style}
-\usepackage{float}
 \usepackage{multirow}
 \usepackage{booktabs}
 \usepackage{fmtcount}
 \usepackage{array}
+
+% Theorem environments. jmlr defines proposition, lemma and remark but
+% refuses amsthm and has no assumption environment.
+\makeatletter
+\@ifundefined{proposition}{\newtheorem{proposition}{Proposition}}{}
+\@ifundefined{lemma}{\newtheorem{lemma}{Lemma}}{}
+\@ifundefined{remark}{\newtheorem{remark}{Remark}}{}
+\@ifundefined{assumption}{\newtheorem{assumption}{Assumption}}{}
+\makeatother
+% jmlr's proof environment takes no title argument; the appendix uses this.
+\newenvironment{idmproof}[1]%
+  {\par\medskip\noindent\textbf{Proof of #1.}\ }%
+  {\hfill$\square$\par\medskip}
 
 % ---- table styling (after the SCRUB paper; content-level, not template) ---
 \definecolor{tabink}{HTML}{111111}
@@ -43,75 +59,72 @@
 \newcommand{\mc}[1]{\multicolumn{1}{c}{#1}}                 % centred cell
 \newcommand{\unit}[1]{{\color{tabmuted}#1}}                 % muted unit text
 \newcommand{\best}[1]{\textcolor{tabaccent}{\bfseries #1}}  % best entry
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 % ---- revision markup ---------------------------------------------------
-% \changed{...} / \begin{changedblock}  RED: kept for compatibility with the
-%   CoRL-era sources. The 2026-10-13 rewrite (SC-idm@1590, from
-%   gaitnet-docs/) replaced every section, so it is not marked.
-% \pending{...}                       ORANGE: a claim, number, or figure
-%   that depends on runs not finished yet (seeds, newer Gazebo rounds,
-%   hardware) or on a figure still to be redrawn.
-% \verify{...}                        MAGENTA: taken from gaitnet-docs, whose
-%   checkpoint or eval provenance must be confirmed against the raw
-%   summary.json / sweep output before submission.
-% All are revision aids only. Set \revmarkupfalse below to render the
-% whole paper in plain black for submission.
+% \pending{...}  ORANGE: depends on runs not finished yet.
+% \verify{...}   MAGENTA: a source or fact to confirm with the author
+%   before submission (see the open items in the 2026-10-27 review notes).
+% Revision aids only. Set \revmarkuptrue to highlight them; every \verify
+% must be resolved before the PDF is uploaded.
 \newif\ifrevmarkup
 \revmarkupfalse
 \newcommand{\changed}[1]{\ifrevmarkup\textcolor{red}{#1}\else#1\fi}
 \newenvironment{changedblock}{\ifrevmarkup\color{red}\fi}{}
 \newcommand{\pending}[1]{\ifrevmarkup\textcolor{orange}{#1}\else#1\fi}
 \newcommand{\verify}[1]{\ifrevmarkup\textcolor{magenta}{#1}\else#1\fi}
-% \xx: placeholder for a result number until the updated runs arrive.
 \newcommand{\xx}{\pending{\text{xx}}}
 
-% Leave spare space at the bottom of a column instead of stretching the
-% gaps between paragraphs (IEEEtran is \flushbottom by default, which
-% spread paragraphs apart when an unbreakable block or a float moved on).
-\raggedbottom
+\title[GaitNet]{GaitNet: Reusing a Learned Footstep Planner on a New
+  Controller through an Inverse Footstep Model}
 
-\pdfinfo{
-  /Author (Anonymous)
-  /Title (GaitNet: Where Do I Step?)
-  /Subject (Robotics: Science and Systems submission)
-  /Keywords (Quadruped Locomotion; Footstep Planning; Reinforcement Learning; Sim-to-Sim Transfer)
+% L4DC is single-blind: real names and affiliations are required.
+% TODO before submission: the author list, order, emails and affiliations
+% below are placeholders (\Name cannot hold \verify; jmlr parses it).
+\author{%
+ \Name{Author One} \Email{author1@example.edu}\\
+ \addr Affiliation
+ \AND
+ \Name{Author Two} \Email{author2@example.edu}\\
+ \addr Affiliation%
 }
 
 \begin{document}
 
-\title{GaitNet: Where Do I Step?}
-
-\author{Author Names Omitted for Anonymous Review. Paper-ID [add your ID here]}
-
 \maketitle
 
-\begin{abstract}
-  Quadruped robots that cross ground with holes must decide, step by
-  step, which leg to lift, where to place it, and when. A fixed gait
-  settles the timing and order of the legs in advance; we present
-  GaitNet, a learned footstep planner that is given no gait and
-  produces acyclic contact sequences. Every \corlControlTickMs\,ms,
-  GaitNet picks one step (a leg, a landing point, and a swing time) or
-  no step from sampled safe footholds, and it may start a step while
-  another leg is still swinging. Because a controller does not always
-  place the foot where it is told, and different controllers miss in
-  different ways, GaitNet separates choosing a step from executing it:
-  an inverse footstep model (IDM), fitted from the controller's own
-  logged steps, turns where GaitNet wants the foot into the command
-  that lands it there. For a new controller, OCS2's nonlinear MPC and
-  whole-body controller in simulation, the IDM is refit on that
-  controller's own steps while GaitNet stays frozen. With terrain from
-  a simulated depth camera, over 0--\corlOcsMaxVoidPct\% voids and
-  commands of \corlOcsSpeedMin--\corlOcsSpeedMax\,m/s, GaitNet matches
-  OCS2's own trot on sparse voids and does better on dense ones: at
-  40--\corlOcsMaxVoidPct\% voids it succeeds in \corlOcsDenseFull\% of
-  trials against \corlOcsDenseTrot\%. Swinging two legs at once, comparing
-  candidates, and the IDM each raise its success.
+\begin{abstract}%
+  A learned footstep planner is trained on top of one low-level
+  controller, yet each controller lands a commanded foot with its own
+  error, and a miss of a few centimetres can put the foot in a hole.
+  We study how to reuse such a planner on a new controller without
+  retraining it. GaitNet plans footsteps for a quadruped crossing ground
+  with voids and is not given a gait schedule: every
+  \corlControlTickMs\,ms it chooses one step (a leg, a foothold among
+  sampled safe cells, and a swing time) or no step, and it may start a
+  step while another leg is still swinging. An inverse footstep model
+  (IDM), fitted by regression on a controller's own logged steps, maps
+  the foothold GaitNet wants to the command that lands the foot there;
+  it is the only learned part refitted for a new controller. We state
+  what this hindsight regression estimates, when it inverts the
+  controller's footstep map, how it is biased when it does not in a
+  linear-Gaussian case, and how its error
+  bounds the chance that a step aimed at a safe cell lands in a void.
+  GaitNet is trained with PPO on a convex MPC in Isaac Lab and runs
+  frozen on OCS2's nonlinear MPC and whole-body controller in Gazebo,
+  with terrain from a simulated depth camera. Over
+  0--\corlOcsMaxVoidPct\% voids, it matches OCS2's own trot on sparse
+  voids and succeeds in \corlOcsDenseFull\% of trials against
+  \corlOcsDenseTrot\% at 40--\corlOcsMaxVoidPct\% voids
+  (\corlOcsTrialsPerPoint{} trials per point). The frozen GaitNet
+  depends on the IDM: without it, its success over the void sweep falls
+  from \corlOcsAllFull\% to \corlOcsAllNoIdm\%, and its lead over the trot
+  on dense voids disappears.%
 \end{abstract}
 
-\IEEEpeerreviewmaketitle
+\begin{keywords}%
+  Legged locomotion; footstep planning; reinforcement learning; inverse
+  models; transfer across controllers%
+\end{keywords}
 
 % Each file below starts its own \section.
 \input{introduction}
@@ -120,8 +133,17 @@ T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \input{results}
 \input{conclusions}
 
-\bibliographystyle{plainnat}
+% Required by the L4DC 2027 template. \verify: the authors must confirm
+% that this statement describes their use of generative AI accurately.
+\subsection*{Generative AI Use}
+\verify{Generative AI tools were used for literature search, for checking
+the statistical analysis and the derivations, and for editing the
+writing. The authors reviewed and verified all AI-assisted content and
+take responsibility for the final content of the paper.}
+
 \bibliography{refs}
 
-\end{document}
+\appendix
+\input{appendix}
 
+\end{document}

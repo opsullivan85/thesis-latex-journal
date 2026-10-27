@@ -1,7 +1,7 @@
 
 @mastersthesis{Sullivan2025,
   author = {Sullivan, Owen},
-  title  = {GaitNet: Greedy, Acyclic Quadruped Gait Generation},
+  title  = {{GaitNet}: Greedy, Acyclic Quadruped Gait Generation},
   school = {Worcester Polytechnic Institute},
   year   = {2025},
 }
@@ -54,11 +54,10 @@
 }
 
 @misc{leggedcontrol,
-  title = {{legged\_control}: NMPC, WBC, state estimation, and
-  sim2real framework for legged robots based on OCS2 and ros-controls},
-  note = {[Online]. Available:
-  \url{https://github.com/qiayuanl/legged_control}},
-  author = {Qiayuan Liao and others}
+  title        = {{legged\_control}: {NMPC}, {WBC}, State Estimation, and Sim2real Framework for Legged Robots Based on {OCS2} and ros-controls},
+  author       = {Liao, Qiayuan and others},
+  year         = {n.d.},
+  howpublished = {\url{https://github.com/qiayuanl/legged_control}},
 }
 
 @misc{leggedperceptive,
@@ -187,7 +186,7 @@ author = {Winkler, Alexander W. and Bellicoso, C. Dario and Hutter,
 Marco and Buchli, Jonas},
 title = {{Gait and Trajectory Optimization for Legged Systems Through
 Phase-Based End-Effector Parameterization}},
-journal = {IEEE Rob. Autom. Lett.},
+journal = {IEEE Robotics and Automation Letters},
 volume = {3},
 number = {3},
 pages = {1560--1567},
@@ -210,45 +209,15 @@ eprint = {1809.09759},
 doi = {10.1109/LRA.2019.2899434}
 }
 
-@misc{tsounis_deepgait_2020,
-title      = {{DeepGait}: Planning and Control of Quadrupedal Gaits
-using Deep Reinforcement Learning},
-url        = {http://arxiv.org/abs/1909.08399},
-doi        = {10.48550/arXiv.1909.08399},
-shorttitle = {{DeepGait}},
-abstract   = {This paper addresses the problem of legged locomotion
-  in non-ﬂat terrain. As legged robots such as quadrupeds are to be
-  deployed in terrains with geometries which are difﬁcult to model and
-  predict, the need arises to equip them with the capability to
-  generalize well to unforeseen situations. In this work, we propose a
-  novel technique for training neuralnetwork policies for terrain-aware
-  locomotion, which combines state-of-the-art methods for model-based
-  motion planning and reinforcement learning. Our approach is centered
-  on formulating Markov decision processes using the evaluation of
-  dynamic feasibility criteria in place of physical simulation. We thus
-  employ policy-gradient methods to independently train policies which
-  respectively plan and execute foothold and base motions in 3D
-  environments using both proprioceptive and exteroceptive
-  measurements. We apply our method within a challenging suite of
-  simulated terrain scenarios which contain features such as narrow
-  bridges, gaps and stepping-stones, and train policies which succeed
-in locomoting effectively in all cases.},
-number     = {{arXiv}:1909.08399},
-publisher  = {{arXiv}},
-author     = {Tsounis, Vassilios and Alge, Mitja and Lee, Joonho and
-Farshidian, Farbod and Hutter, Marco},
-urldate    = {2025-07-14},
-date       = {2020-01-31},
-langid     = {english},
-eprinttype = {arxiv},
-eprint     = {1909.08399 [cs]},
-keywords   = {Computer Science - Machine Learning, Computer Science - Robotics},
-file       = {2020 - DeepGait Planning and Control of Quadrupedal
-  Gaits using Deep Reinforcement
-  Learning.pdf:C\:\\Users\\Owen\\OneDrive - Worcester Polytechnic
-  Institute (wpi.edu)\\2025\\Thesis\\papers\\2020 - DeepGait Planning
-  and Control of Quadrupedal Gaits using Deep Reinforcement
-Learning.pdf:application/pdf}
+@article{tsounis_deepgait_2020,
+  title   = {{DeepGait}: Planning and Control of Quadrupedal Gaits Using Deep Reinforcement Learning},
+  author  = {Tsounis, Vassilios and Alge, Mitja and Lee, Joonho and Farshidian, Farbod and Hutter, Marco},
+  journal = {IEEE Robotics and Automation Letters},
+  volume  = {5},
+  number  = {2},
+  pages   = {3699--3706},
+  year    = {2020},
+  doi     = {10.1109/LRA.2020.2979660},
 }
 
 @misc{meduri_deepq_2020,
@@ -291,14 +260,14 @@ terrain.pdf:application/pdf}
 }
 
 @article{lee_learning_2020,
-author = {Lee, Joonho and Hwangbo, Jemin and Wellhausen, Lorenz and
-Koltun, Vladlen and Hutter, Marco},
-title = {{Learning Quadrupedal Locomotion over Challenging Terrain}},
-journal = {arXiv},
-year = {2020},
-month = oct,
-eprint = {2010.11251},
-doi = {10.1126/scirobotics.abc5986}
+  title   = {Learning Quadrupedal Locomotion over Challenging Terrain},
+  author  = {Lee, Joonho and Hwangbo, Jemin and Wellhausen, Lorenz and Koltun, Vladlen and Hutter, Marco},
+  journal = {Science Robotics},
+  volume  = {5},
+  number  = {47},
+  pages   = {eabc5986},
+  year    = {2020},
+  doi     = {10.1126/scirobotics.abc5986},
 }
 
 @inproceedings{zhu_off-road_2020,
@@ -562,92 +531,26 @@ file       = {2021 - Sim-to-Real Learning of All Common Bipedal Gaits
 Reward Composition.pdf:application/pdf}
 }
 
-@misc{grandia_perceptive_2022,
-title      = {Perceptive Locomotion through Nonlinear Model Predictive Control},
-url        = {http://arxiv.org/abs/2208.08373},
-doi        = {10.48550/arXiv.2208.08373},
-abstract   = {Dynamic locomotion in rough terrain requires accurate
-  foot placement, collision avoidance, and planning of the
-  underactuated dynamics of the system. Reliably optimizing for such
-  motions and interactions in the presence of imperfect and often
-  incomplete perceptive information is challenging. We present a
-  complete perception, planning, and control pipeline, that can
-  optimize motions for all degrees of freedom of the robot in
-  real-time. To mitigate the numerical challenges posed by the terrain
-  a sequence of convex inequality constraints is extracted as local
-  approximations of foothold feasibility and embedded into an online
-  model predictive controller. Steppability classiﬁcation, plane
-  segmentation, and a signed distance ﬁeld are precomputed per
-  elevation map to minimize the computational effort during the
-  optimization. A combination of multipleshooting, real-time iteration,
-  and a ﬁlter-based line-search are used to solve the formulated
-  problem reliably and at high rate. We validate the proposed method in
-  scenarios with gaps, slopes, and stepping stones in simulation and
-  experimentally on the {ANYmal} quadruped platform, resulting in
-state-of-the-art dynamic climbing.},
-number     = {{arXiv}:2208.08373},
-publisher  = {{arXiv}},
-author     = {Grandia, Ruben and Jenelten, Fabian and Yang, Shaohui
-and Farshidian, Farbod and Hutter, Marco},
-urldate    = {2025-07-14},
-date       = {2022-08-17},
-langid     = {english},
-eprinttype = {arxiv},
-eprint     = {2208.08373 [cs]},
-keywords   = {Computer Science - Robotics},
-file       = {2022 - Perceptive Locomotion through Nonlinear Model
-  Predictive Control.pdf:C\:\\Users\\Owen\\OneDrive - Worcester
-  Polytechnic Institute (wpi.edu)\\2025\\Thesis\\papers\\2022 -
-  Perceptive Locomotion through Nonlinear Model Predictive
-Control.pdf:application/pdf}
+@article{grandia_perceptive_2022,
+  title   = {Perceptive Locomotion Through Nonlinear Model-Predictive Control},
+  author  = {Grandia, Ruben and Jenelten, Fabian and Yang, Shaohui and Farshidian, Farbod and Hutter, Marco},
+  journal = {IEEE Transactions on Robotics},
+  volume  = {39},
+  number  = {5},
+  pages   = {3402--3421},
+  year    = {2023},
+  doi     = {10.1109/TRO.2023.3275384},
 }
 
 @article{gangapurwala_rloc_2022,
-title        = {{RLOC}: Terrain-Aware Legged Locomotion using
-Reinforcement Learning and Optimal Control},
-volume       = {38},
-issn         = {1552-3098, 1941-0468},
-url          = {http://arxiv.org/abs/2012.03094},
-doi          = {10.1109/TRO.2022.3172469},
-shorttitle   = {{RLOC}},
-abstract     = {We present a uniﬁed model-based and data-driven
-  approach for quadrupedal planning and control to achieve dynamic
-  locomotion over uneven terrain. We utilize on-board proprioceptive
-  and exteroceptive feedback to map sensory information and desired
-  base velocity commands into footstep plans using a reinforcement
-  learning ({RL}) policy. This {RL} policy is trained in simulation
-  over a wide range of procedurally generated terrains. When ran
-  online, the system tracks the generated footstep plans using a
-  model-based motion controller. We evaluate the robustness of our
-  method over a wide variety of complex terrains. It exhibits behaviors
-  which prioritize stability over aggressive locomotion. Additionally,
-  we introduce two ancillary {RL} policies for corrective whole-body
-  motion tracking and recovery control. These policies account for
-  changes in physical parameters and external perturbations. We train
-  and evaluate our framework on a complex quadrupedal system, {ANYmal}
-  version B, and demonstrate transferability to a larger and heavier
-robot, {ANYmal} C, without requiring retraining.},
-pages        = {2908--2927},
-number       = {5},
-journaltitle = {{IEEE} Transactions on Robotics},
-shortjournal = {{IEEE} Trans. Robot.},
-author       = {Gangapurwala, Siddhant and Geisert, Mathieu and
-Orsolino, Romeo and Fallon, Maurice and Havoutis, Ioannis},
-urldate      = {2025-07-14},
-date         = {2022-10},
-langid       = {english},
-eprinttype   = {arxiv},
-eprint       = {2012.03094 [cs]},
-keywords     = {Computer Science - Machine Learning, Computer Science
-- Robotics},
-file         = {2022 - RLOC Terrain-Aware Legged Locomotion using
-  Reinforcement Learning and Optimal
-  Control.pdf:C\:\\Users\\Owen\\OneDrive - Worcester Polytechnic
-  Institute (wpi.edu)\\2025\\Thesis\\papers\\2022 - RLOC Terrain-Aware
-  Legged Locomotion using Reinforcement Learning and Optimal
-Control.pdf:application/pdf},
-year = {2022},
-journal = {arXiv},
+  title   = {{RLOC}: Terrain-Aware Legged Locomotion Using Reinforcement Learning and Optimal Control},
+  author  = {Gangapurwala, Siddhant and Geisert, Mathieu and Orsolino, Romeo and Fallon, Maurice and Havoutis, Ioannis},
+  journal = {IEEE Transactions on Robotics},
+  volume  = {38},
+  number  = {5},
+  pages   = {2908--2927},
+  year    = {2022},
+  doi     = {10.1109/TRO.2022.3172469},
 }
 
 @incollection{duan_sim--real_2022,
@@ -859,16 +762,14 @@ file       = {2024 - A Review of Nine Physics Engines for
 Research.pdf:application/pdf}
 }
 
-@article{bratta_contactnet_2024,
-author = {Bratta, Angelo and Meduri, Avadesh and Focchi, Michele and
-Righetti, Ludovic and Semini, Claudio},
-title = {{ContactNet: Online Multi-Contact Planning for Acyclic
-Legged Robot Locomotion}},
-journal = {arXiv},
-year = {2022},
-month = sep,
-eprint = {2209.15566},
-doi = {10.1109/UR61395.2024.10597477}
+@inproceedings{bratta_contactnet_2024,
+  title     = {{ContactNet}: Online Multi-Contact Planning for Acyclic Legged Robot Locomotion},
+  author    = {Bratta, Angelo and Meduri, Avadesh and Focchi, Michele and Righetti, Ludovic and Semini, Claudio},
+  booktitle = {2024 21st International Conference on Ubiquitous Robots (UR)},
+  pages     = {747--754},
+  year      = {2024},
+  publisher = {IEEE},
+  doi       = {10.1109/UR61395.2024.10597477},
 }
 
 @incollection{gaspard_footstepnet_2024,
@@ -1032,17 +933,14 @@ Solutions to the fo.pdf:application/pdf}
 }
 
 @article{mittal_orbit_2023,
-author = {Mittal, Mayank and Yu, Calvin and Yu, Qinxi and Liu,
-  Jingzhou and Rudin, Nikita and Hoeller, David and Yuan, Jia Lin and
-  Singh, Ritvik and Guo, Yunrong and Mazhar, Hammad and Mandlekar, Ajay
-and Babich, Buck and State, Gavriel and Hutter, Marco and Garg, Animesh},
-title = {{Orbit: A Unified Simulation Framework for Interactive Robot
-Learning Environments}},
-journal = {arXiv},
-year = {2023},
-month = jan,
-eprint = {2301.04195},
-doi = {10.1109/LRA.2023.3270034}
+  title   = {{Orbit}: A Unified Simulation Framework for Interactive Robot Learning Environments},
+  author  = {Mittal, Mayank and Yu, Calvin and Yu, Qinxi and Liu, Jingzhou and Rudin, Nikita and Hoeller, David and Yuan, Jia Lin and Singh, Ritvik and Guo, Yunrong and Mazhar, Hammad and Mandlekar, Ajay and Babich, Buck and State, Gavriel and Hutter, Marco and Garg, Animesh},
+  journal = {IEEE Robotics and Automation Letters},
+  volume  = {8},
+  number  = {6},
+  pages   = {3740--3747},
+  year    = {2023},
+  doi     = {10.1109/LRA.2023.3270034},
 }
 
 @misc{asselmeier_steppability-informed_2024,
@@ -1246,18 +1144,14 @@ perspectives.pdf:application/pdf}
 }
 
 @article{taouil_non-gaited_2024,
-author = {Taouil, Ilyass and Amatucci, Lorenzo and Khadiv, Majid and
-Dai, Angela and Barasuol, Victor and Turrisi, Giulio},
-title = {{Non-Gaited Legged Locomotion With Monte-Carlo Tree Search
-and Supervised Learning}},
-journal = {IEEE Rob. Autom. Lett.},
-volume = {10},
-number = {2},
-pages = {1265--1272},
-year = {2024},
-month = dec,
-publisher = {IEEE},
-doi = {10.1109/LRA.2024.3519908}
+  title   = {Non-Gaited Legged Locomotion With {Monte-Carlo} Tree Search and Supervised Learning},
+  author  = {Taouil, Ilyass and Amatucci, Lorenzo and Khadiv, Majid and Dai, Angela and Barasuol, Victor and Turrisi, Giulio and Semini, Claudio},
+  journal = {IEEE Robotics and Automation Letters},
+  volume  = {10},
+  number  = {2},
+  pages   = {1265--1272},
+  year    = {2025},
+  doi     = {10.1109/LRA.2024.3519908},
 }
 
 @article{wang_walking_2025,
@@ -1315,42 +1209,14 @@ file         = {2025 - Walking control of humanoid robots based on
 humanoid robots based on improv.pdf:application/pdf}
 }
 
-@misc{amatucci_monte_2022,
-title      = {Monte Carlo Tree Search Gait Planner for Non-Gaited
-Legged System Control},
-url        = {http://arxiv.org/abs/2205.14277},
-doi        = {10.48550/arXiv.2205.14277},
-abstract   = {In this work, a non-gaited framework for legged system
-  locomotion is presented. The approach decouples the gait sequence
-  optimization by considering the problem as a decision-making process.
-  The redeﬁned contact sequence problem is solved by utilizing a Monte
-  Carlo Tree Search ({MCTS}) algorithm that exploits optimization-based
-  simulations to evaluate the best search direction. The proposed
-  scheme has proven to have a good trade-off between exploration and
-  exploitation of the search space compared to the state-ofthe-art
-  Mixed-Integer Quadratic Programming ({MIQP}). The model predictive
-  control ({MPC}) utilizes the gait generated by the {MCTS} to optimize
-  the ground reaction forces and future footholds position. The
-  simulation results, performed on a quadruped robot, showed that the
-  proposed framework could generate known periodic gait and adapt the
-  contact sequence to the encountered conditions, including external
-  forces and terrain with unknown and variable properties. When tested
-on robots with different layouts, the system has also shown its reliability.},
-number     = {{arXiv}:2205.14277},
-publisher  = {{arXiv}},
-author     = {Amatucci, Lorenzo and Kim, Joon-Ha and Hwangbo, Jemin
-and Park, Hae-Won},
-urldate    = {2025-07-15},
-date       = {2022-05-28},
-langid     = {english},
-eprinttype = {arxiv},
-eprint     = {2205.14277 [cs]},
-keywords   = {Computer Science - Robotics},
-file       = {2022 - Monte Carlo Tree Search Gait Planner for
-  Non-Gaited Legged System Control.pdf:C\:\\Users\\Owen\\OneDrive -
-  Worcester Polytechnic Institute (wpi.edu)\\2025\\Thesis\\papers\\2022
-  - Monte Carlo Tree Search Gait Planner for Non-Gaited Legged System
-Control.pdf:application/pdf}
+@inproceedings{amatucci_monte_2022,
+  title     = {{Monte Carlo} Tree Search Gait Planner for Non-Gaited Legged System Control},
+  author    = {Amatucci, Lorenzo and Kim, Joon-Ha and Hwangbo, Jemin and Park, Hae-Won},
+  booktitle = {2022 International Conference on Robotics and Automation (ICRA)},
+  pages     = {4701--4707},
+  year      = {2022},
+  publisher = {IEEE},
+  doi       = {10.1109/ICRA46639.2022.9812421},
 }
 
 @article{mittal2023orbit,
@@ -1483,14 +1349,13 @@ eprint = {2303.10327},
 doi = {10.48550/arXiv.2303.10327}
 }
 @article{Wensing2022Nov,
-author = {Wensing, Patrick M. and Posa, Michael and Hu, Yue and
-Escande, Adrien and Mansard, Nicolas and Del Prete, Andrea},
-title = {{Optimization-Based Control for Dynamic Legged Robots}},
-journal = {arXiv},
-year = {2022},
-month = nov,
-eprint = {2211.11644},
-doi = {10.48550/arXiv.2211.11644}
+  title   = {Optimization-Based Control for Dynamic Legged Robots},
+  author  = {Wensing, Patrick M. and Posa, Michael and Hu, Yue and Escande, Adrien and Mansard, Nicolas and Del Prete, Andrea},
+  journal = {IEEE Transactions on Robotics},
+  volume  = {40},
+  pages   = {43--63},
+  year    = {2024},
+  doi     = {10.1109/TRO.2023.3324580},
 }
 @article{Makoviychuk_isaac_2021,
 author = {Makoviychuk, Viktor and Wawrzyniak, Lukasz and Guo, Yunrong
@@ -1505,15 +1370,11 @@ month = aug,
 eprint = {2108.10470},
 doi = {10.48550/arXiv.2108.10470}
 }
-@article{Schulman_proximal_2017,
-author = {Schulman, John and Wolski, Filip and Dhariwal, Prafulla and
-Radford, Alec and Klimov, Oleg},
-title = {{Proximal Policy Optimization Algorithms}},
-journal = {arXiv},
-year = {2017},
-month = jul,
-eprint = {1707.06347},
-doi = {10.48550/arXiv.1707.06347}
+@misc{Schulman_proximal_2017,
+  title        = {Proximal Policy Optimization Algorithms},
+  author       = {Schulman, John and Wolski, Filip and Dhariwal, Prafulla and Radford, Alec and Klimov, Oleg},
+  year         = {2017},
+  howpublished = {arXiv:1707.06347},
 }
 @article{bishop_relu_2023,
 author = {Bishop, Arun L. and Zhang, John Z. and Gurumurthy,
@@ -1583,25 +1444,25 @@ month = may,
 publisher = {IEEE},
 doi = {10.1109/TSMC.2025.3563974}
 }
-@article{akizhanov_learning_2024,
-author = {Akizhanov, Rikhat and
-  Dh{\ifmmode\acute{e}\else\'{e}\fi}din, Victor and Khadiv, Majid and
-Laptev, Ivan},
-title = {{Learning feasible transitions for efficient contact planning}},
-journal = {arXiv},
-year = {2024},
-month = jul,
-eprint = {2407.11788},
-doi = {10.48550/arXiv.2407.11788}
+@inproceedings{akizhanov_learning_2024,
+  title     = {Learning Feasible Transitions for Efficient Contact Planning},
+  author    = {Akizhanov, Rikhat and Dh{\'e}din, Victor and Khadiv, Majid and Laptev, Ivan},
+  booktitle = {Proceedings of the 7th Annual Learning for Dynamics \& Control Conference (L4DC)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {283},
+  pages     = {431--442},
+  year      = {2025},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v283/akizhanov25a.html},
 }
-@article{zhang_learning_2023,
-author = {Zhang, Chong and Rudin, Nikita and Hoeller, David and Hutter, Marco},
-title = {{Learning Agile Locomotion on Risky Terrains}},
-journal = {arXiv},
-year = {2023},
-month = nov,
-eprint = {2311.10484},
-doi = {10.48550/arXiv.2311.10484}
+@inproceedings{zhang_learning_2023,
+  title     = {Learning Agile Locomotion on Risky Terrains},
+  author    = {Zhang, Chong and Rudin, Nikita and Hoeller, David and Hutter, Marco},
+  booktitle = {2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages     = {11864--11871},
+  year      = {2024},
+  publisher = {IEEE},
+  doi       = {10.1109/IROS58592.2024.10801909},
 }
 @article{chen_gait_2024,
 author = {Chen, Liuhongxu and Du, Ping and Zhan, Pengfei and Xie, Bo},
@@ -1655,17 +1516,16 @@ publisher = {IEEE},
 doi = {10.1109/ICRA48506.2021.9562093},
 year = {2021},
 }
-@article{da_learning_2020,
-author = {Da, Xingye and Xie, Zhaoming and Hoeller, David and Boots,
-  Byron and Anandkumar, Animashree and Zhu, Yuke and Babich, Buck and
-Garg, Animesh},
-title = {{Learning a Contact-Adaptive Controller for Robust,
-Efficient Legged Locomotion}},
-journal = {arXiv},
-year = {2020},
-month = sep,
-eprint = {2009.10019},
-doi = {10.48550/arXiv.2009.10019}
+@inproceedings{da_learning_2020,
+  title     = {Learning a Contact-Adaptive Controller for Robust, Efficient Legged Locomotion},
+  author    = {Da, Xingye and Xie, Zhaoming and Hoeller, David and Boots, Byron and Anandkumar, Anima and Zhu, Yuke and Babich, Buck and Garg, Animesh},
+  booktitle = {Proceedings of the 2020 Conference on Robot Learning (CoRL)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {155},
+  pages     = {883--894},
+  year      = {2021},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v155/da21a.html},
 }
 @article{aceituno_simultaneous_2019,
 author = {Aceituno-Cabezas, Bernardo and Mastalli, Carlos and Dai,
@@ -1680,16 +1540,14 @@ month = apr,
 eprint = {1904.04595},
 doi = {10.1109/LRA.2017.2779821}
 }
-@incollection{deits_footstep_2014,
-author = {Deits, Robin and Tedrake, Russ},
-title = {{Footstep planning on uneven terrain with mixed-integer
-convex optimization}},
-booktitle = {{2014 IEEE-RAS International Conference on Humanoid Robots}},
-pages = {18--20},
-year = {2014},
-isbn = {978-1-4799-7174-9},
-publisher = {IEEE},
-doi = {10.1109/HUMANOIDS.2014.7041373}
+@inproceedings{deits_footstep_2014,
+  title     = {Footstep Planning on Uneven Terrain with Mixed-Integer Convex Optimization},
+  author    = {Deits, Robin and Tedrake, Russ},
+  booktitle = {2014 IEEE-RAS International Conference on Humanoid Robots},
+  pages     = {279--286},
+  year      = {2014},
+  publisher = {IEEE},
+  doi       = {10.1109/HUMANOIDS.2014.7041373},
 }
 
 @phdthesis{di_mini_cheetah_2020,
@@ -1744,14 +1602,21 @@ url = {https://github.com/silvery107/rl-mpc-locomotion}
   journal = {IEEE Robotics and Automation Letters},
   volume  = {11},
   number  = {5},
+  pages   = {5797--5804},
   year    = {2026},
+  doi     = {10.1109/LRA.2026.3675839},
 }
 
 @inproceedings{fu_minimizing_2021,
   title     = {Minimizing Energy Consumption Leads to the Emergence of Gaits in Legged Robots},
   author    = {Fu, Zipeng and Kumar, Ashish and Malik, Jitendra and Pathak, Deepak},
-  booktitle = {Conference on Robot Learning (CoRL)},
-  year      = {2021},
+  booktitle = {Proceedings of the 5th Conference on Robot Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {164},
+  pages     = {928--937},
+  year      = {2022},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v164/fu22a.html},
 }
 
 @inproceedings{florence_implicit_2021,
@@ -1763,10 +1628,12 @@ url = {https://github.com/silvery107/rl-mpc-locomotion}
 
 @inproceedings{li_zero-shot_2022,
   title     = {Zero-Shot Retargeting of Learned Quadruped Locomotion Policies Using Hybrid Kinodynamic Model Predictive Control},
-  author    = {Li, He and Zhang, Tingnan and Yu, Wenhao and Wensing, Patrick M.},
+  author    = {Li, He and Yu, Wenhao and Zhang, Tingnan and Wensing, Patrick M.},
   booktitle = {2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages     = {11971--11977},
   year      = {2022},
   publisher = {IEEE},
+  doi       = {10.1109/IROS47612.2022.9981967},
 }
 
 @article{kim_contact-implicit_2025,
@@ -1812,9 +1679,10 @@ url = {https://github.com/silvery107/rl-mpc-locomotion}
 }
 
 @misc{ocs2,
-  title  = {{OCS2}: An Open Source Library for Optimal Control of Switched Systems},
-  author = {Farshidian, Farbod and others},
-  note   = {[Online]. Available: \url{https://github.com/leggedrobotics/ocs2}},
+  title        = {{OCS2}: An Open Source Library for Optimal Control of Switched Systems},
+  author       = {Farshidian, Farbod and others},
+  year         = {n.d.},
+  howpublished = {\url{https://github.com/leggedrobotics/ocs2}},
 }
 
 @article{wilson_probable_1927,
@@ -1825,4 +1693,79 @@ url = {https://github.com/silvery107/rl-mpc-locomotion}
   number  = {158},
   pages   = {209--212},
   year    = {1927},
+}
+
+@misc{christiano_transfer_2016,
+  title  = {Transfer from Simulation to Real World through Learning Deep Inverse Dynamics Model},
+  author = {Christiano, Paul and Shah, Zain and Mordatch, Igor and Schneider, Jonas and Blackwell, Trevor and Tobin, Joshua and Abbeel, Pieter and Zaremba, Wojciech},
+  year   = {2016},
+  eprint = {1610.03518},
+  archivePrefix = {arXiv},
+  note   = {arXiv:1610.03518},
+}
+
+@inproceedings{taouil_quadrupedal_2023,
+  title     = {Quadrupedal Footstep Planning Using Learned Motion Models of a Black-Box Controller},
+  author    = {Taouil, Ilyass and Turrisi, Giulio and Schleich, Daniel and Barasuol, Victor and Semini, Claudio and Behnke, Sven},
+  booktitle = {2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages     = {800--806},
+  year      = {2023},
+  publisher = {IEEE},
+  doi       = {10.1109/IROS55552.2023.10342440},
+}
+
+@article{jenelten_dtc_2024,
+  title   = {{DTC}: Deep Tracking Control},
+  author  = {Jenelten, Fabian and He, Junzhe and Farshidian, Farbod and Hutter, Marco},
+  journal = {Science Robotics},
+  volume  = {9},
+  number  = {86},
+  pages   = {eadh5401},
+  year    = {2024},
+  doi     = {10.1126/scirobotics.adh5401},
+}
+
+@inproceedings{andrychowicz_hindsight_2017,
+  title     = {Hindsight Experience Replay},
+  author    = {Andrychowicz, Marcin and Wolski, Filip and Ray, Alex and Schneider, Jonas and Fong, Rachel and Welinder, Peter and McGrew, Bob and Tobin, Josh and Abbeel, Pieter and Zaremba, Wojciech},
+  booktitle = {Advances in Neural Information Processing Systems (NIPS)},
+  volume    = {30},
+  year      = {2017},
+}
+
+@inproceedings{ghosh_learning_2021,
+  title     = {Learning to Reach Goals via Iterated Supervised Learning},
+  author    = {Ghosh, Dibya and Gupta, Abhishek and Reddy, Ashwin and Fu, Justin and Devin, Coline and Eysenbach, Benjamin and Levine, Sergey},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2021},
+  url       = {https://openreview.net/forum?id=rALA0Xo6yNJ},
+}
+
+@article{jordan_forward_1992,
+  title   = {Forward Models: Supervised Learning with a Distal Teacher},
+  author  = {Jordan, Michael I. and Rumelhart, David E.},
+  journal = {Cognitive Science},
+  volume  = {16},
+  number  = {3},
+  pages   = {307--354},
+  year    = {1992},
+  doi     = {10.1207/s15516709cog1603_1},
+}
+
+@inproceedings{hanna_grounded_2017,
+  title     = {Grounded Action Transformation for Robot Learning in Simulation},
+  author    = {Hanna, Josiah P. and Stone, Peter},
+  booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume    = {31},
+  number    = {1},
+  year      = {2017},
+  doi       = {10.1609/aaai.v31i1.11044},
+}
+
+@inproceedings{eysenbach_imitating_2022,
+  title     = {Imitating Past Successes can be Very Suboptimal},
+  author    = {Eysenbach, Benjamin and Udatha, Soumith and Levine, Sergey and Salakhutdinov, Ruslan},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {35},
+  year      = {2022},
 }

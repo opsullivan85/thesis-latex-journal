@@ -1,0 +1,362 @@
+% ---------------------------------------------------------------------------
+% Appendix: proofs for Sec. \ref{subsec:idm-theory}. Corrected 2026-10-27
+% after an adversarial check; the draft it replaces is
+% idm_appendix_draft.tex. Numerical checks: scratchpad/idmcheck/*.py.
+% ---------------------------------------------------------------------------
+\section{Proofs for the Inverse Footstep Model}
+\label{app:idm-proofs}
+
+Norms are Euclidean unless marked, $\mathbf a_1, \mathbf a_2$ are the axes
+of the terrain-ray grid, which is aligned with the yaw frame of the
+decision, $\Phi$ is the standard normal distribution function, and we
+drop the superscript $c$ from $I^c$ and $I^c_\star$.
+
+\paragraph{Orthogonality.}
+Let $\mathbb E_{P_c}\|\mathbf u\|^2 < \infty$ and $I_\star(\zeta,\mathbf o)
+= \mathbb E_{P_c}[\mathbf u \mid \zeta,\mathbf o]$. For any
+square-integrable $I(\zeta,\mathbf o)$, the cross term $\mathbb
+E[(\mathbf u - I_\star)(I_\star - I)^\top]$ and its transpose vanish,
+because $\mathbb E[\mathbf u - I_\star \mid \zeta,\mathbf o] = \mathbf 0$
+and $I_\star - I$ is a function of $(\zeta,\mathbf o)$. Hence
+\begin{equation}
+  \mathbb E\big[(\mathbf u - I)(\mathbf u - I)^\top\big]
+  = \mathbb E\big[\operatorname{Cov}(\mathbf u \mid \zeta,\mathbf o)\big]
+  + \mathbb E\big[(I_\star - I)(I_\star - I)^\top\big],
+  \label{eq:app-orth}
+\end{equation}
+since $\mathbb E[(\mathbf u - I_\star)(\mathbf u - I_\star)^\top] =
+\mathbb E[\operatorname{Cov}(\mathbf u \mid \zeta,\mathbf o)]$. The trace
+gives $\mathbb E\|\mathbf u - I\|^2 = \mathbb E\|\mathbf u - I_\star\|^2 +
+\mathbb E\|I_\star - I\|^2$: the population held-out squared error of a
+fitted IDM is the irreducible error plus its mean squared distance from
+$I_\star$. Since the last term of Eq.~\eqref{eq:app-orth} is positive
+semidefinite, the held-out residual second-moment matrix $R := \mathbb
+E[(\mathbf u - I)(\mathbf u - I)^\top]$ dominates $\mathbb
+E[\operatorname{Cov}(\mathbf u \mid \zeta,\mathbf o)]$, which is an
+average over $(\zeta,\mathbf o)$, not each $\operatorname{Cov}(\mathbf u
+\mid \zeta,\mathbf o)$.
+
+\begin{idmproof}{Proposition~\ref{prop:idm-mean}}
+By the trace of Eq.~\eqref{eq:app-orth}, $I_\star$ minimises the
+population loss, uniquely up to $P_c$-null sets. Let $\kappa(\cdot \mid
+\zeta,\mathbf o)$ be a regular conditional distribution of $\mathbf u$
+given $(\zeta,\mathbf o)$; it exists because $\mathbf u \in \mathbb R^2$.
+Take the continuous versions of Assumption~\ref{as:idm-exact}(iii), and
+write $\mathcal U(\zeta,\mathbf o) := \{\mathbf u \in \operatorname{supp}
+P_c(\mathbf u \mid \zeta) : \bar F_c(\zeta,\mathbf u) = \mathbf o\}$ for
+the set in (ii), which is closed because $\bar F_c$ is continuous. By (i),
+$\bar F_c(\zeta,\mathbf u) = \mathbf o$ almost surely, so
+$\kappa(\mathcal U(\zeta,\mathbf o) \mid \zeta,\mathbf o) = 1$ for
+$P_c$-almost every $(\zeta,\mathbf o)$. The mean of an integrable
+probability measure that gives mass one to a closed convex set $\mathcal
+K$ lies in $\mathcal K$: otherwise a vector $\boldsymbol\nu$ and a scalar
+$t_0$ separate the mean $\mathbf m$ strictly, $\boldsymbol\nu^\top\mathbf
+m > t_0 \ge \boldsymbol\nu^\top \mathbf x$ for all $\mathbf x \in
+\mathcal K$, and integrating gives $\boldsymbol\nu^\top \mathbf m \le
+t_0$, a contradiction. With (ii), $I_\star(\zeta,\mathbf o) \in \mathcal
+U(\zeta,\mathbf o)$, that is, $\bar F_c(\zeta, I_\star(\zeta,\mathbf o)) =
+\mathbf o$, for $P_c$-almost every $(\zeta,\mathbf o)$. The map
+$\mathbf g_\star(\zeta,\mathbf o) := \bar F_c(\zeta, I_\star(\zeta,\mathbf o)) -
+\mathbf o$ is continuous and vanishes on a set of full measure. Such a set
+is dense in the support, because every open set that meets the support
+has positive measure, so $\mathbf g_\star$ vanishes on the whole support of the logged
+$(\zeta,\mathbf o)$, which contains every deployment pair by (iii). The
+same argument shows that two continuous versions of $I_\star$ agree on the
+support, and by (iv) the fitted IDM, continuous and equal to $I_\star$
+almost everywhere, equals $I_\star$ there. Hence $\bar F_c(\zeta,
+I(\zeta,\mathbf u^\star)) = \mathbf u^\star$. Since the law of $\mathbf o$
+given $(\zeta,\mathbf u)$ is the same at deployment, (i) holds there too,
+and the landing equals $\mathbf u^\star$ almost surely. Finally, if
+$\mathbf u \mapsto \bar F_c(\zeta,\mathbf u) - \mathbf u$ is
+$L_\delta$-Lipschitz with $L_\delta < 1$, then $\|\bar F_c(\zeta,\mathbf u) - \bar
+F_c(\zeta,\mathbf u')\| \ge (1 - L_\delta)\|\mathbf u - \mathbf u'\|$,
+so $\bar F_c(\zeta,\cdot)$ is injective and the sets in (ii) are single
+points.
+\end{idmproof}
+
+\begin{idmproof}{Proposition~\ref{prop:idm-shrink}}
+$(\mathbf u,\mathbf o)$ is jointly Gaussian with
+$\operatorname{Cov}(\mathbf o) = S \succ 0$ and
+$\operatorname{Cov}(\mathbf u,\mathbf o) = \Sigma_u A^\top$, so
+$I_\star(\mathbf o) = \boldsymbol\mu + K(\mathbf o - \bar{\mathbf o})$
+with $K = \Sigma_u A^\top S^{-1}$, and
+$\Sigma_{u\mid o} = \Sigma_u - K A \Sigma_u$. The command
+$\tilde{\mathbf u} = I_\star(\mathbf u^\star)$ is fixed given the
+decision and $\boldsymbol\eta$ is independent of it, so its landing
+$\mathbf o^\star = A\tilde{\mathbf u} + \mathbf b + \boldsymbol\eta$ has
+$\mathbb E[\mathbf o^\star] = A\tilde{\mathbf u} + \mathbf b = \bar{\mathbf o} +
+AK(\mathbf u^\star - \bar{\mathbf o})$ and
+$\mathbb E[\mathbf o^\star] - \mathbf u^\star = -(I - AK)(\mathbf u^\star -
+\bar{\mathbf o})$. Now $I - AK = (S - A\Sigma_u A^\top) S^{-1} =
+\Sigma_\eta S^{-1} = \Lambda$, and $A \Sigma_{u\mid o} \Sigma_u^{-1}
+A^{-1} = A (I - KA) A^{-1} = I - AK$. The matrix $M := S^{-1/2}
+\Sigma_\eta S^{-1/2} = I - S^{-1/2} A\Sigma_u A^\top S^{-1/2}$ is
+symmetric and positive semidefinite, with eigenvalues in $[0,1)$ because
+$A\Sigma_u A^\top \succ 0$, and $\Lambda = S^{1/2} M S^{-1/2}$ is similar
+to $M$. Moreover $\mathbb E[\mathbf o^\star] - \bar{\mathbf o} = (I - \Lambda)
+(\mathbf u^\star - \bar{\mathbf o})$ and $S^{-1/2}(I - \Lambda) = (I -
+M) S^{-1/2}$ with $0 \prec I - M \preceq I$, which gives the contraction
+in $\|\cdot\|_{S^{-1}}$. For $A = I$, $\Lambda =
+\Sigma_{u\mid o}\Sigma_u^{-1}$ and $\|\Lambda\| \le \|\Sigma_{u\mid
+o}\|\,\|\Sigma_u^{-1}\|$.
+\end{idmproof}
+
+$\Lambda$ is symmetric, and the pull toward $\bar{\mathbf o}$ a
+contraction in Euclidean norm as well, when $\Sigma_\eta$ and
+$A\Sigma_u A^\top$ commute, for instance when both are isotropic.
+Otherwise the Euclidean norm of $\Lambda$ can exceed one even for $A =
+I$: $\Sigma_u = \bigl[\begin{smallmatrix} 0.01 & -0.18 \\ -0.18 & 4
+\end{smallmatrix}\bigr]$ and $\Sigma_\eta = \bigl[\begin{smallmatrix} 0.01
+& 0.18 \\ 0.18 & 4 \end{smallmatrix}\bigr]$ give $S =
+\operatorname{diag}(0.02, 8)$ and $\Lambda = \bigl[\begin{smallmatrix} 0.5
+& 0.0225 \\ 9 & 0.5 \end{smallmatrix}\bigr]$, with eigenvalues $0.05$ and
+$0.95$, so a target offset by $(1,0)$ from $\bar{\mathbf o}$ lands on
+average at offset $(0.5,-9)$. Isotropic command noise limits such cases
+by bounding $\lambda_{\min}(\Sigma_u)$ from below.
+
+\paragraph{Instantiating Proposition~\ref{prop:idm-shrink}.}
+If the logged command is $\mathbf u = \mathbf u_0 + \boldsymbol\xi$ with
+$\boldsymbol\xi \sim \mathcal N(\mathbf 0,\Sigma_\xi)$ drawn independently
+of everything else, then $\Sigma_u = \operatorname{Cov}(\mathbf u_0 \mid
+\zeta) + \Sigma_\xi \succeq \Sigma_\xi$. If $\operatorname{Cov}(\mathbf u
+\mid \zeta,\mathbf o)$ depends neither on $\mathbf o$, as in the model,
+nor on $\zeta$, Eq.~\eqref{eq:app-orth} gives $\Sigma_{u\mid o} \preceq
+R$. For $A = I$,
+\begin{equation}
+  \|\Lambda\| \le \lambda_{\max}(R) / \lambda_{\min}(\Sigma_\xi)
+  \le \operatorname{tr}(R) / \lambda_{\min}(\Sigma_\xi),
+  \label{eq:app-shrink-bound}
+\end{equation}
+which needs only the held-out error and the added command noise; in the
+plane the trace step loses at most a factor of two. The bound holds in the
+linear-Gaussian model with these covariances, not for a trained IDM in
+general.
+
+\paragraph{Shift between logged landings and targets.}
+Let $Q$ be the distribution of the deployment pairs $(\zeta,\mathbf
+u^\star)$. If $Q$ has a density $\psi \le \Psi$ with respect to the logged
+$(\zeta,\mathbf o)$, then for any fitted IDM $I$
+\begin{equation}
+  \mathbb E_Q \|I - I_\star\|^2 = \mathbb E_{P_c}\big[\psi\,\|I -
+  I_\star\|^2\big] \le \Psi\, \mathbb E_{P_c}\|I - I_\star\|^2
+  \le \Psi\, \mathbb E_{P_c}\|\mathbf u - I\|^2,
+  \label{eq:app-shift}
+\end{equation}
+the last step by Eq.~\eqref{eq:app-orth}. Our targets, however, are cell
+centres on the $h$-grid while the landings are continuous, so $Q$ itself
+has no density with respect to them. Let $\tilde Q$ spread each target
+over its cell, $\mathbf u^\star + \mathbf v$ with $\mathbf v$ uniform on
+$[-h/2,h/2]^2$, and suppose that $\tilde Q$ has a density at most $\Psi$
+and that $I - I_\star$ is $L_I$-Lipschitz in its landing argument. Then
+$\|\mathbf x\|^2 \le 2\|\mathbf y\|^2 + 2\|\mathbf x - \mathbf y\|^2$ and
+$\mathbb E\|\mathbf v\|^2 = h^2/6$ give $\mathbb E_Q\|I - I_\star\|^2 \le
+2\Psi\,\mathbb E_{P_c}\|\mathbf u - I\|^2 + L_I^2 h^2/3$. If $Q$ puts mass
+where no landing was logged, no such $\Psi$ exists and the held-out error
+bounds nothing. Two shifts are built into our pipeline: the training
+controller's IDM is fitted without the controller randomisation that it
+then runs under (Sec.~\ref{subsec:method-training}), which also breaks
+the assumption below Eq.~\eqref{eq:mean-forward} that the law of $\mathbf
+o$ given $(\zeta,\mathbf u)$ is unchanged; and the OCS2 IDM is fitted on
+steps sent through the training controller's IDM but replaces it at
+deployment, which changes the commands and hence the states visited.
+Logging again with the deployed IDM and refitting, as in the incremental
+data collection of \citet{christiano_transfer_2016}, would shrink the
+second.
+
+\begin{idmproof}{Proposition~\ref{prop:idm-void}}
+By Eq.~\eqref{eq:mean-forward}, $\mathbf e = \bar F_c(\zeta,\mathbf u) +
+\boldsymbol\eta - \mathbf u^\star = \boldsymbol\beta + \boldsymbol\eta$,
+and $\boldsymbol\beta$ and $d(\mathbf u^\star)$ are fixed given $\mathcal
+G$.
+(a)~If $\mathbf o \in \mathcal V$, then $d(\mathbf u^\star) \le \|\mathbf
+e\|_\infty \le \|\mathbf e\| \le \|\boldsymbol\beta\| +
+\|\boldsymbol\eta\|$.
+(b)~The same inclusion, $\{\mathbf o \in \mathcal V\} \subseteq
+\{\|\mathbf e\|_\infty \ge d(\mathbf u^\star)\}$.
+(c)~Write $d = d(\mathbf u^\star)$ and $\bar\beta = \|\boldsymbol\beta\|$.
+Then $\{\|\mathbf e\|_\infty \ge d\} \subseteq \{\|\mathbf e\| \ge d\}
+\subseteq \{\|\boldsymbol\eta\| \ge d - \bar\beta\}$. If $\boldsymbol\eta
+\sim \mathcal N(\mathbf 0,\sigma_\eta^2 I)$ given $\mathcal G$, then
+$\|\boldsymbol\eta\|^2/\sigma_\eta^2 \sim \chi^2_2$, so
+$\Pr(\|\boldsymbol\eta\| \ge t \mid \mathcal G) =
+\exp(-t^2/(2\sigma_\eta^2))$ for $t \ge 0$. In the sub-Gaussian case,
+$\{\|\mathbf e\|_\infty \ge d\} = \bigcup_{\mathbf n \in \{\pm \mathbf
+a_1, \pm \mathbf a_2\}} \{\mathbf n^\top \mathbf e \ge d\}$ and $\mathbf
+n^\top \mathbf e \le \bar\beta + \mathbf n^\top \boldsymbol\eta$, so each
+event implies $\mathbf n^\top \boldsymbol\eta \ge d - \bar\beta$, whose
+probability given $\mathcal G$ is at most $\exp(-(d -
+\bar\beta)^2/(2\sigma_\eta^2))$ when $d > \bar\beta$; a union bound over
+the four directions gives the factor~4. Both bounds are trivial when $d
+\le \bar\beta$.
+All three statements weaken as $d$ decreases, so any lower bound on
+$d(\mathbf u^\star)$, such as that of Lemma~\ref{lem:idm-grid}, may
+replace it.
+\end{idmproof}
+
+\paragraph{Fitting error and relabelling bias.}
+With $\tilde{\mathbf u} := I_\star(\zeta,\mathbf u^\star)$,
+\begin{equation}
+  \boldsymbol\beta = \big[\bar F_c(\zeta,\mathbf u) - \bar
+  F_c(\zeta,\tilde{\mathbf u})\big] + \big[\bar F_c(\zeta,\tilde{\mathbf
+  u}) - \mathbf u^\star\big].
+  \label{eq:app-beta}
+\end{equation}
+If $\bar F_c(\zeta,\cdot)$ is $L$-Lipschitz on the segment from
+$\tilde{\mathbf u}$ to $\mathbf u$, the first term is at most
+$L\|I(\zeta,\mathbf u^\star) - I_\star(\zeta,\mathbf u^\star)\|$ in norm:
+a fitting error, controlled in mean square over the targets by
+Eq.~\eqref{eq:app-shift}. The second term is the relabelling bias. It
+vanishes under Assumption~\ref{as:idm-exact}(i)--(iii), by the proof of
+Proposition~\ref{prop:idm-mean}, and it equals $-\Lambda(\mathbf u^\star -
+\bar{\mathbf o})$ in the setting of Proposition~\ref{prop:idm-shrink}; in
+command space the same bias is $\tilde{\mathbf u} - A^{-1}(\mathbf u^\star
+- \mathbf b) = -A^{-1}\Lambda(\mathbf u^\star - \bar{\mathbf o})$. This
+split needs no exact preimage of $\mathbf u^\star$; given one, $\mathbf
+u^\dagger$, with $\bar F_c(\zeta,\cdot)$ $L$-Lipschitz on the segment from
+$\mathbf u^\dagger$ to $\mathbf u$, also $\|\boldsymbol\beta\| \le
+L\|\mathbf u - \mathbf u^\dagger\|$. In the form of
+Eq.~\eqref{eq:forward}, $\bar F_c(\zeta,\mathbf u) = \mathbf u +
+\bar{\boldsymbol\delta}_c(\zeta,\mathbf u)$ with
+$\bar{\boldsymbol\delta}_c := \mathbb E[\boldsymbol\delta_c \mid
+\zeta,\mathbf u]$, so $L \le 1 + \operatorname{Lip}_{\mathbf
+u}(\bar{\boldsymbol\delta}_c)$; a landing error that depends only weakly
+on the command gives $L \approx 1$. Over a trial with steps $j =
+1,\dots,J$, a union bound gives $\Pr(\text{any void entry}) \le \sum_j
+\Pr(\|\mathbf e_j\|_\infty \ge d(\mathbf u^\star_j))$; on OCS2, $J$ is
+about 97 (\corlOcsStepsPerMFull{} steps per metre over
+\corlOcsTrackM\,m).
+
+\paragraph{One-sided form.}
+The event in Proposition~\ref{prop:idm-void}(b) counts errors in every
+direction, but voids seldom surround a foothold. Cover $\mathcal V$ by
+closed half-planes $H_j = \{\mathbf x : \mathbf n_j^\top(\mathbf x -
+\mathbf u^\star) \ge c_j\}$ with unit normals $\mathbf n_j$; a closed
+convex void at Euclidean distance $c_j > 0$ from $\mathbf u^\star$, such
+as one terrain cell, lies in the half-plane whose normal points from
+$\mathbf u^\star$ to its nearest point. Then $\Pr(\mathbf o \in \mathcal
+V \mid \mathcal G) \le \sum_j \Pr(\mathbf n_j^\top \mathbf e \ge c_j \mid
+\mathcal G)$, which for $\mathbf e \sim \mathcal N(\boldsymbol\beta,
+\sigma_\eta^2 I)$ given $\mathcal G$ is $\sum_j \Phi(-(c_j - \mathbf
+n_j^\top\boldsymbol\beta)/\sigma_\eta)$, with equality when $\mathcal V$
+is a single half-plane. A half-plane at $\infty$-norm distance $d$ has
+$c_j = d\,\|\mathbf n_j\|_1 \ge d$, because $\max\{\mathbf n^\top\mathbf y
+: \|\mathbf y\|_\infty \le d\} = d\|\mathbf n\|_1$; for $\boldsymbol\beta
+= \mathbf 0$, an edge parallel to a grid axis is therefore the worst
+straight edge, with probability $\Phi(-d/\sigma_\eta)$. For void beyond
+either of two perpendicular edges, each at distance $d$, the probability
+is $1 - (1 - \Phi(-d/\sigma_\eta))^2$. The first gives the values in
+Remark~\ref{rem:idm-numbers}, where $\sigma_\eta = \sqrt2$ or $2$\,cm; for
+$J'$ steps at clearance $d$ from one straight edge with independent
+errors, no step enters the void with probability $(1 -
+\Phi(-d/\sigma_\eta))^{J'}$, which is $(1 - 0.079)^{10} \approx 0.44$ or
+$(1 - 0.159)^{10} \approx 0.18$ for $J' = 10$ and $d = 2$\,cm. For
+comparison, zero-mean isotropic
+Gaussian $\mathbf e$ has $\Pr(\|\mathbf e\|_\infty \ge d) = 1 - (1 -
+2\Phi(-d/\sigma_\eta))^2$, which at $d = 2$\,cm is $0.29$ or $0.53$ under
+the two readings of Remark~\ref{rem:idm-numbers}, below the bounds
+$e^{-1}$ and $e^{-1/2}$ of Proposition~\ref{prop:idm-void}(c).
+
+\paragraph{The grown mask on a grid.}
+Model the terrain rays as samples on a lattice $\mathbf r_0 + h\mathbb
+Z^2$ in the yaw frame of the decision, a sample being unsafe if it lies in
+the closed set $\mathcal V$ (exact perception and registration). A
+candidate is a sample with no unsafe sample within $\infty$-norm distance
+$kh$; this is the grown mask, a $(2k{+}1) \times (2k{+}1)$ max-pool, with
+$k = 2$ and $h = 1$\,cm in training. The pool has no padding, so every
+lattice point within $kh$ of a candidate is sampled. Define
+\[
+  \rho_{\mathcal V} := \sup_{\mathbf p \in \mathcal V}\;
+  \min\big\{\|\mathbf p - \mathbf r\|_\infty :
+  \mathbf r \in (\mathbf r_0 + h\mathbb Z^2) \cap \mathcal V\big\}.
+\]
+
+\begin{lemma}
+\label{lem:idm-grid}
+(a)~Every candidate $\mathbf u^\star$ satisfies $d(\mathbf u^\star) \ge
+(k+1)h - \rho_{\mathcal V}$.
+(b)~If $\mathcal V$ is a union of closed rectangles with sides parallel to
+the grid axes and at least $h$ long, then $\rho_{\mathcal V} \le h$, so
+$d(\mathbf u^\star) \ge kh = m$.
+(c)~If $\mathcal V$ is a union of closed squares of side at least
+$3\sqrt2\,h$ whose edges make an angle $\varphi$ with the grid axes, then
+$\rho_{\mathcal V} \le (1 + \tfrac12|\sin 2\varphi|)\,h$, so $d(\mathbf
+u^\star) \ge (k - \tfrac12|\sin 2\varphi|)\,h$.
+(d)~For $k \ge 1$, the bound in (c) is approached at $\varphi = 0$ and at
+$\varphi = 45^\circ$: there are such voids with a candidate whose
+$d(\mathbf u^\star)$ exceeds $kh$, respectively $(k - \tfrac12)h$, by an
+arbitrarily small amount.
+\end{lemma}
+
+\begin{idmproof}{Lemma~\ref{lem:idm-grid}}
+(a)~Take $\mathbf p \in \mathcal V$ and a lattice point $\mathbf r \in
+\mathcal V$ with $\|\mathbf p - \mathbf r\|_\infty \le \rho_{\mathcal V}$;
+the minimum exists because only finitely many lattice points lie within
+any bounded distance. If $\mathbf r$ is sampled, it is unsafe; if it is
+not, it lies farther than $kh$ from every candidate. Either way
+$\|\mathbf r - \mathbf u^\star\|_\infty > kh$, and since both are lattice
+points, $\|\mathbf r - \mathbf u^\star\|_\infty \ge (k+1)h$, so
+$\|\mathbf p - \mathbf u^\star\|_\infty \ge (k+1)h - \rho_{\mathcal V}$.
+
+(b)~For an aligned rectangle $[a_1,b_1]\times[a_2,b_2] \ni \mathbf p$ with
+$b_i - a_i \ge h$, let $t_i^- \le p_i \le t_i^+$ be adjacent lattice
+coordinates along axis $i$, so $t_i^+ - t_i^- \le h$. If $t_i^- < a_i$,
+then $b_i - p_i \ge h - (p_i - a_i) > h - (p_i - t_i^-) \ge t_i^+ - p_i$,
+so $t_i^+ \in [a_i,b_i]$; either way one of them lies in $[a_i,b_i]$,
+within $h$ of $p_i$. The lattice point with these two coordinates lies in
+the rectangle, within $\infty$-norm distance $h$ of $\mathbf p$.
+
+(c)~Take $\mathbf p$ in one of the squares, $\mathcal Q \subseteq
+\mathcal V$, of side $s \ge 3\sqrt2\,h$, with unit edge directions
+$\mathbf d_1, \mathbf d_2$, each signed so that $\mathcal Q$ extends at
+least $s/2$ from $\mathbf p$ along it; then $\mathcal Q$ contains
+$\mathbf p + \{\gamma_1\mathbf d_1 + \gamma_2\mathbf d_2 : 0 \le
+\gamma_1, \gamma_2 \le s/2\}$. Rotations by $90^\circ$ and reflections in
+the grid axes map the lattice to a translate of itself and preserve
+$\|\cdot\|_\infty$, so we may take $h = 1$, $0 \le \varphi \le 45^\circ$,
+$\mathbf p = \mathbf 0$ (moving the lattice), $\mathbf d_1 =
+(\cos\varphi, \sin\varphi)$ and $\mathbf d_2 = (-\sin\varphi,
+\cos\varphi)$. The cone spanned by $\mathbf d_1$ and $\mathbf d_2$ is
+$\{\mathbf x : \mathbf x^\top\mathbf d_1 \ge 0,\ \mathbf x^\top\mathbf
+d_2 \ge 0\}$. It contains the axis-aligned unit square $B = [x_0, x_0 +
+1] \times [y_0, y_0 + 1]$ with $x_0 = -\sin^2\varphi$ and $y_0 =
+\sin\varphi\cos\varphi$: its lower corners $(\cos^2\varphi, y_0) =
+\cos\varphi\,\mathbf d_1$ and $(x_0, y_0) = \sin\varphi\,\mathbf d_2$
+lie on the two edges of the cone, and $(0,1)$ has non-negative products
+with $\mathbf d_1$ and $\mathbf d_2$, so the upper corners lie inside.
+Every point of $B$ is within $\infty$-norm distance $\max(\sin^2\varphi,
+\cos^2\varphi, 1 + y_0) = 1 + \tfrac12\sin 2\varphi$ of $\mathbf 0$, hence
+within Euclidean distance $\tfrac32\sqrt2 \le s/2$, so its coordinates
+along $\mathbf d_1$ and $\mathbf d_2$ lie in $[0, s/2]$ and $B \subseteq
+\mathcal Q$. A closed axis-aligned unit square contains a point of every
+translate of $\mathbb Z^2$, so $\mathcal Q$ contains a lattice point
+within $1 + \tfrac12\sin 2\varphi$ of $\mathbf p$.
+
+(d)~Take $h = 1$ and the lattice $\mathbb Z^2$. For $\varphi = 0$, let a
+void square have its left edge at $x_1 = \epsilon \in (0,1)$; its lattice
+points have $x_1 \ge 1$, so a lattice point $\mathbf u^\star$ with
+$u^\star_1 = -k$, $u^\star_2$ within the square's vertical extent and no
+other void nearby is a candidate, with $d(\mathbf u^\star) = k +
+\epsilon$. For $\varphi = 45^\circ$, near a corner with apex $\mathbf p =
+(p_1, p_2)$ the void is $\{\mathbf x : x_2 \le p_2 - |x_1 - p_1|\}$. A
+lattice point $(i,j)$ in it has $p_2 - j \ge |i - p_1|$, so its
+$\infty$-norm distance to $\mathbf p$ is $p_2 - j$, minimised by the
+largest admissible $j = \lfloor p_2 - \delta \rfloor$ with $\delta =
+\min_i |i - p_1| \le 1/2$; this distance tends to $3/2$ for $p_1 = 1/2$
+and $p_2 \uparrow 1/2$, so (c) is tight for $\rho_{\mathcal V}$. With
+$\mathbf p = (1/2, 1/2 - \epsilon)$, every lattice point of the void has
+$j \le -1$, so $\mathbf u^\star = (0,k)$ is a candidate if no other void
+is near; every void point has $x_2 \le 1/2 - \epsilon$, so $d(\mathbf
+u^\star) = \|\mathbf p - \mathbf u^\star\|_\infty = k - 1/2 + \epsilon$.
+\end{idmproof}
+
+The terrain cells, $12.5h$ in training and $24h$ in Gazebo, meet the side
+condition $3\sqrt2\,h \approx 4.2h$. With $k = 2$ and $h = 1$\,cm, the
+margin guaranteed by the mask is therefore $(2 - \tfrac12|\sin
+2\varphi|)$\,cm, with $\varphi$ the yaw of the void edges relative to the
+rays, before perception, odometry and foot-size errors. A numerical
+search over apex positions (a $1/300$ grid) at $1^\circ$ steps finds the
+corner value within $0.004h$ of the bound in (c) at every $\varphi$, so
+the bound appears tight at intermediate angles too; that is a numerical
+observation, not part of the lemma. At deployment the candidate grid is
+built from a depth-camera map, whose errors and resampling the lemma does
+not cover.

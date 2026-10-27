@@ -1,0 +1,143 @@
+% Appendix of the L4DC version. L4DC does not review the appendix, so
+% nothing a claim in the main text depends on may live only here.
+
+\section{Settings}
+\label{app:settings}
+
+Table~\ref{tab:settings} lists the main settings.
+
+\begin{table}[!ht]
+  \centering
+  \caption{Main settings.}
+  \label{tab:settings}
+  \footnotesize
+  \setlength{\tabcolsep}{2.5pt}
+  % source: gaitnet-docs/methodology.md 3-6, training-setup.md 2-12,
+  % experiment-setup.md 2 (state of 2026-10-13; the sc_idm preset).
+  \begin{tabular}{@{}ll@{\hspace{1.2em}}ll@{}}
+    \toprule
+    \thd{Item} & \thd{Value} & \thd{Item} & \thd{Value} \\
+    \midrule
+    \grouprow{4}{GaitNet}
+    Tick; swing time & \corlControlTickMs\,ms;
+      \corlSwingDurationMin--\corlSwingDurationMax\,s &
+    Candidates/leg; choices & \corlTrainCandidatesPerLeg;
+      \corlTotalCandidates \\
+    Candidate grid; margin & $\pm\corlGridReachCm$\,cm at
+      \corlScanResCm\,cm; \corlMarginCm\,cm &
+    History & \corlHistSeconds\,s (\corlHistTicks{} ticks) \\
+    Candidate mixer & \corlMixerLayers{} layers, width \corlMixerDim,
+      \corlMixerHeads{} heads &
+    Parameters & \corlParamsGaitNetK{}k (per-candidate
+      \corlParamsPerCandidateK{}k) \\
+    \grouprow{4}{Inverse footstep model (training controller)}
+    Network; data & MLP, 2 $\times$ \corlIdmHidden;
+      \corlIdmFootsteps{} steps &
+    Held-out error & \corlIdmRmsCm\,cm RMS (identity
+      \corlIdmIdentityRmsCm\,cm) \\
+    \grouprow{4}{Training (Eq.~\eqref{eq:reward})}
+    Robots; rollout & \corlParallelEnvs; \corlRolloutSteps{} steps &
+    LR; epochs; minibatches & $\corlLearningRate$;
+      \corlPpoEpochs; \corlMiniBatches \\
+    Clip; entropy; $\gamma$; $\lambda$ & \corlClip; \corlEntropyCoef;
+      \corlGamma; \corlLambda &
+    $w_a$; $w_s$; $w_f$ & \corlAliveWeight; \corlActionPenalty;
+      \corlTerminationPenalty \\
+    $\sigma_v$; $\sigma_\omega$; $\sigma_T$ & \corlTrackXyStd\,m/s;
+      \corlTrackYawStd\,rad/s; \corlDurationExploreStd\,s &
+    Episode; command & \corlEpisodeSeconds\,s;
+      0--\corlCmdVxMax\,m/s \\
+    Terrain cells; void depth & \corlTerrainCellCm\,cm;
+      \corlVoidDepth\,m &
+    Curriculum & \corlNumLevels{} levels, 0--\verify{\corlMaxVoidPct}\% voids \\
+    \grouprow{4}{OCS2}
+    Step lead & \corlGzLead\,s & Track; time limit & \corlOcsTrackM\,m;
+      \corlOcsTimeFactor$\times$ nominal \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Training Details}
+\label{app:training}
+
+\paragraph{Episodes and failure.}
+An episode lasts up to \corlEpisodeSeconds\,s. It fails earlier if the
+trunk tilts by more than \corlTiltLimitDeg$^\circ$, the base drops below
+\corlMinBaseHeight\,m, or a foot drops more than
+\corlFootDepthLimit\,m below the ground. Commands are forward-only
+because the deployed robot maps terrain with a forward-facing camera.
+The tracking widths $\sigma_v$ and $\sigma_\omega$ are narrow on purpose:
+with wider widths, a robot standing still would still earn most of the
+tracking reward at our speeds. Observations are not normalized and carry
+no added noise, and there are no pushes.
+
+\paragraph{Curriculum.}
+Difficulty levels raise the void fraction step by step. A robot
+progresses if it walks a set share of the commanded distance. It moves
+up with probability $p_{\text{up}}$ after a progressing time-out and down
+with probability $p_{\text{down}}$ after a failure or a stalled
+time-out, so the share of failed or stalled episodes settles near
+$p_{\text{up}}/(p_{\text{up}} + p_{\text{down}})$
+\verify{$= 1/4$ ($p_{\text{up}}$ of the evaluated run to be confirmed)}.
+
+\paragraph{Controller randomization.}
+At every reset, each robot's controller is redrawn: its tracking gains,
+swing apex height (\corlRandApexMin--\corlRandApexMax\,m), a landing
+bias of up to \corlRandBiasCm\,cm, landing noise of
+\corlRandNoiseCm\,cm, and a lift-off delay. Every chosen candidate is
+first corrected by the IDM and then executed by this randomized
+controller; GaitNet's touchdown errors are measured against the IDM's
+output, so its history reports how far the controller missed the
+corrected command.
+
+\section{Deployment Details}
+\label{app:deployment}
+
+GaitNet and the controller get terrain from a simulated RealSense D435
+depth camera. We build a depth-vote terrain: a fine grid in which each
+depth frame votes hit or miss for the cells it sees. A cell is walkable
+while its fading votes are positive and it is far enough from unwalkable
+cells, a distance that grows with how far the robot has walked since it
+last saw the cell. The simulated depth images carry no noise. Odometry
+comes from OCS2's leg-based state estimator with a slip gate, which
+ignores feet whose velocity disagrees with the estimate. The body
+reference stays a short distance ahead of the body.
+
+\section{Success Counts}
+\label{app:counts}
+
+Table~\ref{tab:counts} lists the successes behind Fig.~\ref{fig:ocs2-results}
+out of \corlOcsTrialsPerPoint{} trials per point. All methods ran the
+same world seeds. The void sweep spreads its trials over the five
+commanded speeds; the speed sweep is a separate set of trials
+\verify{(its void fractions to be stated)}.
+
+\begin{table}[!ht]
+  \centering
+  \caption{Successes out of \corlOcsTrialsPerPoint{} trials per point on
+    OCS2.}
+  \label{tab:counts}
+  \footnotesize
+  \setlength{\tabcolsep}{4.5pt}
+  \begin{tabular}{@{}lrrrrrrrrr@{}}
+    \toprule
+    \thd{Void fraction [\%]} & 0 & 10 & 20 & 30 & 40 & 50 & 60 & 70 &
+      \thd{All} \\
+    \midrule
+    GaitNet & 80 & 80 & 72 & 72 & 73 & 64 & 48 & 40 & 529 \\
+    OCS2's own trot & 80 & 80 & 70 & 60 & 56 & 30 & 24 & 10 & 410 \\
+    GaitNet-Single & 69 & 59 & 66 & 53 & 54 & 34 & 24 & 22 & 381 \\
+    GaitNet, no IDM & 77 & 64 & 51 & 45 & 35 & 30 & 29 & 21 & 352 \\
+    Per-candidate + IDM & 78 & 74 & 75 & 56 & 53 & 56 & 42 & 37 & 471 \\
+    \midrule
+    \thd{Speed [m/s]} & 0.05 & 0.10 & 0.15 & 0.20 & 0.25 & & & &
+      \thd{All} \\
+    \midrule
+    GaitNet & 67 & 71 & 69 & 65 & 53 & & & & 325 \\
+    OCS2's own trot & 63 & 63 & 59 & 51 & 41 & & & & 277 \\
+    GaitNet-Single & 59 & 54 & 50 & 43 & 32 & & & & 238 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\input{appendix_idm}
