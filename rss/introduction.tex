@@ -1,96 +1,65 @@
 \section{Introduction}
 \label{sec:introduction}
+% 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 
 \input{fig_overview}
 
-A quadruped crossing broken ground must decide which leg to lift, when,
-where to put it down, and how long the swing should last. Most
-model-based controllers settle the first two with a fixed gait
-\citep{dicarlo_dynamic_2018, ocs2}, which fixes when each leg lifts
-regardless of where safe footholds appear. Learned footstep
-planners can make all four decisions, and simulation lets them practise
-on large amounts of terrain. They are, however, trained on top of one
-low-level controller, and a controller does not land the foot exactly
-where it is told: each one misses in its own way. On our training
-controller the foot lands \corlOvershootSlowMin--\corlOvershootFastMax\,cm past the commanded point, while the
-planner keeps footholds only \corlMarginCm\,cm from a hole
-(Sec.~\ref{subsec:method-idm}). When a learned planner fails on a new
-controller, the fault need not lie in choosing a safe foothold; it can
-lie in landing on it.
+\looseness=-1 To cross ground with holes, or \emph{voids}, a quadruped must
+decide which leg to lift, when, where, and for how long.
+Model-based controllers track such steps well, but usually take them
+from a fixed gait \citep{dicarlo_dynamic_2018, ocs2}, such as a trot,
+which swings diagonal leg pairs in turn on a preset schedule, regardless
+of where safe footholds appear.
 
-We therefore treat the controller, from the planner's point of view, as
-a closed-loop map from a commanded foothold to a landed one, and ask
-what a planner should send so that it can be reused when that map
-changes. Our answer separates choosing a step from executing it
-(Fig.~\ref{fig:overview}). GaitNet chooses, every
-\corlControlTickMs\,ms, one step or none among a few sampled safe
-footholds per leg, and is not given a gait schedule. An execution layer
-then has the controller land the step where and when GaitNet meant. Its
-only learned, per-controller part is an inverse footstep model (IDM),
-fitted by regression on the controller's own logged steps, that maps
-the foothold GaitNet wants to the command that lands the foot there.
-For a new controller, the IDM is refitted and GaitNet stays frozen.
-This fit is direct inverse modelling \citep{jordan_forward_1992} with
-the hindsight relabelling of goal-conditioned reinforcement learning
-\citep{andrychowicz_hindsight_2017, ghosh_learning_2021}; it is exact
-only under conditions that a stochastic controller violates, which we
-make explicit (Sec.~\ref{subsec:idm-theory}).
+\looseness=-1 Deciding the gait online raises two problems. First, contact decisions
+are discrete, so choosing them inside a model predictive controller
+(MPC) makes its optimization mixed-integer \citep{Wensing2022Nov}.
+Second, each controller misses commanded footholds in its own way. The
+convex MPC we train on overshoots them by about the margin we keep
+between footholds and voids. A planner trained on one controller may
+therefore choose a safe foothold and still miss it on another.
 
-\paragraph{Contributions.}
-\begin{itemize}
-  \item GaitNet, a footstep planner without a gait schedule that picks
-    one step or none per tick from sampled safe footholds, comparing
-    the candidates with attention and drawing on a short motion history.
-    It extends the GaitNet of \citet{Sullivan2025}, which already chose
-    one step per tick with up to two legs in swing, on one controller
-    (Secs.~\ref{subsec:method-step}--\ref{subsec:method-network}).
-  \item An execution layer whose only per-controller learned part is an
-    IDM, with the conditions under which its regression inverts the
-    controller's footstep map, its bias otherwise in a linear-Gaussian
-    case, and a bound linking its error to the chance of a foot landing
-    in a void (Secs.~\ref{subsec:method-idm}
-    and~\ref{subsec:idm-theory}).
-  \item An evaluation in which GaitNet, trained on a convex MPC in Isaac
-    Lab, runs frozen on OCS2's nonlinear MPC and whole-body controller
-    with a simulated depth camera, against OCS2's own trot and three
-    ablations, with \corlOcsTrialsPerPoint{} trials per point and
-    significance tests (Sec.~\ref{sec:experiments}).
-\end{itemize}
-All results are in simulation, on one pair of controllers.
+\looseness=-1 We propose GaitNet (Fig.~\ref{fig:overview}), a learned
+planner that decides these steps outside the controller, without a gait
+schedule. Every \corlControlTickMs\,ms, a \emph{tick}, it
+takes the \emph{no-step option} or picks a leg, a swing time, and
+a foothold among a few safe cells near the hip, the \emph{candidates}.
+As it may start a step while another leg swings, the order, timing, and
+overlap of steps are its own choice. A small transformer, the
+\emph{candidate mixer}, compares the candidates, and a one-second
+\emph{history} of the robot's motion shows how the controller executes
+its steps. An \emph{execution layer} starts and lands these steps. Its only learned part, an \emph{inverse
+footstep model} (IDM), turns the chosen foothold into the command that
+lands the foot there. Trained with proximal policy optimization (PPO)
+on the convex MPC, with no gait, foot-clearance, or posture reward,
+GaitNet then runs frozen on OCS2's nonlinear MPC (NMPC) and whole-body
+controller (WBC), with only the IDM refitted. Our
+contributions are:
+\begin{enumerate}
+  \item \looseness=-1 GaitNet
+    (Secs.~\ref{subsec:method-step}--\ref{subsec:method-network}), which
+    adds the candidate mixer, history, and execution layer to the
+    per-candidate network of \citet{Sullivan2025}. That network also
+    chose one step per tick, with up to two legs in swing, but scored
+    each candidate alone and ran on one controller.
+  \item The execution layer (Secs.~\ref{subsec:method-idm}
+    and~\ref{subsec:method-deployment}), whose IDM is fitted on each
+    controller's logged steps by direct inverse modelling
+    \citep{jordan_forward_1992} with hindsight relabelling
+    \citep{andrychowicz_hindsight_2017, ghosh_learning_2021}, as in
+    \citet{akizhanov_learning_2024}. We show that the IDM can remove
+    only the landing error that its inputs predict, so the
+    \emph{candidate margin} around voids must cover the rest
+    (Sec.~\ref{subsec:idm-theory}).
+\end{enumerate}
 
-\paragraph{Related work.}
-Model-based planners place foothold choice, contact timing and
-whole-body motion in one optimization \citep{Wensing2022Nov}; once
-contacts are free, the problem becomes mixed-integer. Some methods
-restrict footholds to convex regions \citep{deits_footstep_2014,
-grandia_perceptive_2022} or
-optimize contact schedules and timing together
-\citep{winkler_gait_2018}. Gait-free planners choose contact timing
-online from per-leg feasibility rules \citep{bjelonic_whole-body_2021}
-or by tree search \citep{amatucci_monte_2022}, sped up by a learned
-cost-to-go \citep{taouil_non-gaited_2024}, or with learned per-foot
-flight phases inside an MPC \citep{patrizi_rl-augmented_2026}.
-End-to-end policies decide contacts implicitly in their joint targets
-\citep{lee_learning_2020, zhang_learning_2023, fu_minimizing_2021}.
-Hybrid methods keep an explicit foothold: RLOC learns it while a gait
-fixes the timing \citep{gangapurwala_rloc_2022}, DeepGait
-\citep{tsounis_deepgait_2020} also learns which legs are in contact,
-\citet{da_learning_2020} learn only which legs are in contact, and
-ContactNet
-\citep{bratta_contactnet_2024} ranks discretized foothold regions
-without prescribing the swing leg, with concurrency and swing timing set
-by configuration.
-
-For transfer, \citet{christiano_transfer_2016} keep a policy fixed and
-fit an inverse dynamics model on the target system, \citet{xie_fada_2026}
-split a humanoid policy into a planner and an inverse dynamics model and
-adapt only the latter, and \citet{li_zero-shot_2022} retarget
-locomotion policies to new robots through a kinodynamic MPC. At the
-footstep level, \citet{akizhanov_learning_2024} correct the contact
-targets of an NMPC with a network trained on the contacts it actually
-reached, the construction of our IDM, within a fixed gait and one
-controller; \citet{taouil_quadrupedal_2023} plan footsteps with learned
-motion models of a black-box trotting controller; and
-\citet{jenelten_dtc_2024} reuse a learned tracker under new planners. We are not aware of work that
-moves a learned, gait-free footstep planner between two model-based
-controllers.
+\looseness=-1 On OCS2, in \corlBenchTrialsPerArm{} trials per run on
+shared Gazebo worlds (Sec.~\ref{sec:experiments}), GaitNet succeeded in \corlBenchFull\%
+against \corlBenchTrot\% for OCS2's own trot, and in
+\corlBenchFullDense\% against \corlBenchTrotDense\% at the densest,
+\corlBenchVoidHigh\% voids. It came within five percentage points of
+its success on the convex MPC, but without the IDM it failed on both
+controllers. In successful trials, it almost always swung diagonal leg
+pairs, like the trot, but on its own timing. The per-candidate network's four training seeds averaged
+about the trot's success but spread too widely to rank GaitNet against
+it. All results are in simulation, on one pair of controllers.

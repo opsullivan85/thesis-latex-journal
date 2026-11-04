@@ -74,8 +74,8 @@
 \newcommand{\verify}[1]{\ifrevmarkup\textcolor{magenta}{#1}\else#1\fi}
 \newcommand{\xx}{\pending{\text{xx}}}
 
-\title[GaitNet]{GaitNet: Reusing a Learned Footstep Planner on a New
-  Controller through an Inverse Footstep Model}
+\title[GaitNet]{GaitNet: Learning to Choose the Gait for a Model-Based
+  Locomotion Controller}
 
 % L4DC is single-blind: real names and affiliations are required.
 % TODO before submission: the author list, order, emails and affiliations
@@ -93,41 +93,38 @@
 \maketitle
 
 \begin{abstract}%
-  A learned footstep planner is trained on top of one low-level
-  controller, yet each controller lands a commanded foot with its own
-  error, and a miss of a few centimetres can put the foot in a hole.
-  We study how to reuse such a planner on a new controller without
-  retraining it. GaitNet plans footsteps for a quadruped crossing ground
-  with voids and is not given a gait schedule: every
-  \corlControlTickMs\,ms it chooses one step (a leg, a foothold among
-  sampled safe cells, and a swing time) or no step, and it may start a
-  step while another leg is still swinging. An inverse footstep model
-  (IDM), fitted by regression on a controller's own logged steps, maps
-  the foothold GaitNet wants to the command that lands the foot there;
-  it is the only learned part refitted for a new controller. We state
-  what this hindsight regression estimates, when it inverts the
-  controller's footstep map, how it is biased when it does not in a
-  linear-Gaussian case, and how its error
-  bounds the chance that a step aimed at a safe cell lands in a void.
-  GaitNet is trained with PPO on a convex MPC in Isaac Lab and runs
-  frozen on OCS2's nonlinear MPC and whole-body controller in Gazebo,
-  with terrain from a simulated depth camera. Over
-  0--\corlOcsMaxVoidPct\% voids, it matches OCS2's own trot on sparse
-  voids and succeeds in \corlOcsDenseFull\% of trials against
-  \corlOcsDenseTrot\% at 40--\corlOcsMaxVoidPct\% voids
-  (\corlOcsTrialsPerPoint{} trials per point). The frozen GaitNet
-  depends on the IDM: without it, its success over the void sweep falls
-  from \corlOcsAllFull\% to \corlOcsAllNoIdm\%, and its lead over the trot
-  on dense voids disappears.%
+  % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
+  A quadruped crossing ground with holes, or voids, must decide which leg
+  to lift, when, where, and for how long. Model-based controllers track
+  such steps well but usually follow a fixed gait. Choosing contacts
+  inside them makes their optimization mixed-integer. We present
+  GaitNet, a learned planner that makes these choices outside the
+  controller, with no gait schedule. Every \corlControlTickMs\,ms, it may
+  start one step, choosing the leg, swing time, and safe foothold, even
+  while another leg swings. An inverse footstep model (IDM), fitted on
+  logged steps, turns the chosen foothold into the command that lands
+  the foot there, and a margin around voids must cover the error it
+  cannot predict. Trained by reinforcement learning on a convex model
+  predictive controller (MPC), GaitNet ran frozen on OCS2's nonlinear MPC
+  and whole-body controller with only the IDM refitted. In
+  \corlBenchTrialsPerArm{} Gazebo trials per run on shared worlds, with a
+  simulated depth camera, it succeeded in \corlBenchFull\% against
+  \corlBenchTrot\% for OCS2's own trot, and in \corlBenchFullDense\%
+  against \corlBenchTrotDense\% at \corlBenchVoidHigh\% voids. It kept
+  most of its convex-MPC success of \corlBenchIsaacIdm\% but failed on
+  both controllers without the IDM. In successful trials, it almost always
+  swung diagonal leg pairs, like the trot, but on its own timing. Restricted to them, it stayed
+  only about three percentage points above the trot.%
 \end{abstract}
 
 \begin{keywords}%
-  Legged locomotion; footstep planning; reinforcement learning; inverse
-  models; transfer across controllers%
+  Legged locomotion; gait and footstep planning; reinforcement learning;
+  model predictive control; inverse models%
 \end{keywords}
 
 % Each file below starts its own \section.
 \input{introduction}
+\input{related}
 \input{setup}
 \input{methodology}
 \input{results}

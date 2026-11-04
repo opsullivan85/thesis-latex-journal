@@ -1,324 +1,194 @@
+% 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 \section{Method}
 \label{sec:method}
-
-GaitNet chooses at every tick which step to take, if any; an execution
-layer turns that step into a command and a start time that the
-controller in use lands where and when GaitNet meant
-(Fig.~\ref{fig:overview}). Settings are listed in
-App.~\ref{app:settings}.
 
 \subsection{Choosing One Step per Tick}
 \label{subsec:method-step}
 
-At every tick GaitNet may start at most one step for one leg, while the
-other legs keep their current commands. Because a swing lasts several
-ticks, GaitNet may start a second swing before the first one ends; the
-feasibility rules of Sec.~\ref{sec:setup} decide which legs may step,
-where a leg that is waiting to lift off counts as lifted. Beyond these
-rules, GaitNet never chooses a gait phase, leg pair or contact sequence.
-It commits only to the next step, and nothing in its action
-space ties its steps to a cycle: at each tick it asks whether any
-available step is better than doing nothing.
-
-The candidates are safe cells near each hip. A grid of terrain rays at
-\corlScanResCm\,cm spacing around the hip marks a cell as safe when the
-ground under it is within reach below the hip, and as unsafe when it is
-a void or the ray misses. The unsafe cells are grown by
-\numberstringnum{\corlMarginCm} cells, so that no unsafe ray lies
-within $m = \corlMarginCm$\,cm of a remaining cell along the grid axes,
-and, with exact terrain, the void is at least 1.5\,cm away at any edge orientation
-(Sec.~\ref{subsec:idm-theory}); no other
-reach, edge or kinematic rule is applied. For each leg that may step,
-GaitNet draws \corlTrainCandidatesPerLeg{} safe cells at random without
-repeats and masks empty slots when a leg has fewer. With the no-step
-option, these form the choices of a tick, built the same way in
-training and at deployment, apart from the margin.
+\looseness=-1 Each tick, GaitNet scores every step that
+Sec.~\ref{sec:setup} allows against the no-step option and starts at
+most one, while the other legs keep their commands. Beyond these rules,
+it never chooses a gait phase, leg pair, or contact sequence, and nothing
+in its action space ties steps to a cycle. To build candidates, vertical terrain rays on a
+grid of spacing $h$ around each hip mark a cell safe when the ground under it
+lies within reach below the hip, and unsafe when it is a void or the ray
+misses. The unsafe region is
+then grown by $k$ cells on every side, so
+that no unsafe ray lies within the candidate margin $m = m_{c_0} = kh$
+of a remaining safe cell along the grid axes
+(Sec.~\ref{subsec:idm-theory}). No other reach, edge, or kinematic rule
+is applied. For each leg that may step,
+GaitNet draws $K$ safe cells at random without
+repeats and ignores empty slots when a leg has fewer. With the no-step
+option, they form the choices of a tick.
 
 \subsection{Network}
 \label{subsec:method-network}
 
-GaitNet has three inputs: the tracking state $\mathbf x_g$ (the feet's
-planar positions relative to the trunk, base height, base linear and
-angular velocity, the velocity command, the controller's scheduled
-contacts and projected gravity, in the trunk frame except the height);
-the candidates, each described by $\mathbf q_i$, a one-hot code of its
-leg and its offset from the hip; and the history $\mathbf h$ of the last
-\corlHistSeconds\,s (\corlHistTicks{} ticks) of base velocities, foot
-positions relative to the hips from the joint encoders, scheduled
-contacts, and each leg's last touchdown error (the foot's position at
-its scheduled touchdown minus the command). All can be estimated on a
-real robot. A state encoder $f_s$ and a history encoder $f_h$ form a context
-shared by all choices, a candidate encoder embeds each candidate, and
-each choice becomes a token,
+\looseness=-1 GaitNet has three inputs. The state $\mathbf x_g$ holds the
+feet's planar positions relative to the trunk, the base height, the base
+linear and angular velocity, the commanded velocity, each leg's
+scheduled contact, and projected gravity, all in the trunk frame except
+the height. Candidate $i$ is described by $\mathbf q_i$, a one-hot code
+of its leg and its offset from the hip. The history $\mathbf h$ covers
+the last $H$ ticks of base
+velocities, foot positions relative to the hips from the joint encoders,
+scheduled contacts, and each leg's last \emph{touchdown error}, the
+foot's position at its scheduled touchdown minus the command $\mathbf u$.
+All of these can be estimated on a real robot. Encoders $f_s$, $f_h$,
+and $f_c$ embed the state, the history, and each candidate, and each
+choice $i$ becomes a token $\mathbf t_i$,
 \begin{equation}
   \mathbf z = f_s(\mathbf x_g) + W_h\, f_h(\mathbf h), \qquad
   \mathbf t_i = \mathrm{ReLU}\big(W_t [\mathbf z; f_c(\mathbf q_i)]\big),
   \label{eq:context}
 \end{equation}
 with a learned embedding in place of $f_c(\mathbf q_i)$ for the no-step
-option $\varnothing$. So that a choice can be judged against the
-alternatives, a candidate mixer, a small pre-norm transformer encoder
-\citep{vaswani_attention_2017}, lets the tokens attend to each other;
-empty slots are masked as keys. A readout $g$ and two linear heads give
-each choice a score and a swing time,
+option $\varnothing$.
+
+\looseness=-1 The candidate mixer, a small pre-norm transformer encoder
+\citep{vaswani_attention_2017}, lets the tokens attend to each other,
+so each choice is judged against the alternatives. No token attends to
+empty slots. A shared network $g$ and two linear heads give each
+choice a score and a swing time,
 \begin{equation}
   \alpha_i = \mathbf w_\alpha^\top g(\tilde{\mathbf t}_i), \qquad
   T_i = T_{\min} + (T_{\max} - T_{\min})\,
-    \sigma\big(\mathbf w_T^\top g(\tilde{\mathbf t}_i)\big),
+    \operatorname{sig}\big(\mathbf w_T^\top g(\tilde{\mathbf t}_i)\big),
   \label{eq:heads}
 \end{equation}
-with $\tilde{\mathbf t}_i$ the mixed token and $\sigma$ the logistic
-function. The scores of the valid choices are the logits of a
-categorical distribution $\pi(i) \propto \exp(\alpha_i)$. In training,
-GaitNet samples a choice and a swing time $T \sim \mathcal N(T_i,
-\sigma_T^2)$; at deployment it takes the top-scoring choice and $T_i$.
-$W_h$, the attention output projections and the last layer of each
-feed-forward block start at zero, so at initialization GaitNet computes
-exactly the per-candidate network of \citet{Sullivan2025}, which scores
-each candidate on its own from $\mathbf x_g$ and $\mathbf q_i$; as in
-that network, $\mathbf q_i$ carries a last entry for a separate cost,
-which we keep at zero. During training GaitNet learns to use the history
-and to compare candidates.
+with $\tilde{\mathbf t}_i$ the mixed token and
+$\operatorname{sig}$ the logistic function. Each valid choice has
+probability $\pi(i) \propto \exp(\alpha_i)$. In training, GaitNet samples
+a choice and an unclipped swing time $T \sim \mathcal N(T_i,
+\sigma_T^2)$, and at deployment it takes the top-scoring choice
+and $T_i$. The projection $W_h$, the attention output projections, and the
+last layer of each feed-forward block start at zero, so GaitNet begins
+as exactly the per-candidate network of \citet{Sullivan2025}, which
+scores each candidate alone from $\mathbf x_g$ and $\mathbf q_i$, and
+as there $\mathbf q_i$ ends in a zero cost entry. Training teaches it to use the history and
+compare candidates.
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}
 
-Our training controller keeps re-aiming each swing at the moving hip, so
-the foot lands past the commanded point, the more so the faster the
-robot walks: by +\corlOvershootSlowMin{} to +\corlOvershootSlowMax\,cm
-along the walking direction at \corlSimSpeedSlow\,m/s and
-+\corlOvershootFastMin{} to +\corlOvershootFastMax\,cm at
-\corlSimSpeedFast\,m/s, against the \corlMarginCm\,cm margin. OCS2, in
-contrast, fixes the target in the world when the step is commanded. Every
-candidate, including the chosen $\mathbf u^\star$, already lies in a
-cell that the mask marks as safe, so we treat $\mathbf u^\star$ as the
-desired landing and, for controller $c$, send
+\looseness=-1 Our training controller keeps each swing's target fixed
+relative to the hip, which moves forward, so the foot
+lands past the commanded point, more so at higher speed, where the
+overshoot exceeds the candidate margin (App.~\ref{app:settings}). OCS2 instead fixes the target in the world at
+command time. For controller $c$, the layer sends
 \begin{equation}
-  \mathbf u = I^c(\mathbf s, \ell, T, \mathbf u^\star),
+  \mathbf u = I^c(\zeta, \mathbf u^\star),
   \qquad\text{so that}\qquad
   F_c(\mathbf s, \ell, T, \mathbf u) \approx \mathbf u^\star .
   \label{eq:idm}
 \end{equation}
-GaitNet is the same for every controller; only $I^c$ changes. The IDM is
-a small MLP that predicts a correction,
-\begin{equation}
-  I^c_\theta(\mathbf h_{\text{last}}, \ell, T, \mathbf o) =
-  \mathbf o + \Delta^c_\theta(\mathbf h_{\text{last}}, \ell, T, \mathbf o),
-  \label{eq:idm-model}
-\end{equation}
-where $\mathbf h_{\text{last}}$, the newest tick of GaitNet's history,
-stands in for $\mathbf s$; its last layer starts at zero, so an untrained
-IDM sends GaitNet's choice unchanged. We log steps that $c$ executes as
-tuples $(\mathbf h_{\text{last}}, \ell, T, \mathbf u, \mathbf o)$ and fit
+We log the steps that $c$ executes as tuples $(\zeta, \mathbf u,
+\mathbf o)$. Whatever foothold a command $\mathbf u$ was meant
+to reach, it landed the foot at $\mathbf o$, so in hindsight every logged
+step is an example of the inverse map from landing to command
+\citep{jordan_forward_1992, andrychowicz_hindsight_2017}, as in
+\citet{akizhanov_learning_2024}. We therefore fit $I^c$ with the landing
+$\mathbf o$ as input and the command $\mathbf u$ as target, since the
+desired foothold $\mathbf u^\star$ takes the landing's place at
+deployment,
 \begin{equation}
   \min_\theta \; \mathbb E\,
-  \big\| \mathbf u - I^c_\theta(\mathbf h_{\text{last}}, \ell, T, \mathbf o) \big\|^2 .
+  \big\| \mathbf u - I^c(\zeta, \mathbf o) \big\|^2,
+  \qquad
+  I^c(\zeta, \mathbf o) = \mathbf o + \Delta_\theta(\zeta, \mathbf o),
   \label{eq:idm-loss}
 \end{equation}
-Whatever $\mathbf u$ was aimed at, it did land the foot at $\mathbf o$,
-so $(\mathbf o, \mathbf u)$ is an example of the inverse map
-\citep{jordan_forward_1992, andrychowicz_hindsight_2017}; the same
-construction corrects NMPC contact targets in
-\citet{akizhanov_learning_2024}. For the training controller, the steps
-come from two earlier policies without controller randomization, at up
-to 30\% voids and across our speed range, with Gaussian noise added to
-every command to widen the data around the footholds a policy prefers.
-For OCS2, we log \verify{fewer than 20{,}000 steps of the frozen GaitNet
-run on OCS2 with the training controller's IDM}, on worlds kept separate
-from those of the evaluation \verify{(OCS2-IDM fit details and held-out error
-to be stated)}.
+\looseness=-1 where $\Delta_\theta$ is a small multilayer perceptron whose last
+layer starts at zero, so an untrained IDM sends GaitNet's choice
+unchanged. For the training controller, we log steps of two earlier
+policies without controller randomization, with Gaussian command noise
+(App.~\ref{app:settings}). For OCS2, we log steps on worlds separate from the evaluation
+(App.~\ref{app:settings}).
 
-\subsection{What the Inverse Footstep Model Estimates}
+\subsection{What the Inverse Footstep Model Can Correct}
 \label{subsec:idm-theory}
 
-Let $\zeta := (\mathbf h_{\text{last}}, \ell, T)$ be the IDM's inputs
-besides the landing, write $I^c(\zeta,\cdot)$ for the fitted IDM
-$I^c_\theta$ of Eq.~\eqref{eq:idm-model}, and let $P_c$ be the
-distribution of the logged tuples. Norms are Euclidean unless marked.
-Since $\zeta$ omits part of $\mathbf s$, the landing is random given
-$(\zeta,\mathbf u)$ even if $F_c$ is deterministic:
+\looseness=-1 The IDM sees $\zeta$ but not the full state $\mathbf s$.
+Given $(\zeta,\mathbf u)$, the landing is therefore random even though
+$F_c$ is deterministic, and we split it into its conditional mean and a
+zero-mean residual $\boldsymbol\eta$,
 \begin{equation}
   \mathbf o = \bar F_c(\zeta,\mathbf u) + \boldsymbol\eta, \qquad
   \bar F_c(\zeta,\mathbf u) := \mathbb E[\mathbf o \mid \zeta,\mathbf u].
   \label{eq:mean-forward}
 \end{equation}
-We assume this conditional law is the same when logging and at
-deployment, although both policies choose commands from terrain that
-$\zeta$ omits; it fails for the training controller's IDM, which runs
-under a randomization it was not fitted on
-(Sec.~\ref{subsec:method-training}). Proofs are in
-App.~\ref{app:idm-proofs}.
-
-\begin{assumption}[Exact relabelling]
-\label{as:idm-exact}
-(i)~$\boldsymbol\eta = \mathbf 0$ almost surely under $P_c$;
-(ii)~for every $(\zeta,\mathbf o)$, the logged commands that land at
-$\mathbf o$ form a convex set (at most one point if $\mathbf u \mapsto
-\bar F_c(\zeta,\mathbf u) - \mathbf u$ is Lipschitz with constant below
-one); (iii)~every deployment pair $(\zeta,\mathbf u^\star)$ lies in the
-support of the logged $(\zeta,\mathbf o)$, and $\bar F_c$ and
-$\mathbb E_{P_c}[\mathbf u \mid \zeta,\mathbf o]$ have continuous
-versions; (iv)~$I^c$ is continuous and equals
-$I^c_\star := \mathbb E_{P_c}[\mathbf u \mid \zeta,\mathbf o]$
-$P_c$-almost everywhere.
-\end{assumption}
-
-\begin{proposition}[Hindsight regression]
-\label{prop:idm-mean}
-If $\mathbb E_{P_c}\|\mathbf u\|^2 < \infty$, then $I^c_\star$
-minimises the loss in Eq.~\eqref{eq:idm-loss} over all square-integrable
-functions of $(\zeta,\mathbf o)$, uniquely up to $P_c$-null sets. Under
-Assumption~\ref{as:idm-exact}, $\bar F_c(\zeta, I^c(\zeta,\mathbf
-u^\star)) = \mathbf u^\star$ for every deployment pair.
-\end{proposition}
-
-Each logged command did land the foot at $\mathbf o$ from its state, so
-noise added to a command before it is sent does not corrupt its label.
-When Assumption~\ref{as:idm-exact} fails, Eq.~\eqref{eq:idm-loss}
-averages $\mathbf u$ over the hidden states and noise that share
-$(\zeta,\mathbf o)$: without (ii), commands from two inverse branches
-can average to one that lands at neither \citep{jordan_forward_1992};
-without (iii), the held-out error says nothing off the logged support;
-and without (i), the regression is in general biased even with
-unlimited data \citep{eysenbach_imitating_2022}.
-
-\begin{proposition}[Relabelling bias]
-\label{prop:idm-shrink}
-Fix $\zeta$. Let $\mathbf u \sim \mathcal N(\boldsymbol\mu,\Sigma_u)$ and
-$\mathbf o = A\mathbf u + \mathbf b + \boldsymbol\eta$ with
-$\boldsymbol\eta \sim \mathcal N(\mathbf 0,\Sigma_\eta)$ independent of
-$\mathbf u$, $\Sigma_u \succ 0$ and $A$ invertible, and let
-$\bar{\mathbf o} = A\boldsymbol\mu + \mathbf b$ and $S = A\Sigma_u
-A^\top + \Sigma_\eta$. The landing $\mathbf o^\star := A\,I^c_\star(\zeta,
-\mathbf u^\star) + \mathbf b + \boldsymbol\eta$ of the deployed command
-has the mean error
+For the command $\mathbf u = I^c(\zeta, \mathbf u^\star)$, the
+\emph{landing error} splits into two parts,
 \begin{equation}
-  \mathbb E[\mathbf o^\star] - \mathbf u^\star
-  = -\Lambda\,(\mathbf u^\star - \bar{\mathbf o}), \qquad
-  \Lambda = \Sigma_\eta S^{-1},
-  \label{eq:idm-shrink}
+  \mathbf e := \mathbf o - \mathbf u^\star
+    = \boldsymbol\beta + \boldsymbol\eta, \qquad
+  \boldsymbol\beta := \bar F_c(\zeta,\mathbf u) - \mathbf u^\star .
+  \label{eq:error-split}
 \end{equation}
-where the eigenvalues of $\Lambda$ lie in $[0,1)$ and
-$\|\mathbb E[\mathbf o^\star] - \bar{\mathbf o}\|_{S^{-1}} \le
-\|\mathbf u^\star - \bar{\mathbf o}\|_{S^{-1}}$, with
-$\|\mathbf x\|_{S^{-1}}^2 := \mathbf x^\top S^{-1}\mathbf x$.
-\end{proposition}
+The IDM acts only through $\boldsymbol\beta$, the part of the error that
+its inputs predict. A better fit shrinks $\boldsymbol\beta$, but no IDM
+with these inputs removes $\boldsymbol\eta$. The regression of
+Eq.~\eqref{eq:idm-loss} makes $\boldsymbol\beta$ zero when the logged
+landings carry no residual and the fit is exact. Otherwise, in a
+linear-Gaussian case, it biases the landing toward the mean logged
+landing, most for footholds the logging policy seldom reached
+(App.~\ref{app:idm-proofs}).
 
-The landing is pulled toward the mean logged landing $\bar{\mathbf o}$,
-a contraction in the Mahalanobis metric of the logged landings, by a
-bias linear in $\mathbf u^\star - \bar{\mathbf o}$: along any direction
-it grows with the target's distance from $\bar{\mathbf o}$, so it is
-largest for footholds the logging policy seldom reached. This is the
-attenuation of a regression on a noisy regressor. Spreading the logged
-commands (larger $\Sigma_u$) does not raise any eigenvalue of
-$\Lambda$, although it need not shrink the bias at every target; this
-is a second reason, besides coverage, for the command noise in the
-training controller's logs.
-
-Let $\mathcal V$ be the void points, as offsets from the hip in the yaw
-frame of the decision, and $d(\mathbf u^\star) := \inf_{\mathbf p \in
-\mathcal V} \|\mathbf p - \mathbf u^\star\|_\infty$ along the ray grid.
-With exact rays at spacing $h = \corlScanResCm$\,cm, unsafe cells grown
-by $m/h$ cells, and voids made of squares of side at least
-$3\sqrt2\,h \approx 4.2$\,cm (our terrain cells are
-\corlTerrainCellCm\,cm in training and \corlGzTileCm\,cm in Gazebo) whose
-edges make an angle $\varphi$ with the rays, every candidate has
-$d(\mathbf u^\star) \ge (\corlMarginCm - \tfrac12|\sin 2\varphi|)$\,cm
-(Lemma~\ref{lem:idm-grid}): $\corlMarginCm$\,cm for edges parallel to
-the rays, 1.5\,cm at $45^\circ$, before perception and odometry errors
-and the foot's radius.
-
-\begin{proposition}[Landing error and voids]
-\label{prop:idm-void}
-Send $\mathbf u = I^c(\zeta,\mathbf u^\star)$, let $\mathcal G$ be the
-information at the decision, which fixes $\zeta$, $\mathbf u^\star$,
-$\mathbf u$ and $\mathcal V$, and let $\boldsymbol\beta := \bar
-F_c(\zeta,\mathbf u) - \mathbf u^\star$. Then $\mathbf e := \mathbf o -
-\mathbf u^\star = \boldsymbol\beta + \boldsymbol\eta$, and
-(a)~if $\|\boldsymbol\beta\| + \|\boldsymbol\eta\| < d(\mathbf
-u^\star)$, the foot does not land in a void;
-(b)~$\Pr(\mathbf o \in \mathcal V \mid \mathcal G) \le
-\Pr(\|\mathbf e\|_\infty \ge d(\mathbf u^\star) \mid \mathcal G)$;
-(c)~if $\boldsymbol\eta \sim \mathcal N(\mathbf 0,\sigma_\eta^2
-\mathbf I_2)$ given $\mathcal G$, then $\Pr(\mathbf o \in \mathcal V
-\mid \mathcal G) \le \exp\!\big(-(d(\mathbf u^\star) -
-\|\boldsymbol\beta\|)_+^2 / (2\sigma_\eta^2)\big)$, and four times this
-if instead, given $\mathcal G$, its components along the grid axes are
-zero-mean and $\sigma_\eta$-sub-Gaussian.
-\end{proposition}
-
-The IDM acts only through $\boldsymbol\beta$, the part of the landing
-error that $\zeta$ predicts, not through $\boldsymbol\eta$. If
-$\bar F_c(\zeta,\cdot)$ is $L$-Lipschitz, $\|\boldsymbol\beta\|$ is at
-most $L$ times the IDM's fitting error at the target plus the
-relabelling bias $\|\bar F_c(\zeta, I^c_\star(\zeta,\mathbf u^\star)) -
-\mathbf u^\star\|$: zero under Assumption~\ref{as:idm-exact},
-$\|\Lambda(\mathbf u^\star - \bar{\mathbf o})\|$ in
-Proposition~\ref{prop:idm-shrink} (Eq.~\eqref{eq:app-beta}). Hypothesis
-(c) also needs the nearby voids to neither shift nor widen the error.
-
-\begin{remark}[Landing error against the margin]
-\label{rem:idm-numbers}
-On flat ground, the IDM cuts OCS2's landing error from
-\corlOcsLandRmsNoIdm\ to \corlOcsLandRmsIdm\,cm RMS
-(Sec.~\ref{subsec:exp-why}). For zero-mean isotropic Gaussian
-$\mathbf e$ with per-axis standard deviation $\sigma$, a foothold at
-distance $d$ from a long straight void edge enters the void with
-probability $\Phi(-d/\sigma)$, $\Phi$ the standard normal distribution
-function (App.~\ref{app:idm-proofs}): at $d = 2$\,cm, $0.08$ if $2$\,cm
-is the RMS of $\|\mathbf e\|$ and $0.16$ if it is per axis
-\verify{(convention to be confirmed)}, so ten such footholds among the
-roughly 97 of a trial (\corlOcsStepsPerMFull{} steps/m over
-\corlOcsTrackM\,m) would leave the trial void-free with probability
-only $0.44$ or $0.18$. OCS2's \verify{\corlGzProbeMarginCm}\,cm margin
-lowers the per-foothold values to $0.02$ or $0.07$; we have not
-measured how close GaitNet's footholds come to voids.
-\end{remark}
+\looseness=-1 Let the \emph{clearance} $d(\mathbf u^\star) :=
+\inf_{\mathbf p \in \mathcal V} \|\mathbf p - \mathbf u^\star\|_\infty$
+be the foothold's distance to the nearest void point. If the
+Euclidean norms satisfy $\|\boldsymbol\beta\| + \|\boldsymbol\eta\| <
+d(\mathbf u^\star)$, the foot cannot land in a void
+(Proposition~\ref{prop:idm-void} in App.~\ref{app:idm-proofs}). The
+candidate margin must therefore cover both the error the IDM leaves
+in $\boldsymbol\beta$ and the residual $\boldsymbol\eta$. With exact
+terrain, the mask of Sec.~\ref{subsec:method-step} gives every candidate
+a clearance of at least $m - \tfrac h2|\sin 2\varphi|$,
+with $\varphi$ the angle between the void edges and the grid axes, that
+is, $m$ for parallel edges and $m - h/2$ at $45^\circ$
+(Lemma~\ref{lem:idm-grid}). This bound holds for voids made of squares
+at least $3\sqrt2\,h$ wide, as all our tiles are (App.~\ref{app:settings}). It ignores
+perception and odometry errors and the foot's radius. On flat ground,
+the IDM cut OCS2's landing error to about this clearance
+(Sec.~\ref{subsec:exp-why}), but we have not measured how close
+GaitNet's footholds come to voids.
 
 \subsection{Training}
 \label{subsec:method-training}
 
-We train GaitNet with PPO \citep{Schulman_proximal_2017} in Isaac Lab
-\citep{mittal_orbit_2023}, with \corlParallelEnvs{} robots in parallel.
-The evaluated checkpoint was trained from scratch for about
-\verify{\corlOcsCheckpoint} iterations, about \corlTrainHours\,h on one
-NVIDIA RTX PRO 6000 Blackwell GPU. The critic is a separate, smaller
-network that reads the state and candidates but not the history. The
-training controller's IDM is fitted first, offline, and then sits fixed
-between GaitNet and the controller from the first iteration; GaitNet
-still sees the raw candidates. Each robot's controller is redrawn at
-every reset (tracking quality, swing height, landing bias and noise,
-lift-off delay; App.~\ref{app:training}), although the IDM was fitted
-without this randomization. The robot follows a forward velocity
-command over terrain in which a fraction of the cells, the void
-fraction, are deep voids, and a curriculum raises the void fraction.
-The reward per tick is
+\looseness=-1 We train GaitNet with PPO
+\citep{Schulman_proximal_2017} in Isaac Lab
+\citep{mittal_orbit_2023}, with many robots in parallel.
+The robot follows a commanded forward velocity over terrain in which a
+fraction of the tiles, the \emph{void fraction}, are deep voids, and a
+curriculum raises it. The reward per tick is
 \begin{equation}
-  r = \Delta t\,\Big[\,w_a\,\mathbb{I}_{\text{alive}}
+  r = \Delta t\,\Big[\,w_a\,\mathbf 1_{\text{alive}}
   + e^{-\|\mathbf v^{usr}_{xy} - \mathbf v_{b,xy}\|^2/\sigma_v^2}
   + e^{-(\omega^{usr}_z - \omega_{b,z})^2/\sigma_\omega^2}
-  - w_s\,\mathbb{I}_{\text{step}}
-  - w_f\,\mathbb{I}_{\text{fail}}\Big],
+  - w_s\,\mathbf 1_{\text{step}}
+  - w_f\,\mathbf 1_{\text{fail}}\Big],
   \label{eq:reward}
 \end{equation}
 with commanded ($usr$) and base ($b$) velocities, and no gait,
-clearance, posture or smoothness terms (failure conditions in
-App.~\ref{app:training}).
+foot-clearance, posture, or smoothness terms. The training controller's
+IDM sits frozen in the loop from the first iteration and corrects only
+GaitNet's chosen candidate. At every reset, each
+robot's controller gets new tracking quality, swing height, landing bias and noise, and lift-off delay
+(App.~\ref{app:training}), a randomization absent from the IDM's data.
+PPO's critic, a smaller network that estimates the return, reads
+the state and candidates only.
 
 \subsection{Deployment on OCS2}
 \label{subsec:method-deployment}
 
-On OCS2, GaitNet replaces the gait scheduler of the
+\looseness=-1 On OCS2, GaitNet replaces the gait scheduler of the
 \texttt{legged\_control} stack \citep{leggedcontrol,
 grandia_perceptive_2022} in Gazebo, where OCS2's NMPC plans the motion
-and a weighted whole-body controller tracks it
-\verify{with stock task settings}. GaitNet is queried every tick, also
-while two legs swing, with candidates built as in training but with a margin of
-\verify{\corlGzProbeMarginCm}\,cm and the IDM fitted on OCS2's own steps. The IDM
-fixes where the foot lands; when it lands is set by how steps are
-delivered: each step is written into OCS2's contact schedule at absolute
-times on the NMPC clock, a fixed lead of \corlGzLead\,s after the
-decision, and merged with the steps already planned. Terrain comes from
-a simulated RealSense D435 depth camera through a depth-vote map, and
-odometry from OCS2's leg-based state estimator with a slip gate
-(App.~\ref{app:deployment}).
+and a weighted WBC tracks it \verify{with stock task settings}. Its candidates are
+built as in training but with its own margin $m_{c_1}$, and the OCS2 IDM corrects its chosen
+candidate. Each step joins the steps already planned in OCS2's contact
+schedule and starts the lead $\tau_{c_1}$ after its decision. Terrain comes
+from a simulated RealSense D435 depth camera and odometry from OCS2's
+leg-based state estimator (App.~\ref{app:deployment}).

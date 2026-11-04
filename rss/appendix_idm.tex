@@ -3,13 +3,152 @@
 % after an adversarial check; the draft it replaces is
 % idm_appendix_draft.tex. Numerical checks: scratchpad/idmcheck/*.py.
 % ---------------------------------------------------------------------------
-\section{Proofs for the Inverse Footstep Model}
+\section{Analysis of the Inverse Footstep Model}
 \label{app:idm-proofs}
 
-Norms are Euclidean unless marked, $\mathbf a_1, \mathbf a_2$ are the axes
-of the terrain-ray grid, which is aligned with the yaw frame of the
-decision, $\Phi$ is the standard normal distribution function, and we
-drop the superscript $c$ from $I^c$ and $I^c_\star$.
+This appendix states the results behind Sec.~\ref{subsec:idm-theory},
+each with a plain reading, and proves them. Let $P_c$ be the distribution of
+the logged tuples $(\zeta, \mathbf u, \mathbf o)$, one per step that the
+controller executed. Norms are Euclidean unless marked, $\mathbf a_1,
+\mathbf a_2$ are the axes of the terrain-ray grid, which is aligned with
+the yaw frame of the decision, and $\Phi$ is the standard normal
+distribution function.
+
+\subsection{Statements}
+\label{app:idm-statements}
+
+\looseness=-1 We assume that the distribution of $\mathbf o$ given
+$(\zeta,\mathbf u)$ in Eq.~\eqref{eq:mean-forward} is the same when
+logging and at deployment, although the logging policy and GaitNet both
+choose commands from terrain that $\zeta$ omits. This fails for the
+training controller's IDM, which runs under a randomization it was not
+fitted on (Sec.~\ref{subsec:method-training}). Under the following
+idealization, the regression in Eq.~\eqref{eq:idm-loss} inverts the
+controller exactly.
+
+\begin{assumption}[Exact relabelling]
+\label{as:idm-exact}
+(i)~$\boldsymbol\eta = \mathbf 0$ almost surely under $P_c$;
+(ii)~for every $(\zeta,\mathbf o)$, the logged commands that land at
+$\mathbf o$ form a convex set (at most one point if $\mathbf u \mapsto
+\bar F_c(\zeta,\mathbf u) - \mathbf u$ is Lipschitz with constant below
+one); (iii)~every deployment pair $(\zeta,\mathbf u^\star)$ lies in the
+support of the logged $(\zeta,\mathbf o)$, and $\bar F_c$ and
+$\mathbb E_{P_c}[\mathbf u \mid \zeta,\mathbf o]$ have continuous
+versions; (iv)~$I^c$ is continuous and equals
+$I^c_\star := \mathbb E_{P_c}[\mathbf u \mid \zeta,\mathbf o]$
+$P_c$-almost everywhere.
+\end{assumption}
+
+\begin{proposition}[Hindsight regression]
+\label{prop:idm-mean}
+If $\mathbb E_{P_c}\|\mathbf u\|^2 < \infty$, then $I^c_\star$
+minimises the loss in Eq.~\eqref{eq:idm-loss} over all square-integrable
+functions of $(\zeta,\mathbf o)$, uniquely up to $P_c$-null sets. Under
+Assumption~\ref{as:idm-exact}, $\bar F_c(\zeta, I^c(\zeta,\mathbf
+u^\star)) = \mathbf u^\star$ for every deployment pair.
+\end{proposition}
+
+\looseness=-1 Every logged step is an example of the inverse map,
+since its command landed the foot at $\mathbf o$ from its state.
+Noise added to a command before it is sent thus does not corrupt its
+label. When
+Assumption~\ref{as:idm-exact} fails, Eq.~\eqref{eq:idm-loss} averages
+$\mathbf u$ over the hidden states and noise that share
+$(\zeta,\mathbf o)$. Without (ii), commands from two inverse branches
+that land at the same point can average to one that lands at neither
+\citep{jordan_forward_1992}. Without (iii), the held-out error says
+nothing about targets outside the logged landings. Without (i), the
+regression is in general biased, even with unlimited data
+\citep{eysenbach_imitating_2022}. Proposition~\ref{prop:idm-shrink}
+gives the direction and size of this bias in a linear-Gaussian case.
+
+\begin{proposition}[Relabelling bias]
+\label{prop:idm-shrink}
+Fix $\zeta$. Let $\mathbf u \sim \mathcal N(\boldsymbol\mu,\Sigma_u)$ and
+$\mathbf o = A\mathbf u + \mathbf b + \boldsymbol\eta$ with
+$\boldsymbol\eta \sim \mathcal N(\mathbf 0,\Sigma_\eta)$ independent of
+$\mathbf u$, $\Sigma_u \succ 0$ and $A$ invertible, and let
+$\bar{\mathbf o} = A\boldsymbol\mu + \mathbf b$ and $S = A\Sigma_u
+A^\top + \Sigma_\eta$. The landing $\mathbf o^\star := A\,I^c_\star(\zeta,
+\mathbf u^\star) + \mathbf b + \boldsymbol\eta$ of the deployed command
+has the mean error
+\begin{equation}
+  \mathbb E[\mathbf o^\star] - \mathbf u^\star
+  = -\Lambda\,(\mathbf u^\star - \bar{\mathbf o}), \qquad
+  \Lambda = \Sigma_\eta S^{-1},
+  \label{eq:idm-shrink}
+\end{equation}
+where the eigenvalues of $\Lambda$ lie in $[0,1)$ and
+$\|\mathbb E[\mathbf o^\star] - \bar{\mathbf o}\|_{S^{-1}} \le
+\|\mathbf u^\star - \bar{\mathbf o}\|_{S^{-1}}$, with
+$\|\mathbf x\|_{S^{-1}}^2 := \mathbf x^\top S^{-1}\mathbf x$.
+\end{proposition}
+
+\looseness=-1 The matrix $S$ is the covariance of the logged landings, and
+$\Sigma_\eta$ is the part of it that the command does not explain, so in
+one dimension $\Lambda$ is the unexplained share of the landing
+variance. The deployed landing therefore falls short of
+$\mathbf u^\star$, toward the mean logged landing $\bar{\mathbf o}$, by
+the fraction $\Lambda$ of their distance, so the bias is largest for
+footholds that the logging policy seldom reached. This is the attenuation bias of a regression on a noisy input.
+Spreading the logged commands (larger
+$\Sigma_u$) does not raise any eigenvalue of $\Lambda$, although it need
+not shrink the bias at every target. This is a second reason, besides
+coverage, for the command noise in the training controller's logs.
+
+\begin{proposition}[Landing error and voids]
+\label{prop:idm-void}
+For the command $\mathbf u = I^c(\zeta,\mathbf u^\star)$ and the
+clearance $d(\mathbf u^\star)$ of Sec.~\ref{subsec:idm-theory}, let
+$\mathcal G$ be the
+information at the decision, which fixes $\zeta$, $\mathbf u^\star$,
+$\mathbf u$ and $\mathcal V$, and let $\boldsymbol\beta := \bar
+F_c(\zeta,\mathbf u) - \mathbf u^\star$. Then $\mathbf e := \mathbf o -
+\mathbf u^\star = \boldsymbol\beta + \boldsymbol\eta$, and
+(a)~if $\|\boldsymbol\beta\| + \|\boldsymbol\eta\| < d(\mathbf
+u^\star)$, the foot does not land in a void;
+(b)~$\Pr(\mathbf o \in \mathcal V \mid \mathcal G) \le
+\Pr(\|\mathbf e\|_\infty \ge d(\mathbf u^\star) \mid \mathcal G)$;
+(c)~if $\boldsymbol\eta \sim \mathcal N(\mathbf 0,\sigma_\eta^2
+\mathbf I_2)$ given $\mathcal G$, then $\Pr(\mathbf o \in \mathcal V
+\mid \mathcal G) \le \exp\!\big(-(d(\mathbf u^\star) -
+\|\boldsymbol\beta\|)_+^2 / (2\sigma_\eta^2)\big)$, and four times this
+if instead, given $\mathcal G$, its components along the grid axes are
+zero-mean and $\sigma_\eta$-sub-Gaussian.
+\end{proposition}
+
+The predictable part of the error comes from the fit and from the
+relabelling. If
+$\bar F_c(\zeta,\cdot)$ is $L$-Lipschitz, $\|\boldsymbol\beta\|$ is at
+most $L$ times the IDM's fitting error at the target plus the
+relabelling bias $\|\bar F_c(\zeta, I^c_\star(\zeta,\mathbf u^\star)) -
+\mathbf u^\star\|$ (Eq.~\eqref{eq:app-beta}). This bias is zero under
+Assumption~\ref{as:idm-exact} and equals $\|\Lambda(\mathbf u^\star -
+\bar{\mathbf o})\|$ in Proposition~\ref{prop:idm-shrink}. Part (c) also
+assumes that nearby voids neither shift nor widen the error.
+
+\begin{remark}[Landing error against the margin]
+\label{rem:idm-numbers}
+On flat ground, the IDM cuts OCS2's landing error from
+\corlOcsLandRmsNoIdm\ to \corlOcsLandRmsIdm\,cm RMS
+(Sec.~\ref{subsec:exp-why}). For zero-mean isotropic Gaussian
+$\mathbf e$ with per-axis standard deviation $\sigma_e$, a foothold at
+distance $d$ from a long straight void edge enters the void with
+probability $\Phi(-d/\sigma_e)$, with $\Phi$ the standard normal
+distribution function (see the one-sided form below). At $d = 2$\,cm, this is
+$0.08$ if $2$\,cm is the RMS of $\|\mathbf e\|$ and $0.16$ if it is per
+axis \verify{(convention to be confirmed)}. Ten such footholds among the
+roughly 97 of a trial (\corlOcsStepsPerMFull{} steps/m over
+\corlOcsTrackM\,m, \verify{measured on an earlier checkpoint}) would then leave the trial void-free with probability
+only $0.44$ or $0.18$. OCS2's \verify{\corlGzProbeMarginCm}\,cm margin
+lowers the per-foothold values to $0.02$ or $0.07$, but we have not
+measured how close GaitNet's footholds come to voids.
+\end{remark}
+
+\subsection{Proofs}
+
+In the proofs we drop the superscript $c$ from $I^c$ and $I^c_\star$.
 
 \paragraph{Orthogonality.}
 Let $\mathbb E_{P_c}\|\mathbf u\|^2 < \infty$ and $I_\star(\zeta,\mathbf o)
@@ -27,14 +166,14 @@ and $I_\star - I$ is a function of $(\zeta,\mathbf o)$. Hence
 since $\mathbb E[(\mathbf u - I_\star)(\mathbf u - I_\star)^\top] =
 \mathbb E[\operatorname{Cov}(\mathbf u \mid \zeta,\mathbf o)]$. The trace
 gives $\mathbb E\|\mathbf u - I\|^2 = \mathbb E\|\mathbf u - I_\star\|^2 +
-\mathbb E\|I_\star - I\|^2$: the population held-out squared error of a
-fitted IDM is the irreducible error plus its mean squared distance from
-$I_\star$. Since the last term of Eq.~\eqref{eq:app-orth} is positive
-semidefinite, the held-out residual second-moment matrix $R := \mathbb
-E[(\mathbf u - I)(\mathbf u - I)^\top]$ dominates $\mathbb
-E[\operatorname{Cov}(\mathbf u \mid \zeta,\mathbf o)]$, which is an
-average over $(\zeta,\mathbf o)$, not each $\operatorname{Cov}(\mathbf u
-\mid \zeta,\mathbf o)$.
+\mathbb E\|I_\star - I\|^2$. The population held-out squared
+error of a fitted IDM is thus the irreducible error plus its mean squared
+distance from $I_\star$. Since the last term of
+Eq.~\eqref{eq:app-orth} is positive semidefinite, the held-out residual
+second-moment matrix $R := \mathbb E[(\mathbf u - I)(\mathbf u -
+I)^\top]$ dominates $\mathbb E[\operatorname{Cov}(\mathbf u \mid
+\zeta,\mathbf o)]$, which is an average over $(\zeta,\mathbf o)$, not
+each $\operatorname{Cov}(\mathbf u \mid \zeta,\mathbf o)$.
 
 \begin{idmproof}{Proposition~\ref{prop:idm-mean}}
 By the trace of Eq.~\eqref{eq:app-orth}, $I_\star$ minimises the
@@ -101,11 +240,11 @@ in $\|\cdot\|_{S^{-1}}$. For $A = I$, $\Lambda =
 o}\|\,\|\Sigma_u^{-1}\|$.
 \end{idmproof}
 
-$\Lambda$ is symmetric, and the pull toward $\bar{\mathbf o}$ a
-contraction in Euclidean norm as well, when $\Sigma_\eta$ and
-$A\Sigma_u A^\top$ commute, for instance when both are isotropic.
-Otherwise the Euclidean norm of $\Lambda$ can exceed one even for $A =
-I$: $\Sigma_u = \bigl[\begin{smallmatrix} 0.01 & -0.18 \\ -0.18 & 4
+\looseness=-1 When $\Sigma_\eta$ and $A\Sigma_u A^\top$ commute, as
+when both are isotropic, $\Lambda$ is symmetric and the pull toward
+$\bar{\mathbf o}$ is a contraction in Euclidean norm as well. Otherwise
+the Euclidean norm of $\Lambda$ can exceed one even for $A = I$:
+$\Sigma_u = \bigl[\begin{smallmatrix} 0.01 & -0.18 \\ -0.18 & 4
 \end{smallmatrix}\bigr]$ and $\Sigma_\eta = \bigl[\begin{smallmatrix} 0.01
 & 0.18 \\ 0.18 & 4 \end{smallmatrix}\bigr]$ give $S =
 \operatorname{diag}(0.02, 8)$ and $\Lambda = \bigl[\begin{smallmatrix} 0.5
@@ -127,10 +266,10 @@ R$. For $A = I$,
   \le \operatorname{tr}(R) / \lambda_{\min}(\Sigma_\xi),
   \label{eq:app-shrink-bound}
 \end{equation}
-which needs only the held-out error and the added command noise; in the
-plane the trace step loses at most a factor of two. The bound holds in the
-linear-Gaussian model with these covariances, not for a trained IDM in
-general.
+which needs only the held-out error and the added command noise. In the
+plane, the trace step loses at most a factor of two. The bound holds in
+the linear-Gaussian model with these covariances, not for a trained IDM
+in general.
 
 \paragraph{Shift between logged landings and targets.}
 Let $Q$ be the distribution of the deployment pairs $(\zeta,\mathbf
@@ -143,7 +282,7 @@ $(\zeta,\mathbf o)$, then for any fitted IDM $I$
   \label{eq:app-shift}
 \end{equation}
 the last step by Eq.~\eqref{eq:app-orth}. Our targets, however, are cell
-centres on the $h$-grid while the landings are continuous, so $Q$ itself
+centers on the $h$-grid while the landings are continuous, so $Q$ itself
 has no density with respect to them. Let $\tilde Q$ spread each target
 over its cell, $\mathbf u^\star + \mathbf v$ with $\mathbf v$ uniform on
 $[-h/2,h/2]^2$, and suppose that $\tilde Q$ has a density at most $\Psi$
@@ -152,16 +291,16 @@ $\|\mathbf x\|^2 \le 2\|\mathbf y\|^2 + 2\|\mathbf x - \mathbf y\|^2$ and
 $\mathbb E\|\mathbf v\|^2 = h^2/6$ give $\mathbb E_Q\|I - I_\star\|^2 \le
 2\Psi\,\mathbb E_{P_c}\|\mathbf u - I\|^2 + L_I^2 h^2/3$. If $Q$ puts mass
 where no landing was logged, no such $\Psi$ exists and the held-out error
-bounds nothing. Two shifts are built into our pipeline: the training
-controller's IDM is fitted without the controller randomisation that it
-then runs under (Sec.~\ref{subsec:method-training}), which also breaks
-the assumption below Eq.~\eqref{eq:mean-forward} that the law of $\mathbf
-o$ given $(\zeta,\mathbf u)$ is unchanged; and the OCS2 IDM is fitted on
-steps sent through the training controller's IDM but replaces it at
-deployment, which changes the commands and hence the states visited.
-Logging again with the deployed IDM and refitting, as in the incremental
-data collection of \citet{christiano_transfer_2016}, would shrink the
-second.
+bounds nothing. Two shifts are built into our pipeline. First, the
+training controller's IDM is fitted without the controller randomization
+that it then runs under (Sec.~\ref{subsec:method-training}). This also
+breaks the assumption, stated before Assumption~\ref{as:idm-exact}, that
+the distribution of $\mathbf o$ given $(\zeta,\mathbf u)$ is unchanged.
+Second, the OCS2 IDM is fitted on steps sent through the training
+controller's IDM but replaces it at deployment, which changes the
+commands and hence the states visited. Logging again with the deployed
+IDM and refitting, as in the incremental data collection of
+\citet{christiano_transfer_2016}, would shrink the second.
 
 \begin{idmproof}{Proposition~\ref{prop:idm-void}}
 By Eq.~\eqref{eq:mean-forward}, $\mathbf e = \bar F_c(\zeta,\mathbf u) +
@@ -194,7 +333,7 @@ replace it.
 \end{idmproof}
 
 \paragraph{Fitting error and relabelling bias.}
-With $\tilde{\mathbf u} := I_\star(\zeta,\mathbf u^\star)$,
+\looseness=-1 With $\tilde{\mathbf u} := I_\star(\zeta,\mathbf u^\star)$,
 \begin{equation}
   \boldsymbol\beta = \big[\bar F_c(\zeta,\mathbf u) - \bar
   F_c(\zeta,\tilde{\mathbf u})\big] + \big[\bar F_c(\zeta,\tilde{\mathbf
@@ -203,15 +342,15 @@ With $\tilde{\mathbf u} := I_\star(\zeta,\mathbf u^\star)$,
 \end{equation}
 If $\bar F_c(\zeta,\cdot)$ is $L$-Lipschitz on the segment from
 $\tilde{\mathbf u}$ to $\mathbf u$, the first term is at most
-$L\|I(\zeta,\mathbf u^\star) - I_\star(\zeta,\mathbf u^\star)\|$ in norm:
-a fitting error, controlled in mean square over the targets by
+$L\|I(\zeta,\mathbf u^\star) - I_\star(\zeta,\mathbf u^\star)\|$ in norm.
+It is a fitting error, controlled in mean square over the targets by
 Eq.~\eqref{eq:app-shift}. The second term is the relabelling bias. It
 vanishes under Assumption~\ref{as:idm-exact}(i)--(iii), by the proof of
 Proposition~\ref{prop:idm-mean}, and it equals $-\Lambda(\mathbf u^\star -
-\bar{\mathbf o})$ in the setting of Proposition~\ref{prop:idm-shrink}; in
-command space the same bias is $\tilde{\mathbf u} - A^{-1}(\mathbf u^\star
+\bar{\mathbf o})$ in the setting of Proposition~\ref{prop:idm-shrink}. In
+command space, the same bias is $\tilde{\mathbf u} - A^{-1}(\mathbf u^\star
 - \mathbf b) = -A^{-1}\Lambda(\mathbf u^\star - \bar{\mathbf o})$. This
-split needs no exact preimage of $\mathbf u^\star$; given one, $\mathbf
+split needs no exact preimage of $\mathbf u^\star$. Given one, $\mathbf
 u^\dagger$, with $\bar F_c(\zeta,\cdot)$ $L$-Lipschitz on the segment from
 $\mathbf u^\dagger$ to $\mathbf u$, also $\|\boldsymbol\beta\| \le
 L\|\mathbf u - \mathbf u^\dagger\|$. In the form of
@@ -219,20 +358,20 @@ Eq.~\eqref{eq:forward}, $\bar F_c(\zeta,\mathbf u) = \mathbf u +
 \bar{\boldsymbol\delta}_c(\zeta,\mathbf u)$ with
 $\bar{\boldsymbol\delta}_c := \mathbb E[\boldsymbol\delta_c \mid
 \zeta,\mathbf u]$, so $L \le 1 + \operatorname{Lip}_{\mathbf
-u}(\bar{\boldsymbol\delta}_c)$; a landing error that depends only weakly
-on the command gives $L \approx 1$. Over a trial with steps $j =
-1,\dots,J$, a union bound gives $\Pr(\text{any void entry}) \le \sum_j
-\Pr(\|\mathbf e_j\|_\infty \ge d(\mathbf u^\star_j))$; on OCS2, $J$ is
-about 97 (\corlOcsStepsPerMFull{} steps per metre over
-\corlOcsTrackM\,m).
+u}(\bar{\boldsymbol\delta}_c)$. A landing offset that depends only weakly
+on the command gives $L \approx 1$. Over a trial with steps $j
+= 1,\dots,N$, a union bound extends the per-step bounds to
+$\Pr(\text{any void entry}) \le \sum_j \Pr(\|\mathbf e_j\|_\infty \ge
+d(\mathbf u^\star_j))$. On OCS2, $N$ is about 97
+(\corlOcsStepsPerMFull{} steps per meter over \corlOcsTrackM\,m).
 
 \paragraph{One-sided form.}
 The event in Proposition~\ref{prop:idm-void}(b) counts errors in every
 direction, but voids seldom surround a foothold. Cover $\mathcal V$ by
 closed half-planes $H_j = \{\mathbf x : \mathbf n_j^\top(\mathbf x -
-\mathbf u^\star) \ge c_j\}$ with unit normals $\mathbf n_j$; a closed
+\mathbf u^\star) \ge c_j\}$ with unit normals $\mathbf n_j$. A closed
 convex void at Euclidean distance $c_j > 0$ from $\mathbf u^\star$, such
-as one terrain cell, lies in the half-plane whose normal points from
+as one tile, lies in the half-plane whose normal points from
 $\mathbf u^\star$ to its nearest point. Then $\Pr(\mathbf o \in \mathcal
 V \mid \mathcal G) \le \sum_j \Pr(\mathbf n_j^\top \mathbf e \ge c_j \mid
 \mathcal G)$, which for $\mathbf e \sim \mathcal N(\boldsymbol\beta,
@@ -240,16 +379,16 @@ V \mid \mathcal G) \le \sum_j \Pr(\mathbf n_j^\top \mathbf e \ge c_j \mid
 n_j^\top\boldsymbol\beta)/\sigma_\eta)$, with equality when $\mathcal V$
 is a single half-plane. A half-plane at $\infty$-norm distance $d$ has
 $c_j = d\,\|\mathbf n_j\|_1 \ge d$, because $\max\{\mathbf n^\top\mathbf y
-: \|\mathbf y\|_\infty \le d\} = d\|\mathbf n\|_1$; for $\boldsymbol\beta
+: \|\mathbf y\|_\infty \le d\} = d\|\mathbf n\|_1$. For $\boldsymbol\beta
 = \mathbf 0$, an edge parallel to a grid axis is therefore the worst
 straight edge, with probability $\Phi(-d/\sigma_\eta)$. For void beyond
 either of two perpendicular edges, each at distance $d$, the probability
-is $1 - (1 - \Phi(-d/\sigma_\eta))^2$. The first gives the values in
-Remark~\ref{rem:idm-numbers}, where $\sigma_\eta = \sqrt2$ or $2$\,cm; for
-$J'$ steps at clearance $d$ from one straight edge with independent
+is $1 - (1 - \Phi(-d/\sigma_\eta))^2$. The single-edge value gives the
+numbers in Remark~\ref{rem:idm-numbers}, where $\sigma_\eta = \sqrt2$ or
+$2$\,cm. With $N'$ steps at clearance $d$ from one straight edge with independent
 errors, no step enters the void with probability $(1 -
-\Phi(-d/\sigma_\eta))^{J'}$, which is $(1 - 0.079)^{10} \approx 0.44$ or
-$(1 - 0.159)^{10} \approx 0.18$ for $J' = 10$ and $d = 2$\,cm. For
+\Phi(-d/\sigma_\eta))^{N'}$, which is $(1 - 0.079)^{10} \approx 0.44$ or
+$(1 - 0.159)^{10} \approx 0.18$ for $N' = 10$ and $d = 2$\,cm. For
 comparison, zero-mean isotropic
 Gaussian $\mathbf e$ has $\Pr(\|\mathbf e\|_\infty \ge d) = 1 - (1 -
 2\Phi(-d/\sigma_\eta))^2$, which at $d = 2$\,cm is $0.29$ or $0.53$ under
@@ -257,13 +396,15 @@ the two readings of Remark~\ref{rem:idm-numbers}, below the bounds
 $e^{-1}$ and $e^{-1/2}$ of Proposition~\ref{prop:idm-void}(c).
 
 \paragraph{The grown mask on a grid.}
-Model the terrain rays as samples on a lattice $\mathbf r_0 + h\mathbb
-Z^2$ in the yaw frame of the decision, a sample being unsafe if it lies in
-the closed set $\mathcal V$ (exact perception and registration). A
-candidate is a sample with no unsafe sample within $\infty$-norm distance
-$kh$; this is the grown mask, a $(2k{+}1) \times (2k{+}1)$ max-pool, with
-$k = 2$ and $h = 1$\,cm in training. The pool has no padding, so every
-lattice point within $kh$ of a candidate is sampled. Define
+Model the terrain rays as samples on a lattice
+$\mathbf r_0 + h\mathbb Z^2$ in the yaw frame of the decision, a sample
+being unsafe if it lies in the closed set $\mathcal V$ (exact perception
+and registration). A candidate is a sample with no unsafe
+sample within $\infty$-norm distance $kh$. This is the grown mask, a
+$(2k{+}1) \times (2k{+}1)$ max-pool, with $k = 2$ and $h = 1$\,cm in
+training. The pool has no padding, so every lattice point within $kh$ of
+a candidate is sampled. Define the largest distance from a void point to
+the nearest lattice point in the void,
 \[
   \rho_{\mathcal V} := \sup_{\mathbf p \in \mathcal V}\;
   \min\big\{\|\mathbf p - \mathbf r\|_\infty :
@@ -349,14 +490,15 @@ is near; every void point has $x_2 \le 1/2 - \epsilon$, so $d(\mathbf
 u^\star) = \|\mathbf p - \mathbf u^\star\|_\infty = k - 1/2 + \epsilon$.
 \end{idmproof}
 
-The terrain cells, $12.5h$ in training and $24h$ in Gazebo, meet the side
-condition $3\sqrt2\,h \approx 4.2h$. With $k = 2$ and $h = 1$\,cm, the
-margin guaranteed by the mask is therefore $(2 - \tfrac12|\sin
-2\varphi|)$\,cm, with $\varphi$ the yaw of the void edges relative to the
-rays, before perception, odometry and foot-size errors. A numerical
-search over apex positions (a $1/300$ grid) at $1^\circ$ steps finds the
-corner value within $0.004h$ of the bound in (c) at every $\varphi$, so
-the bound appears tight at intermediate angles too; that is a numerical
-observation, not part of the lemma. At deployment the candidate grid is
-built from a depth-camera map, whose errors and resampling the lemma does
-not cover.
+\looseness=-1 The tiles, $12.5h$ in training and $24h$ in Gazebo, meet the side
+condition $3\sqrt2\,h \approx 4.2h$. With $k = 2$ and $h = 1$\,cm, every
+candidate therefore has a clearance of at least $(2 -
+\tfrac12|\sin 2\varphi|)$\,cm, with $\varphi$ the angle between the void
+edges and the grid axes. This leaves out perception and odometry errors
+and the foot's size. A numerical search over apex positions (a $1/300$
+grid) at $1^\circ$ steps finds the corner value within $0.004h$ of the
+bound in (c) at every $\varphi$, so the bound appears tight at
+intermediate angles too. That is a numerical observation, not part of
+the lemma. At deployment, the candidate grid is built from a
+depth-camera map, whose errors and resampling the lemma does not
+cover.

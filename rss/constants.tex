@@ -136,9 +136,10 @@
 \newcommand{\corlOmniIterations}{645}
 \newcommand{\corlIdmStartIteration}{890}
 \newcommand{\corlTotalTransitions}{1.63 \times 10^{8}}
-% Author, 2026-10-16: training the OCS2 checkpoint (~600 iterations) took
-% about 5.5 h on one RTX PRO 6000 Blackwell (600 x 33.4 s = 5.6 h).
-\newcommand{\corlTrainHours}{5.5}
+% Author, 2026-11-03: training the benchmark checkpoint (350 iterations)
+% took about 4 h on one RTX GPU (350 x 33.4 s = 3.2 h of PPO). Was 5.5 h for
+% the ~600-iteration run of 2026-10-16.
+\newcommand{\corlTrainHours}{4}
 % Seconds per PPO iteration on one RTX PRO 6000 Blackwell (training-setup.md 11: 33-35 s; r3 rerun 33.4 s).
 \newcommand{\corlTrainSecPerIter}{33}
 \newcommand{\corlNumSeeds}{4}
@@ -264,7 +265,12 @@
 % same recipe; track 3 m, time limit 1.5 x (3 m / commanded speed); world
 % seeds disjoint from tuning, IDM-data and camera-development seeds; OCS2
 % landing error RMS 6 cm without the IDM, 2 cm with it.
-\newcommand{\corlOcsCheckpoint}{600}
+% Author, 2026-11-03: the benchmark checkpoint is iteration 350 of one of
+% five seeded runs, picked at random; training took about 4 h on one RTX GPU.
+% (Replaces the ~600-iteration run of 2026-10-16.) How the iteration was
+% chosen is still to confirm (\verify in results.tex).
+\newcommand{\corlOcsCheckpoint}{350}
+\newcommand{\corlNumSeedsGaitNet}{five}
 \newcommand{\corlOcsTrackM}{3}
 \newcommand{\corlOcsTimeFactor}{1.5}
 \newcommand{\corlOcsLandRmsNoIdm}{6}
@@ -277,17 +283,34 @@
 \newcommand{\corlOcsMaxVoidPct}{70}
 \newcommand{\corlOcsSpeedMin}{0.05}
 \newcommand{\corlOcsSpeedMax}{0.25}
-\newcommand{\corlOcsAllFull}{83}      % void sweep, 529/640 = 82.7
+% 2026-11-03: GaitNet's sweep numbers below are the new c0 sweep (iteration
+% 350, 100 trials per cell, voids 0-70 %, 0.05-0.30 m/s); by void they pool
+% the five commands 0.05-0.25 m/s (500 trials per point) to match the trot's
+% void sweep, which is the earlier benchmark's data (author, 2026-11-03:
+% "the trot sweep is the existing data"; 80 trials per point).
+%   c0 by void  (/500): 499 498 490 476 465 399 302 132
+%   c0 by speed (/800, all eight voids): 703 685 669 631 573 493
+\newcommand{\corlOcsAllFull}{82}      % c0, 0-70 % voids, 3261/4000 = 81.5
 \newcommand{\corlOcsAllTrot}{64}      % 410/640 = 64.1
-\newcommand{\corlOcsAllSingle}{60}    % 381/640 = 59.5
-\newcommand{\corlOcsAllNoIdm}{55}     % 352/640 = 55.0
-\newcommand{\corlOcsAllMlp}{74}       % 471/640 = 73.6
-\newcommand{\corlOcsDenseFull}{70}    % pooled 40-70 % voids, 225/320 = 70.3
-\newcommand{\corlOcsDenseFullCiLow}{65}
-\newcommand{\corlOcsDenseFullCiHigh}{75}
+% *Ci* macros in the next lines: unused in the text since 2026-11-03 (no p-values or intervals, user); kept for the record
+\newcommand{\corlOcsDenseFull}{65}    % c0, 40-70 % voids, 1298/2000 = 64.9
+\newcommand{\corlOcsDenseFullCiLow}{63}
+\newcommand{\corlOcsDenseFullCiHigh}{67}
 \newcommand{\corlOcsDenseTrot}{38}    % 120/320 = 37.5
 \newcommand{\corlOcsDenseTrotCiLow}{32}
 \newcommand{\corlOcsDenseTrotCiHigh}{43}
+\newcommand{\corlSweepSpeedMax}{0.30}
+\newcommand{\corlSweepTrialsPerCell}{100}
+\newcommand{\corlSweepTrialsPerVoid}{500}
+\newcommand{\corlSweepTrialsPerSpeed}{800}
+\newcommand{\corlSweepFullSlowest}{88}   % 703/800 at 0.05 m/s
+\newcommand{\corlSweepFullTwentyFive}{72} % 573/800 at 0.25 m/s
+\newcommand{\corlSweepFullThirty}{62}    % 493/800 at 0.30 m/s
+% Stale since 2026-11-03: arms of the ~600-iteration checkpoint that were not
+% rerun on iteration 350. Kept for the record; no longer cited in the text.
+\newcommand{\corlOcsAllSingle}{60}    % 381/640 = 59.5
+\newcommand{\corlOcsAllNoIdm}{55}     % 352/640 = 55.0
+\newcommand{\corlOcsAllMlp}{74}       % 471/640 = 73.6
 \newcommand{\corlOcsDenseMlp}{59}     % 188/320 = 58.8
 \newcommand{\corlOcsDenseNoIdm}{36}   % 115/320 = 35.9
 % Two-sided tests on the counts above (2026-10-27). They ignore that the
@@ -302,3 +325,163 @@
 \newcommand{\corlOcsPMlpThirty}{0.003}     % Fisher, 30 % voids (0.0026)
 \newcommand{\corlOcsPMlpForty}{0.0002}     % Fisher, 40 % voids (0.00018)
 \newcommand{\corlOcsPMlpDense}{0.002}      % CMH, 40-70 % voids (0.0021)
+
+% ---- Benchmark of 2026-11-03 ("G125"; author's final results for L4DC) ----
+% Gazebo + OCS2, depth-camera terrain, OCS2 IDM, 12.5 cm tiles; voids
+% 26/38/49 % (matched to Isaac nominal 0.2/0.3/0.4); 20 s trials at 0.10 and
+% 0.20 m/s; world seeds 111-210, 100 trials per cell, 600 per arm. Success:
+% no fall and >= 0.5 v x duration walked. Full record on the cluster:
+% /scratch/sselvaraj/gaitnet-runs/idm/inv/paper_exp/SUMMARY.md.
+% Cells (0.10: 26 38 49 | 0.20: 26 38 49), successes out of 100:
+%   GaitNet c0 100 93 96 | 96 87 77 = 549   rerun c0b 96 97 92 | 96 84 74 = 539
+%   diagonal-only #6 99 96 89 | 96 84 59 = 523   trot #7 97 89 80 | 94 81 63 = 504
+%   no IDM (Gazebo-vs-Isaac table) 48 34 11 | 33 17 8 = 151
+%   per-candidate #4 @1599: s1 513, s2 525, s3 538, s4 453
+%   Isaac, 120 robots/cell, + IDM 96.7 100 95.0 | 100 95.0 89.2 ; no IDM
+%   41.7 34.2 8.3 | 25.0 11.7 6.7 (reported 8.2, not k/120; author 2026-11-03:
+%   "about 8 %", taken as 10/120 = 8.3); counts 50 41 10 | 30 14 8
+% c0 at 49 %/0.20: 77, confirmed by the author on 2026-11-03 (the 87.0 in the
+% Gazebo-vs-Isaac table is superseded); 77 matches the row sums. Left out (author, 2026-11-03): "#3 no IDM" (another condition),
+% #3/#9 Gazebo-refit IDM v1/v2, MLP WB500-r7@1899, Isaac #8.
+% Tests: CMH over the six cells, continuity-corrected; Fisher at single cells
+% (scratchpad stats_lite.py, 2026-11-03).
+% *Ci* and *P* macros in this block (\corlBench*Ci*, \corlBenchP*): unused in the text since 2026-11-03 (no p-values or intervals, user); kept for the record
+\newcommand{\corlBenchTileCm}{12.5}
+\newcommand{\corlBenchVoidLow}{26}
+\newcommand{\corlBenchVoidMid}{38}
+\newcommand{\corlBenchVoidHigh}{49}
+\newcommand{\corlBenchIsaacVoidLow}{20}
+\newcommand{\corlBenchIsaacVoidMid}{30}
+\newcommand{\corlBenchIsaacVoidHigh}{40}
+\newcommand{\corlBenchSpeedSlow}{0.10}
+\newcommand{\corlBenchSpeedFast}{0.20}
+\newcommand{\corlBenchTrialSeconds}{20}
+\newcommand{\corlBenchSeedFirst}{111}
+\newcommand{\corlBenchSeedLast}{210}
+\newcommand{\corlBenchTrialsPerCell}{100}
+\newcommand{\corlBenchTrialsPerArm}{600}
+\newcommand{\corlBenchIsaacRobots}{120}
+\newcommand{\corlBenchFull}{91.5}          % 549/600
+\newcommand{\corlBenchFullCiLow}{89.0}
+\newcommand{\corlBenchFullCiHigh}{93.5}
+\newcommand{\corlBenchRerun}{89.8}         % 539/600
+\newcommand{\corlBenchTrot}{84.0}          % 504/600
+\newcommand{\corlBenchTrotCiLow}{80.9}
+\newcommand{\corlBenchTrotCiHigh}{86.7}
+\newcommand{\corlBenchPTrot}{10^{-4}}      % CMH, 5.7e-5 (reported as p < 1e-4)
+\newcommand{\corlBenchPTrotRerun}{0.0025}  % CMH, 0.0025 (exact 0.00246)
+\newcommand{\corlBenchFullSlow}{96.3}      % 289/300
+\newcommand{\corlBenchTrotSlow}{88.7}      % 266/300
+\newcommand{\corlBenchPTrotSlow}{0.0006}   % CMH over voids, 5.6e-4
+\newcommand{\corlBenchFullFast}{86.7}      % 260/300
+\newcommand{\corlBenchTrotFast}{79.3}      % 238/300
+\newcommand{\corlBenchPTrotFast}{0.02}     % CMH over voids, 0.018
+\newcommand{\corlBenchFullDense}{86.5}     % 49 % voids, 173/200
+\newcommand{\corlBenchTrotDense}{71.5}     % 143/200
+\newcommand{\corlBenchPTrotDense}{0.0003}  % CMH over speeds, 2.7e-4
+\newcommand{\corlBenchDiag}{87.2}          % 523/600
+\newcommand{\corlBenchPDiag}{0.01}         % CMH vs c0, 0.013
+\newcommand{\corlBenchPDiagRerun}{0.15}    % CMH vs c0b
+\newcommand{\corlBenchPDiagTrot}{0.12}     % CMH vs trot
+\newcommand{\corlBenchPDiagCell}{0.01}     % Fisher, 49 %/0.20: 59 vs 77, 0.0097
+\newcommand{\corlBenchNoIdm}{25.2}         % 151/600
+\newcommand{\corlBenchIsaacIdm}{96.0}      % 691/720
+\newcommand{\corlBenchIsaacNoIdm}{21.3}    % 153/720 (cell 49 %/0.10 = 10/120)
+\newcommand{\corlBenchMlpMean}{84.5}       % mean of the four seeds
+\newcommand{\corlBenchMlpMin}{75.5}        % seed 4
+\newcommand{\corlBenchMlpMax}{89.7}        % seed 3; CMH vs c0 p = 0.31
+\newcommand{\corlBenchPMlpBest}{0.31}
+\newcommand{\corlBenchMlpIterations}{1600} % checkpoints @1599
+% Ablation retrains (P2b, #10/#11), two seeds each, same benchmark protocol;
+% a separate training recipe (author, 2026-11-03). Pooled success per seed
+% (unused in the text since 2026-11-03: seed means only, user):
+\newcommand{\corlAblFullA}{82.3}
+\newcommand{\corlAblFullB}{82.5}
+\newcommand{\corlAblNoHistA}{65.7}
+\newcommand{\corlAblNoHistB}{78.3}
+\newcommand{\corlAblNoMixA}{83.0}
+\newcommand{\corlAblNoMixB}{75.3}
+\newcommand{\corlAblNoIdmA}{58.7}
+\newcommand{\corlAblNoIdmB}{69.3}
+\newcommand{\corlAblTrainIdmA}{57.8}
+\newcommand{\corlAblTrainIdmB}{70.2}
+% Per-seed record (ground truth of 2026-11-03). Since the figure rewrite of
+% 2026-11-03 the paper has no tables and plots only seed means (author's
+% rule); the per-seed cells survive here and in the figure scripts.
+% Cells: 0.10 m/s 26/38/49 % | 0.20 m/s 26/38/49 %, successes of 100.
+%   Per-candidate + IDM s1: 98 91 82 | 92 80 70   (pooled 85.5)
+%                       s2: 98 95 87 | 93 84 68   (87.5)
+%                       s3: 99 93 88 | 93 88 77   (89.7)
+%                       s4: 98 87 79 | 83 63 43   (75.5)
+%   Retrained, seed 1/seed 2:
+%     no history:      98/96 95/90 84/84 | 64/82 36/70 17/48
+%     no mixer:        97/93 89/77 84/80 | 89/81 81/69 58/52
+%     no IDM:          81/89 74/85 59/73 | 69/76 47/59 22/34
+%     + training IDM:  72/89 66/84 52/68 | 68/83 52/64 37/33
+%     full retrain:    per command only, 92/92 (0.10) and 72/73 (0.20);
+%                      cells not given.
+% OCS2's own trot (gaitnet-docs experiment-setup.md 4, inv_gaits_1): LF_RH /
+% RF_LH, 0.3 s swings, 0.6 s period, own footholds, stock task.
+\newcommand{\corlTrotSwing}{0.3}
+\newcommand{\corlTrotPeriod}{0.6}
+
+% ---- Earlier benchmark and checkpoint (Fig. 3c; restored 2026-11-04) -----
+% The author's OCS2 benchmark of 2026-10-14 (figure of the 2026-10-28 draft,
+% git 486a92a:figures/plot_ocs2_results.py): an earlier GaitNet checkpoint
+% (about 600 iterations of a seeded run of the same preset, \verify) and its
+% variants on the SAME worlds as OCS2's own trot of Fig. 3a; depth-camera
+% terrain, OCS2 IDM, 0-70 % voids x 80 trials (= 640 per method) spread over
+% 0.05-0.25 m/s; 3 m track within 1.5x the commanded time. Counts recovered
+% from that figure's percentages (unique under round-half-even) and equal to
+% that draft's macros. Per void fraction 0, 10, ..., 70 % (of 80):
+%   GaitNet        80 80 72 72 73 64 48 40  = 529
+%   GaitNet-Single 69 59 66 53 54 34 24 22  = 381
+%   Per-cand.+IDM  78 74 75 56 53 56 42 37  = 471 (one training seed)
+%   GaitNet no IDM 77 64 51 45 35 30 29 21  = 352
+%   OCS2 trot      80 80 70 60 56 30 24 10  = 410
+% Speed sweep (separate trials, 0.05-0.25 m/s, of 80): GaitNet 67 71 69 65 53,
+% GaitNet-Single 59 54 50 43 32, trot 63 63 59 51 41.
+\newcommand{\corlEarlyCheckpoint}{600}     % "about 600 iterations" (author, 2026-10-16)
+\newcommand{\corlEarlyTrials}{640}         % per method, void sweep
+\newcommand{\corlEarlyFull}{82.7}          % 529/640
+\newcommand{\corlEarlySingle}{59.5}        % 381/640
+\newcommand{\corlEarlyMlp}{73.6}           % 471/640
+\newcommand{\corlEarlyNoIdm}{55.0}         % 352/640
+\newcommand{\corlEarlyTrot}{64.1}          % 410/640
+% GaitNet-Single's step length: \corlOcsStepsPerMSingle (45.6) against
+% \corlOcsStepsPerMFull (32.4) steps per metre for the earlier GaitNet, in
+% successful trials. One leg at a time, swings >= \corlSwingDurationMin s and
+% starts only on \corlControlTickMs ms ticks cap it at about 8 steps/s; at
+% 0.25 m/s it would need 0.25 x 45.6 = 11.4 (binds from about 0.20 m/s:
+% 0.20 x 45.6 = 9.1).
+
+% ---- Gait on the G125 benchmark (added 2026-11-04) ----------------------
+% Source: thesis-latex-journal/rss/timming.md (author, 2026-11-04): one row
+% per measured swing of the benchmark's SUCCESSFUL trials (author), GaitNet
+% (c0) and OCS2's own trot; computed by figures/gait_stats.py (run it in
+% thesis-latex-journal/rss/figures, where the data lives; the data file is
+% not part of the paper repo). Swings come from the simulator's ground-truth
+% foot heights (author); statistics are taken from when the rear feet reach
+% the void field (author) to the end of the 20 s trial. Measured swings are
+% shorter than commanded ones (the trot measures 0.235 s against its
+% scheduled 0.3 s), so only GaitNet-vs-trot comparisons are meaningful.
+\newcommand{\corlGaitTrialsGaitNet}{549}   % successful trials, all six cells
+\newcommand{\corlGaitTrialsTrot}{504}
+\newcommand{\corlGaitExampleSeed}{134} % world seed of Fig. 2b; chosen by fig_gait.py's L1 rule, asserted there
+\newcommand{\corlGaitDiagTimePct}{99}      % 99.05 % of GaitNet's two-feet-up time on a diagonal pair (trot 100 %)
+\newcommand{\corlGaitDiagPairPct}{98}      % 24370 of 24793 overlapping swing pairs = 98.3 % (rear 227, side 158, front 38)
+\newcommand{\corlGaitStepsSlow}{5.5}       % steps/s on the field at 0.10 m/s (5.48; cells 5.35 5.47 5.63)
+\newcommand{\corlGaitStepsFast}{7.2}       % at 0.20 m/s (7.16; cells 7.04 7.17 7.29)
+\newcommand{\corlGaitStepsTrot}{6.7}       % trot, 6.66-6.67 in every cell
+\newcommand{\corlGaitAllDownSlow}{51}      % % of field time with all four feet down, GaitNet 0.10 m/s (51.1)
+\newcommand{\corlGaitAllDownFast}{39}      % GaitNet 0.20 m/s (38.7)
+\newcommand{\corlGaitAllDownTrot}{21}      % trot (21.0; its schedule never has all four down: detector effect)
+\newcommand{\corlGaitStrideCv}{0.61}       % coefficient of variation of the same-leg lift-off interval, GaitNet
+\newcommand{\corlGaitStrideCvTrot}{0.02}   % trot
+\newcommand{\corlGaitTrotPeriodMeasured}{0.598} % trot same-leg lift-off interval, median [s]
+\newcommand{\corlGaitTrotSwingMeasured}{0.235}  % trot measured swing, median [s]
+\newcommand{\corlGaitLiftLagMs}{42}        % median lift-off lag between GaitNet's diagonal partners [ms] (q10-q90 21-66; trot: same sample in 97 %)
+\newcommand{\corlGaitNonDiagHard}{2.3}     % non-diagonal overlapping pairs per successful trial, 49 % voids, 0.20 m/s (2.27; 68 of 77 trials)
+\newcommand{\corlGaitNonDiagEasy}{0.1}     % 26 % voids, 0.10 m/s (0.11)
+\newcommand{\corlGaitNonDiagMildTrials}{53} % 0.20 m/s, 26 %: trials with >= 1 non-diagonal pair ...
+\newcommand{\corlGaitNonDiagMildOf}{96}     % ... of 96 successful trials (GaitNet-Diagonal lost 0 points in this cell)

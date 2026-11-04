@@ -1,27 +1,28 @@
 \section{Conclusion and Limitations}
 \label{sec:conclusion}
+% 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 
-Trained on a convex MPC and run frozen on OCS2 with a simulated depth
-camera, with only its inverse footstep model refitted, GaitNet matches OCS2's own trot on sparse voids
-and succeeds more often on dense voids; without the IDM, it loses that
-lead. The analysis of Sec.~\ref{subsec:idm-theory} says what the IDM can do: it
-removes the part of the landing error that its inputs predict, exactly
-only under the conditions of Assumption~\ref{as:idm-exact}, and
-otherwise with a bias, toward the mean logged landing in a
-linear-Gaussian model.
-
-The evidence is limited. All results are in simulation
-\pending{(GaitNet has not yet run on a Unitree Go1)}, on one pair of
-controllers, with an execution layer tuned with the same policy and one
-checkpoint per network; \pending{the other seeds have not been tested
-on OCS2}. On this benchmark, we have not replaced the OCS2 IDM with the
-training controller's IDM or a simple hand-made correction, such as a
-constant or speed-dependent offset per leg, which would show how much of
-the gain needs refitting and how much needs learning, nor measured
-GaitNet's landing errors next to voids, which Remark~\ref{rem:idm-numbers}
-leaves open. GaitNet is not given a gait, but we have not measured which
-legs it swings together on OCS2; it may have learned a trot-like pairing
-with free timing and footholds. Fewer logged steps \citep{xie_fada_2026}
-or relogging with the deployed IDM \citep{christiano_transfer_2016}
-could cheapen the refit. Our tests are also mild: 3\,m tracks, commands up to
-\corlOcsSpeedMax\,m/s, and noise-free depth images.
+\looseness=-1 Trained on a convex MPC, GaitNet ran frozen on OCS2 with
+only its IDM refitted. On the benchmark, it beat OCS2's own trot,
+most on the densest voids, and kept most of its success from the
+training controller, but it failed on both controllers without the IDM.
+All results are in simulation, on one pair of controllers
+\pending{(GaitNet has not yet run on a Unitree Go1)}, and the lead and
+margin were tuned with the same planner. Only one of GaitNet's
+\corlNumSeedsGaitNet{} training seeds ran on OCS2, while the
+per-candidate network's four seeds spread over 14 percentage points, so
+which network transfers better is open. In its successful trials,
+GaitNet almost always swung diagonal pairs, on its own timing, and we
+did not log its failed trials, so why GaitNet-Diagonal lost success
+mainly in the hardest cell remains open. We have not compared the
+refitted IDM with the training controller's IDM or a constant or
+speed-dependent offset per leg, a comparison that would show how much of
+the gain needs learning. Nor have we measured landing errors next to
+voids, where the candidate margin must cover what the IDM's inputs do
+not predict
+(Sec.~\ref{subsec:idm-theory}). Our tests are mild, with speeds up to
+\corlSweepSpeedMax\,m/s and noise-free depth images, and the
+benchmark's success criterion does not penalize a robot that stops
+halfway, unlike the sweep's. Future work will test whether fewer logged
+steps \citep{xie_fada_2026} or relogging with the deployed IDM
+\citep{christiano_transfer_2016} cheapens the refit.

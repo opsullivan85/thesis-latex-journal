@@ -1,59 +1,89 @@
+% 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 \section{Problem Formulation}
 \label{sec:setup}
 
-A Unitree Go1 walks forward over ground with voids, following a
-commanded velocity. All footholds, commands and landings below are
-planar offsets from the leg's hip in the \emph{yaw frame}, the gravity-aligned frame that turns
-with the robot's heading, taken at the moment of the decision.
+\noindent\textbf{Setting.}
+A Unitree Go1 walks forward at a commanded velocity over level ground
+with voids, the set $\mathcal V$. A planner $\pi$ decides the steps, and a
+model-based controller $c$ executes them. The planner is queried at
+ticks $t_k = k\,\Delta t$. It
+is given no \emph{gait schedule}, a map from a phase variable to the legs
+in stance (on the ground), as an input or a constraint.
 
-\paragraph{Decisions.}
-At ticks $t_k = k\,\Delta t$, $\Delta t = \corlControlTickMs$\,ms, a planner
-$\pi$ observes the robot's state, a short history of its motion, and a
-finite set $\mathcal C_k$ of candidate footholds that a safety mask
-keeps, with exact terrain, at least 1.5\,cm from voids, and $m = \corlMarginCm$\,cm when the
-void edges are parallel to its grid axes
-(Secs.~\ref{subsec:method-step} and~\ref{subsec:idm-theory}). It returns either the no-step option
-$\varnothing$ or a step $a_k = (\ell, \mathbf u^\star, T)$: a leg
-$\ell$ that is not already swinging, a desired landing point
-$\mathbf u^\star \in \mathcal C_k$, and a swing time
-$T \in [T_{\min}, T_{\max}]$. At least
-\numberstringnum{\corlMinStanceLegs} legs must stay in stance, so at
-most \numberstringnum{\corlMaxConcurrentSwingLegs} legs swing at once.
-A swing lasts several ticks, so the decision process is semi-Markov,
-and it is partially observed: the planner sees the terrain only through
-$\mathcal C_k$.
+\noindent\textbf{Decisions.}
+\looseness=-1 At each tick, the planner takes the no-step option $\varnothing$ or
+starts a step \mbox{$a_k = (\ell, \mathbf u^\star, T)$}, which lifts leg
+$\ell$ and should land it at the desired foothold $\mathbf u^\star$ after
+a swing of duration $T \in [T_{\min}, T_{\max}]$. Since the step starts a
+fixed \emph{lead} $\tau_c$ after its decision, one decision fixes which
+leg steps, where, for how long, and when. Leg $\ell$ may step
+only if at least \numberstringnum{\corlMinContactLegs} legs, $\ell$ among
+them, are in stance in the \emph{contact schedule} set by the planner's
+earlier steps. A chosen leg that has not yet lifted off counts as
+lifted. Hence at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs
+swing at once. The foothold $\mathbf u^\star$ must be one of the leg's
+candidates $\mathcal C_k^\ell$, cells near the hip drawn at random from
+those that a terrain mask with candidate margin $m_c$ marks as safe
+(Sec.~\ref{subsec:method-step}). The planner observes the robot's state,
+a short window of its recent motion (the history), and the
+candidates (Sec.~\ref{subsec:method-network}). It sees neither the rest
+of the terrain nor the controller's internal state, so the decision
+process is partially observed, with the controller as part of the
+environment \citep{yang_fast_2021}. A frozen planner must therefore
+infer from the history how the controller in use executes its steps.
 
-\paragraph{Controllers.}
-A step is executed by a low-level controller $c$, here a model
-predictive controller that tracks the body and swings the feet. It
-receives a command $\mathbf u$ for leg $\ell$, a swing time $T$ and a
-start time. From the planner's point of view, $c$ is a closed-loop map
-from command to landing,
+\noindent\textbf{Execution.}
+\looseness=-1 Given a \emph{command} $\mathbf u$, the foothold sent for
+leg $\ell$, and a swing time $T$, controller $c$ lands the foot at
 \begin{equation}
   \mathbf o = F_c(\mathbf s, \ell, T, \mathbf u)
     = \mathbf u + \boldsymbol\delta_c(\mathbf s, \ell, T, \mathbf u),
   \label{eq:forward}
 \end{equation}
-where $\mathbf u, \mathbf o \in \mathbb R^2$, $\mathbf s$ is everything that affects the swing (the robot's
-state, the other legs, the terrain and the controller's internal state)
-and $\boldsymbol\delta_c$ is the controller's landing error. Both
-$\boldsymbol\delta_c$ and how the controller schedules a step differ
-between controllers, and in general $\boldsymbol\delta_c \neq
-\mathbf 0$ (Sec.~\ref{subsec:method-idm}). Sending $\mathbf u =
-\mathbf u^\star$ therefore lands the foot at $\mathbf u^\star +
-\boldsymbol\delta_c$, which can be inside a void although
-$\mathbf u^\star$ is not.
+where $\mathbf u, \mathbf o \in \mathbb R^2$ and $\mathbf s$ is
+everything that affects the swing: the robot's state, the other legs,
+the terrain, and the controller's internal state. Footholds, commands,
+landings, and $\mathcal V$ are planar offsets from the stepping leg's hip
+at $t_k$, in the gravity-aligned \emph{yaw frame} that points along the
+robot's heading at $t_k$. The \emph{landing offset}
+$\boldsymbol\delta_c$ includes the base's motion between the decision and
+touchdown. In general $\boldsymbol\delta_c \neq \mathbf 0$, and it
+differs between controllers (Sec.~\ref{subsec:method-idm}), so sending
+the desired foothold unchanged, $\mathbf u = \mathbf u^\star$, can put
+the foot in a void although $\mathbf u^\star$ is safe. An
+\emph{execution layer} between planner and controller guards against
+this. Its IDM $I^c$, fitted to controller $c$, sends the command
+$\mathbf u = I^c(\zeta, \mathbf u^\star)$ expected to land the foot at
+$\mathbf u^\star$, where $\zeta = (\mathbf h_{\text{last}}, \ell, T)$
+holds the newest tick of the history, the leg, and the swing time. The
+layer also applies the lead.
 
-\paragraph{Objective and transfer.}
-A trial succeeds if the robot reaches the end of a track without
-falling or leaving it, within a time limit. The planner is trained with a
-\emph{training controller} $c_0$, the convex MPC of
-\citet{dicarlo_dynamic_2018}, by reinforcement learning
-(Sec.~\ref{subsec:method-training}). It is then deployed with a
-\emph{target controller} $c_1$, OCS2's nonlinear MPC and whole-body
-controller \citep{ocs2, leggedcontrol}, under one constraint: the
-planner's weights are frozen, and the only learned part fitted for
-$c_1$ is a map from desired landings to commands, learned from steps
-that $c_1$ has executed; a few interface constants, such as the step
-lead and the candidate margin, are set by hand. We ask whether the frozen planner then reaches, on held-out
-worlds, a success rate comparable to or above that of $c_1$'s own gait.
+\noindent\textbf{Problem 1 (planning on the training controller).}
+\looseness=-1 The planner is trained with the \emph{training controller} $c_0$, the
+convex MPC of \citet{dicarlo_dynamic_2018}, with no lead ($\tau_{c_0} =
+0$). The controller's parameters, including its lift-off delay, are
+redrawn at every reset (Sec.~\ref{subsec:method-training}). With
+$I^{c_0}$ fitted beforehand and frozen, we seek the planner that
+maximizes the expected discounted return $\mathbb E[\sum_{k \ge 0}
+\gamma^k r_k]$ when $c_0$ executes its
+steps on random void worlds and commanded velocities. The reward $r_k$
+(Eq.~\eqref{eq:reward}) pays for staying up and tracking the commanded
+velocity and yaw rate, and charges for each step and failure. A
+failure, such as a foot dropping into a void, ends the episode, and $r_k
+= 0$ after it. A time-out is not a failure
+(App.~\ref{app:training}). Since $r_k$ has no void-clearance, landing,
+or track-completion term, the return is only a proxy for trial success
+(Sec.~\ref{subsec:exp-setup}).
+
+\noindent\textbf{Problem 2 (deployment on a new controller).}
+\looseness=-1 The \emph{new controller} $c_1$ is OCS2's NMPC and WBC,
+with a lead $\tau_{c_1}$. The planner is frozen, and
+only $I^{c_1}$ is fitted, by regression on steps that $c_1$ executed
+(Sec.~\ref{subsec:method-idm}). The goal is that the planner succeeds on
+held-out worlds (Sec.~\ref{subsec:exp-setup}) at a rate comparable to or
+above that of $c_1$ with its own gait. Moving to $c_1$ also changes the
+simulator, odometry, and terrain source (a depth camera), and in one of
+our tests the tile size. The lead and the candidate margins are set by
+hand, $m_{c_0}$ for exact terrain and $m_{c_1}$ for a map built from the
+depth images (App.~\ref{app:settings}). We tuned $\tau_{c_1}$ and $m_{c_1}$ with
+the same planner on separate worlds.

@@ -1,0 +1,45 @@
+\section{Related Work}
+\label{sec:related}
+% 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
+
+\noindent\textbf{Contact and gait planning.} \looseness=-1 Model-based
+planners shrink the contact search to convex foothold regions
+\citep{deits_footstep_2014, grandia_perceptive_2022} or optimize
+contact schedules and timing together \citep{winkler_gait_2018}.
+Gait-free planners choose contact timing online, from per-leg
+feasibility rules \citep{bjelonic_whole-body_2021} or by tree search
+\citep{amatucci_monte_2022} sped up by a learned cost-to-go
+\citep{taouil_non-gaited_2024}. \citet{patrizi_rl-augmented_2026}
+learn, inside an MPC, when each foot is in the air. These
+gait-free planners decide timing, but none picks footholds from a
+perceived map of safe cells.
+
+\noindent\textbf{Learned gaits and footholds.} \looseness=-1 End-to-end
+policies \citep{lee_learning_2020, zhang_learning_2023,
+fu_minimizing_2021} decide contacts implicitly, in joint targets that a
+model-based controller cannot use. Hybrid methods learn
+part of a model-based controller's gait: gait parameters
+\citep{yang_fast_2021}, contact primitives \citep{da_learning_2020},
+per-foot contact states on gap terrain \citep{margolis_learning_2021},
+or stepping frequency with swing-foot residuals \citep{yang_cajun_2023}.
+Their footholds come from heuristics, at most with learned residuals.
+Others learn footholds while a fixed gait sets the timing
+\citep{gangapurwala_rloc_2022, yu_visual-locomotion_2021}, and DeepGait
+\citep{tsounis_deepgait_2020} also chooses the legs in contact.
+ContactNet \citep{bratta_contactnet_2024} ranks discretized foothold
+regions without prescribing the swing leg, but its configuration and
+gait set how many legs swing at once and when, and it re-ranks
+candidates only at touchdown.
+
+\noindent\textbf{Transfer between controllers.} \looseness=-1 Prior work
+transfers a fixed learned policy through an inverse dynamics model
+fitted or adapted on the target system \citep{christiano_transfer_2016,
+xie_fada_2026}, or through a kinodynamic MPC \citep{li_zero-shot_2022}.
+At the footstep level, \citet{akizhanov_learning_2024} correct an NMPC's
+contact targets with a network trained on the contacts it
+reached, as our inverse footstep model does, but within a fixed gait and
+on one controller. \citet{taouil_quadrupedal_2023} plan footsteps with
+learned motion models of a black-box trotting controller, and
+\citet{jenelten_dtc_2024} reuse a learned tracker under new planners.
+However, we know of no work that moves a learned footstep planner
+without a gait schedule between two model-based controllers.
