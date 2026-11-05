@@ -108,54 +108,53 @@ policies without controller randomization, with Gaussian command noise
 \subsection{What the Inverse Footstep Model Can Correct}
 \label{subsec:idm-theory}
 
-\looseness=-1 The IDM sees $\zeta$ but not the full state $\mathbf s$.
-Given $\zeta$ and the command, the landing is therefore random even though
-$F_c$ is deterministic, and we split it into its conditional mean and a
-zero-mean residual $\boldsymbol\eta$,
+\looseness=-1 The IDM sees $\zeta$ but not the full state $\mathbf s$, so
+given $\zeta$ and the command the landing is random even though $F_c$ is
+deterministic. We split the landing into its conditional mean and a
+zero-mean residual $\boldsymbol\eta$, and the \emph{landing error} of
+the IDM's command into two parts:
 \begin{equation}
-  \mathbf o = \bar F_c(\zeta,\mathbf u) + \boldsymbol\eta, \qquad
-  \bar F_c(\zeta,\mathbf u) := \mathbb E[\mathbf o \mid \zeta,\mathbf u].
-  \label{eq:mean-forward}
-\end{equation}
-For the IDM's command, the
-\emph{landing error} splits into two parts,
-\begin{equation}
-  \mathbf e := \mathbf o - \mathbf u^\star
-    = \boldsymbol\beta + \boldsymbol\eta, \qquad
-  \boldsymbol\beta := \bar F_c(\zeta,\mathbf u) - \mathbf u^\star .
-  \label{eq:error-split}
+\begin{aligned}
+  \mathbf o &= \bar F_c(\zeta,\mathbf u) + \boldsymbol\eta, &
+  \bar F_c(\zeta,\mathbf u) &:= \mathbb E[\mathbf o \mid \zeta,\mathbf u],\\
+  \mathbf e &:= \mathbf o - \mathbf u^\star = \boldsymbol\beta + \boldsymbol\eta, &
+  \boldsymbol\beta &:= \bar F_c(\zeta,\mathbf u) - \mathbf u^\star .
+\end{aligned}
+\label{eq:mean-forward}
 \end{equation}
 The IDM acts only through $\boldsymbol\beta$, the part of the error that
-its inputs predict. A better fit shrinks the fitting part of $\boldsymbol\beta$, but no IDM
-with these inputs removes $\boldsymbol\eta$. The regression of
-Eq.~\eqref{eq:idm-loss} makes $\boldsymbol\beta$ zero if the landing law is the
-same when logging and at deployment, the logged landings carry no residual, each landing is reached by a convex set of
-commands, the
-logged landings cover the desired footholds, and the fit is exact
-(Assumption~\ref{as:idm-exact}, Proposition~\ref{prop:idm-mean}). Otherwise, in a
-linear-Gaussian case, it pulls the landing toward the mean logged
-landing, in the logged landings' metric, and can be largest for footholds the logging
-policy seldom reached (Proposition~\ref{prop:idm-shrink} in App.~\ref{app:idm-proofs}).
+its inputs predict, and a better fit shrinks only its fitting part; no
+IDM with these inputs removes $\boldsymbol\eta$. The regression of Eq.~\eqref{eq:idm-loss} cancels
+$\boldsymbol\beta$ if the landing law is the same when logging and at
+deployment, the logged landings carry no residual, each landing is
+reached by a convex set of commands, the logged landings cover the
+desired footholds, and the fit is exact
+(Proposition~\ref{prop:idm-mean} in App.~\ref{app:idm-proofs}). With a
+residual, even an exact fit is biased: for Gaussian logged commands, a
+linear landing law, and a Gaussian residual independent of the command,
+it pulls the landing toward the mean logged landing in the logged landings' metric; this is the
+attenuation bias of a regression on a noisy input
+\citep{fuller_measurement_1987}, and it can be largest for footholds the
+logging policy seldom reached (Proposition~\ref{prop:idm-shrink}).
 
 \looseness=-1 Let the \emph{clearance} $d(\mathbf u^\star) :=
 \inf_{\mathbf p \in \mathcal V} \|\mathbf p - \mathbf u^\star\|_\infty$
-be the foothold's distance to the nearest point of the voids $\mathcal V$. If the
-Euclidean norms satisfy $\|\boldsymbol\beta\| + \|\boldsymbol\eta\| <
-d(\mathbf u^\star)$, the foot cannot land in a void
-(Proposition~\ref{prop:idm-void} in App.~\ref{app:idm-proofs}). The
-candidate margin must therefore cover both the error the IDM leaves
-and the residual. With exact
-terrain, the mask of Sec.~\ref{subsec:method-step} gives every candidate
-a clearance of at least $m$ for void edges parallel to the grid
-axes and no less than $m - h/2$, at $45^\circ$, the worst angle
-(Lemma~\ref{lem:idm-grid}), for square voids at least $2\sqrt2\,h$
-wide, as all our tiles are. It is a geometric
-bound for exact terrain, not a guarantee of safe touchdowns: perception
-and odometry errors and the foot's radius reduce it. On flat ground,
-the IDM cut OCS2's RMS landing error to about the margin
-(Sec.~\ref{subsec:exp-why}), so with a Gaussian error a foothold at the margin's edge
-still lands in a void with probability about 0.08 (App.~\ref{app:idm-proofs}); we have not measured how
-close GaitNet's footholds come to voids.
+be the foothold's distance to the nearest point of the voids $\mathcal
+V$. Since $\|\mathbf e\|_\infty \le \|\boldsymbol\beta\| +
+\|\boldsymbol\eta\|$, with $\|\cdot\|$ Euclidean, a point foot cannot
+land in a void if this sum is below $d(\mathbf u^\star)$ (App.~\ref{app:idm-void}), so the candidate margin must
+cover both the error the IDM leaves and the residual. With exact
+terrain and a point foot, the mask of Sec.~\ref{subsec:method-step} gives
+every candidate a clearance of at least $m$ for void edges parallel to the grid axes and
+at least $m - h/2$ at any angle (Lemma~\ref{lem:idm-grid}), for square
+voids at least $2\sqrt2\,h$ wide, as all our tiles are. This is a
+point-foot geometric bound, not a hardware safety guarantee: the foot's
+radius and perception and odometry errors reduce it. On flat ground, the IDM
+cut OCS2's RMS landing error to about the margin
+(Sec.~\ref{subsec:exp-why}), so with a Gaussian error a foothold at the
+margin's edge still lands in a void with probability about 0.08
+(Remark~\ref{rem:idm-numbers}); we have not measured how close GaitNet's
+footholds come to voids.
 
 \subsection{Training}
 \label{subsec:method-training}

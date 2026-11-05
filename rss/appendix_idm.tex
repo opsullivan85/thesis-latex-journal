@@ -8,16 +8,20 @@
 % bound (old Prop. (c)), the general one-sided covering, the union bound over
 % a trial, and the tightness part (d) of the grid lemma with its numerical
 % search. Numerical checks of the original: scratchpad/idmcheck/*.py.
+% 2026-11-05 (author: "see if these many proofs are required"): Prop. 1(a)
+% stated as the conditional-mean property, Prop. 1(b) steps 3-4 merged and
+% old step 5 moved into the remark after Assumption 1; Prop. 2 proof
+% shortened (Fuller 1987); old Prop. 3 dissolved into App. F.3 (app:idm-void).
 % ---------------------------------------------------------------------------
 \section{Analysis of the Inverse Footstep Model}
 \label{app:idm-proofs}
 
-\looseness=-1 This appendix proves the statements of
+\looseness=-1 This appendix supports the statements of
 Sec.~\ref{subsec:idm-theory}: when the regression of
 Eq.~\eqref{eq:idm-loss} inverts the controller (Proposition~\ref{prop:idm-mean}),
 how it is biased otherwise (Proposition~\ref{prop:idm-shrink}), when a
-landing error can put the foot in a void (Proposition~\ref{prop:idm-void}),
-and how much clearance the grown mask leaves (Lemma~\ref{lem:idm-grid}).
+landing error can put the foot in a void (App.~\ref{app:idm-void}), and
+how much clearance the grown mask leaves (Lemma~\ref{lem:idm-grid}).
 We drop the superscript $c$ from $I^c$. Let $P_c$ be the distribution of the
 logged tuples $(\zeta, \mathbf u, \mathbf o)$, one per step the controller
 executed, and $I_\star(\zeta,\mathbf o) := \mathbb E_{P_c}[\mathbf u \mid
@@ -55,16 +59,19 @@ logged pairs) and $I_\star$ have continuous versions, which we use.
 everywhere.
 \end{assumption}
 
-Condition (ii) holds, with single points, whenever the landing offset
+Condition (ii) holds, with at most one point, whenever the landing offset
 changes less than the command, that is, when $\mathbf u \mapsto \bar
-F_c(\zeta,\mathbf u) - \mathbf u$ is Lipschitz with a constant below one
-(step~5 of the proof below).
+F_c(\zeta,\mathbf u) - \mathbf u$ is $L_\delta$-Lipschitz with $L_\delta <
+1$: then $\|\bar F_c(\zeta,\mathbf u) - \bar F_c(\zeta,\mathbf u')\| \ge
+(1 - L_\delta)\|\mathbf u - \mathbf u'\|$, so $\bar F_c(\zeta,\cdot)$ is
+injective.
 
 \begin{proposition}[Hindsight regression]
 \label{prop:idm-mean}
 (a)~Among the square-integrable functions of $(\zeta,\mathbf o)$,
 $I_\star$ minimises the loss of Eq.~\eqref{eq:idm-loss}, uniquely up to
-$P_c$-null sets.
+$P_c$-null sets; this is the standard property of the conditional
+mean.
 (b)~Under Assumption~\ref{as:idm-exact}, every deployment pair has
 $\bar F_c(\zeta, I(\zeta,\mathbf u^\star))$ $= \mathbf u^\star$, so the foot
 lands at $\mathbf u^\star$.
@@ -82,12 +89,9 @@ lands at neither \citep{jordan_forward_1992}. Without (iii), the held-out
 error says nothing about targets outside the logged landings.
 
 \begin{idmproof}{Proposition~\ref{prop:idm-mean}}
-(a)~For a square-integrable $I$, split $\mathbf u - I = (\mathbf u -
-I_\star) + (I_\star - I)$. The cross term vanishes, $\mathbb E[(\mathbf u -
-I_\star)^\top(I_\star - I)] = \mathbb E\big[\mathbb E[\mathbf u - I_\star
-\mid \zeta,\mathbf o]^\top (I_\star - I)\big] = 0$, because $I_\star - I$
-depends only on $(\zeta,\mathbf o)$ and $\mathbb E[\mathbf u - I_\star
-\mid \zeta,\mathbf o] = \mathbf 0$. Hence
+(a)~The cross term of $\mathbf u - I = (\mathbf u - I_\star) + (I_\star
+- I)$ has mean zero, as $I_\star - I$ depends only on $(\zeta,\mathbf o)$
+and $\mathbb E[\mathbf u - I_\star \mid \zeta,\mathbf o] = \mathbf 0$, so
 \begin{equation}
   \mathbb E\|\mathbf u - I\|^2 = \mathbb E\|\mathbf u - I_\star\|^2
   + \mathbb E\|I_\star - I\|^2 ,
@@ -125,23 +129,12 @@ the set of $(\zeta,\mathbf o)$ with $(\zeta, I_\star(\zeta,\mathbf o))$ in
 the support of the logged pairs and $\bar F_c(\zeta, I_\star(\zeta,\mathbf
 o)) = \mathbf o$ has probability one. It is closed, as $I_\star$ and $\bar
 F_c$ are continuous by (iii), so it contains the support of the logged
-$(\zeta,\mathbf o)$, and with it every deployment pair $(\zeta,\mathbf
-u^\star)$. Hence the command $I_\star(\zeta,\mathbf u^\star)$ lies in the
-support of the logged pairs and $\bar F_c(\zeta, I_\star(\zeta,\mathbf
-u^\star)) = \mathbf u^\star$.
-
-\emph{Step 4: the fitted IDM.} By (iv), the set where the continuous $I$
-equals $I_\star$ is closed and has probability one, so it contains the
-support, and $I(\zeta,\mathbf u^\star) = I_\star(\zeta,\mathbf u^\star)$.
-This command lies in the support of the logged pairs, where by (i) the
-landing equals $\bar F_c$, so the foot lands at $\mathbf u^\star$.
-
-\emph{Step 5: the condition after the assumption.} If $\mathbf u \mapsto
-\bar F_c(\zeta,\mathbf u) - \mathbf u$ is $L_\delta$-Lipschitz with
-$L_\delta < 1$, then $\|\bar F_c(\zeta,\mathbf u) - \bar F_c(\zeta,\mathbf
-u')\| \ge \|\mathbf u - \mathbf u'\| - L_\delta\|\mathbf u - \mathbf u'\| >
-0$ for $\mathbf u \ne \mathbf u'$, so $\bar F_c(\zeta,\cdot)$ is injective
-and every $\mathcal U(\zeta,\mathbf o)$ has at most one point.
+$(\zeta,\mathbf o)$ and every deployment pair, so $\bar F_c(\zeta,
+I_\star(\zeta,\mathbf u^\star)) = \mathbf u^\star$. By (iv), the set where the
+continuous $I$ and $I_\star$ agree is closed and has probability one, so it
+contains that support, and the command $I(\zeta,\mathbf
+u^\star)$ lies in the support of the logged pairs, where by (i) the foot
+lands at $\bar F_c(\zeta, I(\zeta,\mathbf u^\star)) = \mathbf u^\star$.
 \end{idmproof}
 
 \subsection{Bias When the Landings Are Noisy}
@@ -170,7 +163,10 @@ u^\star - \bar{\mathbf o}\|_{S^{-1}}$, with $\|\mathbf x\|_{S^{-1}}^2 :=
 positive-semidefinite order) raises no eigenvalue of $\Lambda$.
 \end{proposition}
 
-\looseness=-1 Here $\Sigma_\eta$ is the part of the landing covariance $S$
+\looseness=-1 The bias is that of the exact regression $I_\star$, so
+neither more data nor a better fit removes it; in this model it
+vanishes only without a residual.
+Here $\Sigma_\eta$ is the part of the landing covariance $S$
 that the command does not explain. In one dimension, $\Lambda$ is that
 share of the landing variance, and the deployed landing falls short of
 $\mathbf u^\star$, toward the mean logged landing $\bar{\mathbf o}$, by
@@ -180,7 +176,7 @@ landings, not necessarily in the Euclidean one, and the bias, measured
 in that metric, is at most the largest eigenvalue of $\Lambda$ times
 $\|\mathbf u^\star - \bar{\mathbf o}\|_{S^{-1}}$, so it can be largest for footholds that the logging policy
 seldom reached. This is the attenuation bias of a regression on a noisy
-input. Spreading the logged commands raises no eigenvalue of $\Lambda$,
+input \citep{fuller_measurement_1987}. Spreading the logged commands raises no eigenvalue of $\Lambda$,
 and in one dimension it shrinks the bias, a second reason, besides
 coverage, for the command noise in the training controller's IDM data
 (App.~\ref{app:settings});
@@ -201,64 +197,39 @@ A\tilde{\mathbf u} + \mathbf b = \bar{\mathbf o} + AW(\mathbf u^\star -
 -(\mathrm{Id} - AW)(\mathbf u^\star - \bar{\mathbf o})$, and $\mathrm{Id} -
 AW = (S - A\Sigma_u A^\top)S^{-1} = \Sigma_\eta S^{-1} = \Lambda$.
 
-\emph{Step 3: the eigenvalues.} Let $M := S^{-1/2}\Sigma_\eta S^{-1/2} =
-\mathrm{Id} - S^{-1/2}A\Sigma_u A^\top S^{-1/2}$. It is symmetric, positive
-semidefinite because $\Sigma_\eta \succeq 0$, and $M \prec \mathrm{Id}$ because
-$A\Sigma_u A^\top \succ 0$, so its eigenvalues lie in $[0,1)$. Since
-$\Lambda = S^{1/2} M S^{-1/2}$, $\Lambda$ has the same eigenvalues.
-
-\emph{Step 4: the contraction.} $\mathbb E[\mathbf o^\star] - \bar{\mathbf
-o} = (\mathrm{Id} - \Lambda)(\mathbf u^\star - \bar{\mathbf o})$ and
-$S^{-1/2}(\mathrm{Id} - \Lambda) = (\mathrm{Id} - M)S^{-1/2}$. As $0 \prec
-\mathrm{Id} - M \preceq \mathrm{Id}$, $\|\mathbb E[\mathbf o^\star] -
-\bar{\mathbf o}\|_{S^{-1}} = \|(\mathrm{Id} - M)S^{-1/2}(\mathbf u^\star -
-\bar{\mathbf o})\| \le \|S^{-1/2}(\mathbf
-u^\star - \bar{\mathbf o})\| = \|\mathbf u^\star - \bar{\mathbf
-o}\|_{S^{-1}}$. In the same way, $\|S^{-1/2}\Lambda(\mathbf u^\star -
-\bar{\mathbf o})\| = \|M S^{-1/2}(\mathbf u^\star - \bar{\mathbf o})\| \le
-\lambda_{\max}(M)\,\|\mathbf u^\star - \bar{\mathbf o}\|_{S^{-1}}$, which
-bounds the bias in the metric $\|\cdot\|_{S^{-1}}$.
-
-\emph{Step 5: more command spread.} The eigenvalues of $\Lambda =
-\Sigma_\eta S^{-1}$ equal those of the symmetric matrix
-$\Sigma_\eta^{1/2}S^{-1}\Sigma_\eta^{1/2}$, since $XY$ and $YX$ have the
-same eigenvalues. A larger $\Sigma_u$ gives a larger $S$ and so a smaller
-$S^{-1}$ and a smaller $\Sigma_\eta^{1/2}S^{-1}\Sigma_\eta^{1/2}$, whose
-ordered eigenvalues therefore do not increase.
+\emph{Step 3: eigenvalues and contraction.} Let $M :=
+S^{-1/2}\Sigma_\eta S^{-1/2} = \mathrm{Id} - S^{-1/2}A\Sigma_u A^\top
+S^{-1/2}$, symmetric with $0 \preceq M \prec \mathrm{Id}$ (as $\Sigma_\eta
+\succeq 0$ and $A\Sigma_u A^\top \succ 0$). Then $\Lambda = S^{1/2} M
+S^{-1/2}$, which gives the eigenvalues; $S^{-1/2}(\mathrm{Id} - \Lambda) =
+(\mathrm{Id} - M)S^{-1/2}$, which gives the contraction in
+$\|\cdot\|_{S^{-1}}$; and $S^{-1/2}\Lambda = M S^{-1/2}$, which bounds the
+bias in $\|\cdot\|_{S^{-1}}$ by $\lambda_{\max}(\Lambda)\,\|\mathbf
+u^\star - \bar{\mathbf o}\|_{S^{-1}}$. A larger $\Sigma_u$ gives a larger
+$S$ and a smaller $S^{-1}$, so the eigenvalues of
+$\Sigma_\eta^{1/2}S^{-1}\Sigma_\eta^{1/2}$, which are those of $\Lambda$, do
+not increase.
 \end{idmproof}
 
 \subsection{Landing Error and Voids}
+\label{app:idm-void}
 
-\begin{proposition}[Landing error and voids]
-\label{prop:idm-void}
-For the command $\mathbf u = I(\zeta,\mathbf u^\star)$ and the clearance
-$d(\mathbf u^\star)$ of Sec.~\ref{subsec:idm-theory}, let $\mathcal G$ be
-the information at the decision, which fixes $\zeta$, $\mathbf u^\star$,
-$\mathbf u$ and $\mathcal V$, and let $\boldsymbol\beta := \bar
-F_c(\zeta,\mathbf u) - \mathbf u^\star$. Then the landing error is
-$\mathbf e := \mathbf o - \mathbf u^\star = \boldsymbol\beta +
-\boldsymbol\eta$, and
-(a)~if $\|\boldsymbol\beta\| + \|\boldsymbol\eta\| < d(\mathbf u^\star)$,
-the foot does not land in a void;
-(b)~$\Pr(\mathbf o \in \mathcal V \mid \mathcal G) \le \Pr(\|\mathbf
-e\|_\infty \ge d(\mathbf u^\star) \mid \mathcal G)$.
-\end{proposition}
-
-\begin{idmproof}{Proposition~\ref{prop:idm-void}}
-By Eq.~\eqref{eq:mean-forward}, $\mathbf e = \bar F_c(\zeta,\mathbf u) +
-\boldsymbol\eta - \mathbf u^\star = \boldsymbol\beta + \boldsymbol\eta$. As $\boldsymbol\eta$ has mean zero given
-$(\zeta,\mathbf u)$, the mean error is $\boldsymbol\beta$, so an IDM with
-the inputs $\zeta$ can cancel at most $\boldsymbol\beta$.
-If $\mathbf o \in \mathcal V$, then, since $d(\mathbf u^\star)$ is the
-$\infty$-norm distance from $\mathbf u^\star$ to the nearest void point,
-$d(\mathbf u^\star) \le \|\mathbf o - \mathbf u^\star\|_\infty = \|\mathbf
+\looseness=-1 For the command $\mathbf u = I(\zeta,\mathbf u^\star)$,
+Eq.~\eqref{eq:mean-forward} splits the landing error as $\mathbf e =
+\boldsymbol\beta + \boldsymbol\eta$. As
+$\boldsymbol\eta$ has mean zero given $(\zeta,\mathbf u)$, the mean error
+is $\boldsymbol\beta$, so an IDM with the inputs $\zeta$ can cancel at
+most $\boldsymbol\beta$. Treat the foot as a point at its contact
+position. If it lands in a void, then, since the
+clearance $d(\mathbf u^\star)$ is the $\infty$-norm distance from $\mathbf
+u^\star$ to the nearest void point, $d(\mathbf u^\star) \le \|\mathbf
 e\|_\infty \le \|\mathbf e\| \le \|\boldsymbol\beta\| +
-\|\boldsymbol\eta\|$. Read backwards, this is (a). It also shows $\{\mathbf
-o \in \mathcal V\} \subseteq \{\|\mathbf e\|_\infty \ge d(\mathbf
-u^\star)\}$, which is (b). Both statements weaken as $d$ shrinks, so a
-lower bound on $d(\mathbf u^\star)$, such as that of
-Lemma~\ref{lem:idm-grid}, may replace it.
-\end{idmproof}
+\|\boldsymbol\eta\|$. Hence $\|\boldsymbol\beta\| + \|\boldsymbol\eta\| <
+d(\mathbf u^\star)$ keeps a point foot out of voids, and, given the
+information at the decision (which fixes $\zeta$, $\mathbf u^\star$,
+$\mathbf u$ and $\mathcal V$), a void landing is no more likely than
+$\|\mathbf e\|_\infty \ge d(\mathbf u^\star)$. A lower bound on $d(\mathbf
+u^\star)$, such as that of Lemma~\ref{lem:idm-grid}, may replace it.
 
 \paragraph{Where $\boldsymbol\beta$ comes from.}
 \looseness=-1 With $\tilde{\mathbf u} := I_\star(\zeta,\mathbf u^\star)$,
@@ -279,7 +250,8 @@ Eq.~\eqref{eq:forward}, $\bar F_c(\zeta,\mathbf u) = \mathbf u +
 \mathbb E[\boldsymbol\delta_c \mid \zeta,\mathbf u]$, so a landing offset
 that depends only weakly on the command gives $L \approx 1$. The second
 term, the relabelling bias, vanishes under Assumption~\ref{as:idm-exact}
-(steps 1--3 of the proof of Proposition~\ref{prop:idm-mean}) and equals
+(step~3 of the proof of Proposition~\ref{prop:idm-mean}(b), which uses
+(i)--(iii) only) and equals
 $-\Lambda(\mathbf u^\star - \bar{\mathbf o})$ in the setting of
 Proposition~\ref{prop:idm-shrink}.
 
