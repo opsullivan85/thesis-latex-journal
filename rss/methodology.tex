@@ -8,13 +8,13 @@
 \looseness=-1 Each tick, GaitNet scores every step that
 Sec.~\ref{sec:setup} allows against the no-step option and starts at
 most one, while the other legs keep their commands. Beyond these rules,
-it never chooses a gait phase, leg pair, or contact sequence, and nothing
-in its action space ties steps to a cycle. To build candidates, vertical terrain rays on a
+its action names no gait phase, leg pair, or contact sequence; these
+follow from when it starts steps, and nothing ties steps to a cycle. To build candidates, vertical terrain rays on a
 grid of spacing $h$ around each hip mark a cell safe when the ground under it
 lies within reach below the hip, and unsafe when it is a void or the ray
 misses. The unsafe region is
 then grown by $k$ cells on every side, so
-that no unsafe ray lies within the candidate margin $m = m_{c_0} = kh$
+that no unsafe ray lies within the candidate margin $m = kh$
 of a remaining safe cell along the grid axes
 (Sec.~\ref{subsec:idm-theory}). No other reach, edge, or kinematic rule
 is applied. For each leg that may step,
@@ -65,9 +65,9 @@ a choice and an unclipped swing time $T \sim \mathcal N(T_i,
 and $T_i$. The projection $W_h$, the attention output projections, and the
 last layer of each feed-forward block start at zero, so GaitNet begins
 as exactly the per-candidate network of \citet{Sullivan2025}, which
-scores each candidate alone from $\mathbf x_g$ and $\mathbf q_i$, and
-as there $\mathbf q_i$ ends in a zero cost entry. Training teaches it to use the history and
-compare candidates.
+scores each candidate alone from $\mathbf x_g$ and $\mathbf q_i$ (whose
+last entry, a cost, is zero in both). That the history and
+the mixer help is a hypothesis that Sec.~\ref{sec:experiments} tests.
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}
@@ -127,13 +127,16 @@ For the command $\mathbf u = I^c(\zeta, \mathbf u^\star)$, the
   \label{eq:error-split}
 \end{equation}
 The IDM acts only through $\boldsymbol\beta$, the part of the error that
-its inputs predict. A better fit shrinks $\boldsymbol\beta$, but no IDM
+its inputs predict. A better fit shrinks the fitting part of $\boldsymbol\beta$, but no IDM
 with these inputs removes $\boldsymbol\eta$. The regression of
-Eq.~\eqref{eq:idm-loss} makes $\boldsymbol\beta$ zero when the logged
-landings carry no residual and the fit is exact. Otherwise, in a
-linear-Gaussian case, it biases the landing toward the mean logged
-landing, most for footholds the logging policy seldom reached
-(App.~\ref{app:idm-proofs}).
+Eq.~\eqref{eq:idm-loss} makes $\boldsymbol\beta$ zero if the landing law is the
+same when logging and at deployment, the logged landings carry no residual, each landing is reached by a convex set of
+commands, the
+logged landings cover the desired footholds, and the fit is exact
+(Assumption~\ref{as:idm-exact}, Proposition~\ref{prop:idm-mean}). Otherwise, in a
+linear-Gaussian case, it pulls the landing toward the mean logged
+landing, in the logged landings' metric, and can be largest for footholds the logging
+policy seldom reached (Proposition~\ref{prop:idm-shrink} in App.~\ref{app:idm-proofs}).
 
 \looseness=-1 Let the \emph{clearance} $d(\mathbf u^\star) :=
 \inf_{\mathbf p \in \mathcal V} \|\mathbf p - \mathbf u^\star\|_\infty$
@@ -147,12 +150,14 @@ terrain, the mask of Sec.~\ref{subsec:method-step} gives every candidate
 a clearance of at least $m - \tfrac h2|\sin 2\varphi|$,
 with $\varphi$ the angle between the void edges and the grid axes, that
 is, $m$ for parallel edges and $m - h/2$ at $45^\circ$
-(Lemma~\ref{lem:idm-grid}). This bound holds for voids made of squares
-at least $3\sqrt2\,h$ wide, as all our tiles are (App.~\ref{app:settings}). It ignores
-perception and odometry errors and the foot's radius. On flat ground,
-the IDM cut OCS2's landing error to about this clearance
-(Sec.~\ref{subsec:exp-why}), but we have not measured how close
-GaitNet's footholds come to voids.
+(Lemma~\ref{lem:idm-grid}), for square voids at least $2\sqrt2\,h$
+wide, as all our tiles are. It is a geometric
+bound for exact terrain, not a guarantee of safe touchdowns: perception
+and odometry errors and the foot's radius reduce it. On flat ground,
+the IDM cut OCS2's RMS landing error to about the margin
+(Sec.~\ref{subsec:exp-why}), so with a Gaussian error a foothold at the margin's edge
+still lands in a void with probability about 0.08 (App.~\ref{app:idm-proofs}); we have not measured how
+close GaitNet's footholds come to voids.
 
 \subsection{Training}
 \label{subsec:method-training}
@@ -186,9 +191,9 @@ the state and candidates only.
 \looseness=-1 On OCS2, GaitNet replaces the gait scheduler of the
 \texttt{legged\_control} stack \citep{leggedcontrol,
 grandia_perceptive_2022} in Gazebo, where OCS2's NMPC plans the motion
-and a weighted WBC tracks it \verify{with stock task settings}. Its candidates are
-built as in training but with its own margin $m_{c_1}$, and the OCS2 IDM corrects its chosen
-candidate. Each step joins the steps already planned in OCS2's contact
-schedule and starts the lead $\tau_{c_1}$ after its decision. Terrain comes
+and a weighted WBC tracks it with stock task settings. Its candidates
+are built as in training, with the same margin, and the OCS2 IDM corrects
+its chosen candidate. Each step joins the steps already planned in OCS2's
+contact schedule and starts at the tick it is chosen. Terrain comes
 from a simulated RealSense D435 depth camera and odometry from OCS2's
 leg-based state estimator (App.~\ref{app:deployment}).

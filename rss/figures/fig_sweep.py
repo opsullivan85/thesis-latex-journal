@@ -1,80 +1,36 @@
-"""Plot the OCS2 void x speed sweep (Fig. fig:sweep, Sec. 5.2 of the L4DC paper).
+"""Plot the OCS2 sweep (Fig. fig:sweep, Sec. 5 of the L4DC paper).
 
-Source of every number: the author's final results of 2026-11-03 (full record on the cluster,
-/scratch/sselvaraj/gaitnet-runs/idm/inv/paper_exp/SUMMARY.md):
-the speed x void sweep table, and the trot's "existing data" of the earlier
-benchmark. Macros that must agree with the printed values live in
-constants.tex (\\corlSweep*, \\corlOcsTrialsPerPoint); this script checks them
-before it draws anything.
+Source of every number: the author's OCS2 sweep data of 2026-10-14 (the figure
+of the 2026-10-28 draft, git 486a92a:figures/plot_ocs2_results.py), confirmed
+on 2026-11-04 as the paper's sweep: GaitNet is the benchmark checkpoint
+(iteration 350); every method ran on the same worlds, 12.5 cm tiles, 80 trials
+per point; success = reach the end of a 3 m track within 1.5x the nominal time.
+A 500-trial-per-point GaitNet sweep (100 per cell, 0.05-0.30 m/s) used in drafts
+of 2026-11-03/04 had an evaluation mistake (author, 2026-11-04) and was removed
+from the paper; it is kept only in git history.
 
-Design rule (user, 2026-11-03: "the bx and wisker is not good readapple ...
-head map is notr good"): no error bars, whiskers, confidence bands or
-heatmaps. Lines with markers over the void fraction, with the values a reader
-needs printed next to the marks.
+Design rule (user, 2026-11-03): no error bars, whiskers, confidence bands or
+heatmaps. Lines with markers, the values a reader needs printed next to the
+marks. Here only GaitNet's values are printed (five lines in (a), three in
+(b) leave no room for more); App. D lists every count.
 
 Panels
-- (a) Success vs void fraction, GaitNet against OCS2's own trot. Every point
-  carries its value (one decimal, as for the pooled rates of Fig. 2; an
-  exact 100 %, the trot's 80 of 80 at 0 and 10 %, is printed as "100"):
-  GaitNet's in indigo, mostly above its line, the trot's in gray, mostly
-  below. Positions are chosen by a collision check (see "(a) values").
-- (b) GaitNet only, one line per commanded speed. The legend carries each
-  command's success over all eight void fractions (integers, as in the
-  prose macros). The 48 per-cell values are not printed: they do not fit.
-  The legend sits in the empty lower left of (b) (added 2026-11-04, to free
-  the right edge for (c)); dashed lines are the commands above the training
-  range, which the caption states.
-- (c) The EARLIER benchmark (author's data of 2026-10-14, the figure of the
-  2026-10-28 draft, git 486a92a:figures/plot_ocs2_results.py), added at the
-  author's request on 2026-11-04: an earlier GaitNet checkpoint (about 600
-  iterations of a seeded run of the same preset) and its variants, on the
-  SAME worlds as the trot of (a): GaitNet, GaitNet-Single (one leg in swing
-  at a time), Per-candidate + IDM (one training seed), GaitNet without the
-  IDM, and OCS2's own trot. One bar each: success over the whole void sweep
-  (8 void fractions x 80 trials = 640 trials, spread over 0.05-0.25 m/s).
-  The earlier checkpoint is NOT the benchmark checkpoint of (a), (b) and
-  Figs. 2 and 4; compare the bars of (c) only with each other.
+- (a) Success vs void fraction (0-70 %), 80 trials per point spread over
+  0.05-0.25 m/s: GaitNet, OCS2's own trot, GaitNet-Single (trained with one
+  leg in swing at a time, same training seed), GaitNet with the IDM switched
+  off (same weights), and Per-candidate + IDM (one training seed, trained
+  without the IDM in the loop, run with the OCS2 IDM).
+- (b) Success vs commanded speed (0.05-0.25 m/s), 80 trials per point, 10 at
+  each of the eight void fractions: GaitNet, GaitNet-Single, OCS2's own trot.
+  0.25 m/s is above GaitNet's 0.2 m/s training range (\\corlCmdVxMax).
 
-Data conventions
-- GaitNet is the benchmark checkpoint c0 (iteration 350, OCS2 IDM, depth-camera
-  terrain). Its sweep has 100 trials per cell over 8 void fractions (0-70 %) x
-  6 commanded forward speeds (0.05-0.30 m/s). Data are stored as integer
-  success counts out of 100, so a cell's count is its success rate in %.
-- Panel (a), GaitNet: per void fraction, pooled over the five commands
-  0.05-0.25 m/s (500 trials per point) to match the trot's void sweep.
-- Panel (a), OCS2's own trot: the EARLIER benchmark's void sweep (author:
-  "the trot sweep is the existing data"), 80 trials per point spread over
-  0.05-0.25 m/s, on different worlds from GaitNet's sweep. The figure labels it
-  "earlier runs, other worlds"; the comparison is therefore across worlds.
-- Panel (b): GaitNet's 48 cells, one line per command, plus the all-voids
-  value per command pooled over the 8 void fractions (800 trials per
-  command; equal trials per cell, so it is also the mean of the 8 cell
-  rates). Printed as integers so that they equal \\corlSweepFullSlowest (88),
-  \\corlSweepFullTwentyFive (72) and \\corlSweepFullThirty (62).
-- Commands 0.25 and 0.30 m/s are above the 0.2 m/s training range
-  (\\corlCmdVxMax); they are dashed and grouped under "above training range"
-  in the legend.
-- Every derived number is computed from integer counts with fractions.Fraction
-  and rounded half up (decimal.ROUND_HALF_UP); Python's round() is not used for
-  any printed or asserted value.
+Data conventions: integer success counts; every printed or asserted value is
+computed with fractions.Fraction and rounded half up (decimal.ROUND_HALF_UP).
+The counts were recovered from the 2026-10-28 figure's integer percentages
+(each maps to exactly one count of 80 under round-half-even), and their totals
+equal that draft's macros.
 
-Open \\verify items that affect this figure
-- The sweep's tile size and success criterion are unconfirmed. The text assumes
-  the earlier benchmark's 24 cm tiles and "reach the end of a 3 m track within
-  1.5x the commanded time"; both stay under \\verify in the paper.
-- If the author says GaitNet's sweep did NOT use the earlier benchmark's tiles
-  and criterion, the plan's fallback (fidelity R12b) re-renders (a) with GaitNet
-  only: set SHOW_TROT = False below.
-- The trot's SPEED sweep (63 63 59 51 41 of 80) is not plotted because its
-  void fractions are unconfirmed (\\verify in the 5.2 prose; counts in App. D).
-- Not used here: the 12.5 cm benchmark cells (incl. c0's 77 at 49 % / 0.20 m/s)
-  and the Isaac comparison belong to Figs. 2 and 4, not to this sweep.
-
-No per-seed information: the sweep is a single checkpoint, so every marker is
-one run of that checkpoint.
-
-usage: ~/miniforge3/envs/manim/bin/python -B fig_sweep.py
-       (writes fig_sweep.pdf and fig_sweep.png next to this file)
+usage: python fig_sweep.py   (writes fig_sweep.pdf and fig_sweep.png here)
 """
 import re
 import subprocess
@@ -91,49 +47,31 @@ from matplotlib.transforms import Bbox
 
 HERE = Path(__file__).resolve().parent
 CONSTANTS_TEX = HERE.parent / "constants.tex"
-SHOW_TROT = True        # fidelity R12b fallback: False plots GaitNet only in (a)
 
 # ---------------------------------------------------------------- data
 VOIDS = [0, 10, 20, 30, 40, 50, 60, 70]                 # void fraction [%]
-SPEEDS = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30]           # commanded speed [m/s]
+SPEEDS = [0.05, 0.10, 0.15, 0.20, 0.25]                 # commanded speed [m/s]
 TRAINED_MAX_SPEED = 0.2                                 # \corlCmdVxMax
-# GaitNet (c0) successes out of 100 per cell; rows = VOIDS, columns = SPEEDS.
-GRID = [
-    [100, 100, 100, 100, 99, 99],
-    [100, 100, 99, 99, 100, 98],
-    [98, 100, 97, 99, 96, 93],
-    [98, 96, 96, 97, 89, 79],
-    [89, 97, 99, 93, 87, 63],
-    [89, 87, 87, 76, 60, 38],
-    [79, 71, 68, 50, 34, 21],
-    [50, 34, 23, 17, 8, 2],
-]
-TRIALS_PER_CELL = 100                                   # \corlSweepTrialsPerCell
-N_POOLED_SPEEDS = 5                                     # 0.05-0.25 m/s in (a)
-TROT_BY_VOID = [80, 80, 70, 60, 56, 30, 24, 10]         # successes of 80
-TROT_TRIALS = 80                                        # \corlOcsTrialsPerPoint
-# (c) Earlier benchmark, success counts of 80 per void fraction (0-70 %),
-# recovered from the 2026-10-28 figure's percentages (each maps to exactly one
-# count under round-half-even); totals equal that draft's macros (529, 381,
-# 352, 471 and 410 of 640).
-EARLY_TRIALS = 80
-EARLY_BY_VOID = {
-    "GaitNet": [80, 80, 72, 72, 73, 64, 48, 40],
-    "GaitNet-Single": [69, 59, 66, 53, 54, 34, 24, 22],
+N = 80                                                  # trials per point
+BY_VOID = {          # successes of 80 per void fraction (spread over 0.05-0.25 m/s)
+    "GaitNet":             [80, 80, 72, 72, 73, 64, 48, 40],
+    "OCS2's own trot":     [80, 80, 70, 60, 56, 30, 24, 10],
+    "GaitNet-Single":      [69, 59, 66, 53, 54, 34, 24, 22],
+    "GaitNet, no IDM":     [77, 64, 51, 45, 35, 30, 29, 21],
     "Per-candidate + IDM": [78, 74, 75, 56, 53, 56, 42, 37],
-    "GaitNet, no IDM": [77, 64, 51, 45, 35, 30, 29, 21],
-    "OCS2's own trot": TROT_BY_VOID,
 }
-EARLY_PCT_SOURCE = {   # the percentages printed in the 2026-10-28 figure
-    "GaitNet": [100, 100, 90, 90, 91, 80, 60, 50],
-    "GaitNet-Single": [86, 74, 82, 66, 68, 42, 30, 28],
+BY_SPEED = {         # successes of 80 per speed (10 at each void fraction)
+    "GaitNet":         [67, 71, 69, 65, 53],
+    "GaitNet-Single":  [59, 54, 50, 43, 32],
+    "OCS2's own trot": [63, 63, 59, 51, 41],
+}
+PCT_SOURCE = {       # the integer percentages printed in the 2026-10-28 figure
+    "GaitNet":             [100, 100, 90, 90, 91, 80, 60, 50],
+    "OCS2's own trot":     [100, 100, 88, 75, 70, 38, 30, 12],
+    "GaitNet-Single":      [86, 74, 82, 66, 68, 42, 30, 28],
+    "GaitNet, no IDM":     [96, 80, 64, 56, 44, 38, 36, 26],
     "Per-candidate + IDM": [98, 92, 94, 70, 66, 70, 52, 46],
-    "GaitNet, no IDM": [96, 80, 64, 56, 44, 38, 36, 26],
-    "OCS2's own trot": [100, 100, 88, 75, 70, 38, 30, 12],
 }
-for _name, _ks in EARLY_BY_VOID.items():
-    assert [round(100 * k / EARLY_TRIALS) for k in _ks] == EARLY_PCT_SOURCE[_name], _name
-EARLY_N = len(VOIDS) * EARLY_TRIALS                    # 640 per bar
 
 
 def half_up(x: Fraction, places: str = "0.1") -> Decimal:
@@ -147,90 +85,54 @@ def pct(k: int, n: int) -> Fraction:
     return Fraction(100 * k, n)
 
 
-# Derived series.
-N_VOID = N_POOLED_SPEEDS * TRIALS_PER_CELL              # 500, \corlSweepTrialsPerVoid
-N_SPEED = len(VOIDS) * TRIALS_PER_CELL                  # 800, \corlSweepTrialsPerSpeed
-by_void_k = [sum(row[:N_POOLED_SPEEDS]) for row in GRID]
-by_speed_k = [sum(row[j] for row in GRID) for j in range(len(SPEEDS))]
-by_void_pct = [half_up(pct(k, N_VOID)) for k in by_void_k]
-trot_pct = [half_up(pct(k, TROT_TRIALS)) for k in TROT_BY_VOID]
-all_voids_int = [half_up(pct(k, N_SPEED), "1") for k in by_speed_k]
-dense = slice(4, 8)                                     # 40-70 % voids
-dense_k, dense_n = sum(by_void_k[dense]), 4 * N_VOID
-trot_dense_k, trot_dense_n = sum(TROT_BY_VOID[dense]), 4 * TROT_TRIALS
-
-# The strings drawn on the figure. One decimal, except that an exact 100 %
-# (k == n, the trot's 80 of 80 at 0 and 10 %) is printed as "100": it is
-# exact, and the shorter label fits between the two curves at 0-10 %.
-
-
-def value_label(k: int, n: int) -> str:
+def value_label(k: int, n: int = N) -> str:
+    """One decimal; an exact 100 % is printed as "100"."""
     return "100" if k == n else str(half_up(pct(k, n)))
 
 
-LABELS_A_GAITNET = [value_label(k, N_VOID) for k in by_void_k]
-LABELS_A_TROT = [value_label(k, TROT_TRIALS) for k in TROT_BY_VOID]
-LEGEND_B = [f"{SPEEDS[0]:.2f} m/s ({all_voids_int[0]} %)"] + [
-    f"{s:.2f} ({v} %)" for s, v in zip(SPEEDS[1:], all_voids_int[1:])]
-
 # ---------------------------------------------------------------- asserts
-# Every value the spec lists, checked before plotting.
-D = lambda s: [Decimal(v) for v in s.split()]  # noqa: E731
-assert len(GRID) == 8 and all(len(r) == 6 for r in GRID)
-assert all(0 <= c <= TRIALS_PER_CELL for r in GRID for c in r)
-# Data entry against the source table, row by row (rows = void 0..70 %).
-assert [" ".join(map(str, r)) for r in GRID] == [
-    "100 100 100 100 99 99", "100 100 99 99 100 98", "98 100 97 99 96 93",
-    "98 96 96 97 89 79", "89 97 99 93 87 63", "89 87 87 76 60 38",
-    "79 71 68 50 34 21", "50 34 23 17 8 2"]
-assert TROT_BY_VOID == [80, 80, 70, 60, 56, 30, 24, 10] and TROT_TRIALS == 80
-assert by_void_k == [499, 498, 490, 476, 465, 399, 302, 132], by_void_k
-assert by_void_pct == D("99.8 99.6 98.0 95.2 93.0 79.8 60.4 26.4"), by_void_pct
-assert trot_pct == D("100.0 100.0 87.5 75.0 70.0 37.5 30.0 12.5"), trot_pct
-assert LABELS_A_GAITNET == "99.8 99.6 98.0 95.2 93.0 79.8 60.4 26.4".split()
-assert LABELS_A_TROT == "100 100 87.5 75.0 70.0 37.5 30.0 12.5".split()
-assert by_speed_k == [703, 685, 669, 631, 573, 493], by_speed_k
-assert all_voids_int == D("88 86 84 79 72 62"), all_voids_int
-assert LEGEND_B == ["0.05 m/s (88 %)", "0.10 (86 %)", "0.15 (84 %)",
-                    "0.20 (79 %)", "0.25 (72 %)", "0.30 (62 %)"], LEGEND_B
-# Equal trials per cell: the pooled all-voids rate is the mean of the cell rates.
-for j, k in enumerate(by_speed_k):
-    assert pct(k, N_SPEED) == sum(Fraction(r[j]) for r in GRID) / len(VOIDS)
-# The prose's derived numbers (not drawn, but they come from these counts).
-# Dense voids (40-70 %): 1298/2000 = 64.9 % (macro 65) vs 120/320 = 37.5 % (38).
-assert (dense_k, dense_n) == (1298, 2000) and half_up(pct(dense_k, dense_n)) == Decimal("64.9")
-assert half_up(pct(dense_k, dense_n), "1") == 65
-assert (trot_dense_k, trot_dense_n) == (120, 320)
-assert half_up(pct(trot_dense_k, trot_dense_n)) == Decimal("37.5")
-assert half_up(pct(trot_dense_k, trot_dense_n), "1") == 38
-# All voids 0-70 % over 0.05-0.25 m/s: 3261/4000 (macro 82) vs 410/640 (64).
-assert half_up(pct(sum(by_void_k), 8 * N_VOID), "1") == 82
-assert half_up(pct(sum(TROT_BY_VOID), 8 * TROT_TRIALS), "1") == 64
+for _m, _ks in BY_VOID.items():
+    assert len(_ks) == len(VOIDS) and all(0 <= k <= N for k in _ks), _m
+    assert [round(100 * k / N) for k in _ks] == PCT_SOURCE[_m], _m
+for _m, _ks in BY_SPEED.items():
+    assert len(_ks) == len(SPEEDS) and all(0 <= k <= N for k in _ks), _m
+TOTAL = {m: sum(ks) for m, ks in BY_VOID.items()}
+assert TOTAL == {"GaitNet": 529, "OCS2's own trot": 410, "GaitNet-Single": 381,
+                 "GaitNet, no IDM": 352, "Per-candidate + IDM": 471}, TOTAL
+N_ALL = N * len(VOIDS)                                  # 640 per method
+POOLED = {m: str(half_up(pct(k, N_ALL))) for m, k in TOTAL.items()}
+assert POOLED == {"GaitNet": "82.7", "OCS2's own trot": "64.1", "GaitNet-Single": "59.5",
+                  "GaitNet, no IDM": "55.0", "Per-candidate + IDM": "73.6"}, POOLED
+# Prose claims that come from these counts.
+dense = slice(4, 8)                                     # 40-70 % voids
+g_dense, t_dense = sum(BY_VOID["GaitNet"][dense]), sum(BY_VOID["OCS2's own trot"][dense])
+assert (g_dense, t_dense) == (225, 120)                 # 70.3 % (macro 70) vs 37.5 % (38)
+G, T, S = BY_SPEED["GaitNet"], BY_SPEED["OCS2's own trot"], BY_SPEED["GaitNet-Single"]
+gaps_t = [pct(g - t, N) for g, t in zip(G, T)]
+assert min(gaps_t) == 5 and max(gaps_t) == Fraction(35, 2)      # "by 5 to 17.5 points"
+assert all(g > s for g, s in zip(G, S))                 # Single lower at every speed
+assert all(g > s for g, s in zip(BY_VOID["GaitNet"], BY_VOID["GaitNet-Single"]))
+_gp = [g - p for g, p in zip(BY_VOID["GaitNet"], BY_VOID["Per-candidate + IDM"])]
+assert [v for v, d in zip(VOIDS, _gp) if d <= 0] == [20], _gp   # "except 20 %"
+_gt = [g - t for g, t in zip(BY_VOID["GaitNet"], BY_VOID["OCS2's own trot"])]
+assert _gt[:3] == [0, 0, 2], _gt                        # within 2.5 points up to 20 %
+assert min(pct(d, N) for d in _gt[3:]) == 15 and max(pct(d, N) for d in _gt[3:]) == Fraction(85, 2)
+#                                                         "from 30 % on, by 15 to 42.5 points"
+assert pct(G[1] - S[1], N) == Fraction(85, 4)           # 21.25: "21 points at 0.10 m/s"
 
-# The legend values and trial counts must equal the prose macros.
+# The printed pooled values and counts must equal the prose macros.
 MACROS = dict(re.findall(r"\\newcommand\{\\(corl\w+)\}\{([^}]*)\}",
                          CONSTANTS_TEX.read_text()))
-for macro, want in {"corlSweepFullSlowest": all_voids_int[0],
-                    "corlSweepFullTwentyFive": all_voids_int[4],
-                    "corlSweepFullThirty": all_voids_int[5],
-                    "corlSweepTrialsPerCell": TRIALS_PER_CELL,
-                    "corlSweepTrialsPerVoid": N_VOID,
-                    "corlSweepTrialsPerSpeed": N_SPEED,
-                    "corlOcsTrialsPerPoint": TROT_TRIALS}.items():
-    assert Decimal(MACROS[macro]) == Decimal(want), (macro, MACROS[macro], want)
+for _m, _macro in {"GaitNet": "corlSweepFull", "GaitNet-Single": "corlSweepSingle",
+                   "Per-candidate + IDM": "corlSweepMlp", "GaitNet, no IDM": "corlSweepNoIdm",
+                   "OCS2's own trot": "corlSweepTrot"}.items():
+    assert MACROS[_macro] == POOLED[_m], (_macro, MACROS[_macro], POOLED[_m])
+assert int(MACROS["corlSweepTrialsPerMethod"]) == N_ALL
+assert int(MACROS["corlOcsTrialsPerPoint"]) == N
+assert MACROS["corlOcsDenseFull"] == str(half_up(pct(g_dense, 4 * N), "1"))
+assert MACROS["corlOcsDenseTrot"] == str(half_up(pct(t_dense, 4 * N), "1"))
+assert Decimal(MACROS["corlOcsSpeedMax"]) == Decimal(str(SPEEDS[-1]))
 assert Decimal(MACROS["corlCmdVxMax"]) == Decimal(str(TRAINED_MAX_SPEED))
-early_k = {m: sum(ks) for m, ks in EARLY_BY_VOID.items()}
-assert early_k == {"GaitNet": 529, "GaitNet-Single": 381, "Per-candidate + IDM": 471,
-                   "GaitNet, no IDM": 352, "OCS2's own trot": 410}, early_k
-EARLY_LABELS = {m: str(half_up(pct(k, EARLY_N))) for m, k in early_k.items()}
-for _m, _macro in {"GaitNet": "corlEarlyFull", "GaitNet-Single": "corlEarlySingle",
-                   "Per-candidate + IDM": "corlEarlyMlp", "GaitNet, no IDM": "corlEarlyNoIdm",
-                   "OCS2's own trot": "corlEarlyTrot"}.items():
-    assert MACROS[_macro] == EARLY_LABELS[_m], (_macro, MACROS[_macro], EARLY_LABELS[_m])
-assert int(MACROS["corlEarlyTrials"]) == EARLY_N
-assert EARLY_LABELS == {"GaitNet": "82.7", "GaitNet-Single": "59.5",
-                        "Per-candidate + IDM": "73.6", "GaitNet, no IDM": "55.0",
-                        "OCS2's own trot": "64.1"}, EARLY_LABELS
 print("all value checks passed")
 
 # ---------------------------------------------------------------- style
@@ -254,145 +156,79 @@ TITLE = dict(loc="left", fontsize=7.5, fontweight="semibold", color=INK, pad=4)
 VALUE_PT = 6.5                  # value labels of (a)
 PAD_PT = 0.8                    # gap between a marker's edge and its value [pt]
 SHIFT_PT = 3.0                  # sideways shift of a value off a line [pt]
-# Panel (b): one indigo shade per command, light (slow) to dark (fast). The
-# six steps are about evenly spaced in OKLab lightness (0.79, 0.68, 0.59,
-# 0.46, 0.36, 0.26), so neighbouring commands stay apart in grayscale.
-SPEED_COLORS = ["#A5B4FC", "#818CF8", "#6366F1", "#4338CA", "#312E81", "#1E1B4B"]
-GAITNET_MS, TROT_MS = 3.6, 4.0  # marker sizes [pt]; the trot's open square
-                                # is drawn over and around GaitNet's dot
+GAITNET_MS, TROT_MS, VARIANT_MS = 3.6, 4.0, 3.0      # marker sizes [pt]
+STYLE = {   # method -> plot style; teal = Per-candidate + IDM as in Fig. 2a
+    "GaitNet": dict(color=GAITNET, lw=1.6, marker="o", ms=GAITNET_MS, mew=0, zorder=5),
+    "OCS2's own trot": dict(color=TROT, ls=(0, (3.2, 1.8)), lw=1.2, marker="s", ms=TROT_MS,
+                            mfc="none", mec=TROT, mew=0.9, zorder=4),
+    "GaitNet-Single": dict(color="#D97706", lw=1.0, marker="^", ms=VARIANT_MS, mew=0, zorder=3),
+    "GaitNet, no IDM": dict(color="#DB2777", lw=1.0, marker="v", ms=VARIANT_MS, mew=0, zorder=3),
+    "Per-candidate + IDM": dict(color="#0D9488", lw=1.0, marker="D", ms=VARIANT_MS, mew=0,
+                                zorder=3),
+}
+EXTENT = {m: s["ms"] + (s.get("mew", 0) if s.get("mfc") == "none" else 0)
+          for m, s in STYLE.items()}                    # drawn marker extent [pt]
 
 # ---------------------------------------------------------------- layout [mm]
-# Three panels in one row (2026-11-04): (a) and (b) as before but narrower,
-# (b)'s legend inside its empty lower left, and (c) on the right, where (b)'s
-# legend used to be. Axes are placed in mm.
-FIG_W, FIG_H = 152.0, 46.0      # \textwidth of the PMLR class x 46 mm
+FIG_W, FIG_H = 152.0, 42.0      # \textwidth of the PMLR class x 42 mm
 LEFT, TOP, BOTTOM = 9.6, 4.6, 9.4
-W_A, GAP_AB, W_B, GAP_BC, W_C = 55.0, 7.0, 35.5, 17.5, 25.0
+W_A, GAP_AB, W_B = 66.0, 37.0, 37.5   # GAP_AB holds the legend column and (b)'s y labels
+LEG_X = 1.0                           # legend: mm right of (a)
 MM = 1 / 25.4
-PT_PER_MM = 72 / 25.4
 fig = plt.figure(figsize=(FIG_W * MM, FIG_H * MM))
 _h = (FIG_H - TOP - BOTTOM) / FIG_H
-_x = [LEFT, LEFT + W_A + GAP_AB, LEFT + W_A + GAP_AB + W_B + GAP_BC]
-assert _x[2] + W_C < FIG_W - 1.5, _x
+_x = [LEFT, LEFT + W_A + GAP_AB]
+assert _x[1] + W_B < FIG_W - 1.5, _x
 ax_a = fig.add_axes([_x[0] / FIG_W, BOTTOM / FIG_H, W_A / FIG_W, _h])
 ax_b = fig.add_axes([_x[1] / FIG_W, BOTTOM / FIG_H, W_B / FIG_W, _h])
-ax_c = fig.add_axes([_x[2] / FIG_W, BOTTOM / FIG_H, W_C / FIG_W, _h])
-
-Y_MAX = 114                     # headroom for the labels above 100 % in (a)
+Y_MAX = 118                     # headroom for the labels above 100 % (42 mm tall)
 
 
-def style_axes(ax, xmax):
-    ax.set_xlim(-4.5, xmax)
+def style_axes(ax, xs, pad, xlabel):
+    ax.set_xlim(xs[0] - pad, xs[-1] + 1.8 * pad)
     ax.set_ylim(0, Y_MAX)
-    ax.set_xticks(VOIDS)
+    ax.set_xticks(xs)
     ax.set_yticks(range(0, 101, 20))
-    ax.set_xlabel("Void fraction [%]", labelpad=2)
+    ax.set_xlabel(xlabel, labelpad=2)
+    ax.set_ylabel("Success [%]", labelpad=2)
     ax.grid(axis="y", color=GRIDLINE, lw=0.5, zorder=0)
     ax.spines[["top", "right"]].set_visible(False)
     ax.spines["left"].set_bounds(0, 100)   # the headroom above 100 holds labels
+    ax.spines["bottom"].set_bounds(xs[0], xs[-1])
 
 
-# ---------------------------------------------------------------- (a) by void
-# x extends past 70 % so that the values at 70 % fit right of their markers
-# (left of them the two steep segments leave no room).
-style_axes(ax_a, 78)
-ax_a.set_ylabel("Success [%]", labelpad=2)
-ax_a.tick_params(labelleft=True)
+# (a) by void fraction
+style_axes(ax_a, VOIDS, 4.5, "Void fraction [%]")
 ax_a.set_title("(a) By void fraction, 0.05–0.25 m/s", **TITLE)
-series_a = [("GaitNet", [float(pct(k, N_VOID)) for k in by_void_k], LABELS_A_GAITNET,
-             dict(color=GAITNET, lw=1.6, marker="o", ms=GAITNET_MS, mew=0,
-                  zorder=4), GAITNET_MS)]
-if SHOW_TROT:
-    series_a.append(("OCS2's own trot\n(earlier runs,\nother worlds)",
-                     [float(pct(k, TROT_TRIALS)) for k in TROT_BY_VOID], LABELS_A_TROT,
-                     dict(color=TROT, ls=(0, (3.2, 1.8)), lw=1.2, marker="s",
-                          ms=TROT_MS, mfc="none", mec=TROT, mew=0.9, zorder=5),
-                     TROT_MS + 0.9))   # drawn extent: side + edge width
-lines_a = []
-for label, ys, _, style, _ in series_a:
-    (ln,) = ax_a.plot(VOIDS, ys, label=label, **style)
-    lines_a.append(ln)
-# Lower left is empty: both curves start near 100 % and fall to the right.
-leg_a = ax_a.legend(loc="lower left", frameon=False, handlelength=2.2,
-                    borderaxespad=0.3, labelspacing=0.35, handletextpad=0.6)
+lines = {"a": {}, "b": {}}
+for m in ("Per-candidate + IDM", "GaitNet, no IDM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
+    (lines["a"][m],) = ax_a.plot(VOIDS, [float(pct(k, N)) for k in BY_VOID[m]], label=m, **STYLE[m])
 
-# ---------------------------------------------------------------- (b) by speed
-style_axes(ax_b, 73)
-ax_b.tick_params(labelleft=True)        # sharey hides them by default
-ax_b.set_title("(b) GaitNet by speed", **TITLE)
-n_in = SPEEDS.index(TRAINED_MAX_SPEED) + 1               # 4 commands in range
-handles_b = []
-# One marker shape per command, so that lines with similar values (0.10 and
-# 0.15 m/s overlap at 40-60 % voids) stay distinguishable without colour.
-MARKERS_B = ["o", "s", "^", "D", "v", "X"]
-for j, (speed, color, label) in enumerate(zip(SPEEDS, SPEED_COLORS, LEGEND_B)):
-    above = j >= n_in
-    (ln,) = ax_b.plot(VOIDS, [row[j] for row in GRID], color=color, lw=1.3,
-                      ls=(0, (3.2, 1.6)) if above else "-",
-                      marker=MARKERS_B[j], ms=2.8, mew=0, zorder=3 + j / 10,
-                      label=label)
-    handles_b.append(ln)
-# One legend in the empty lower left of (b): every line is near 100 % up to
-# 30 % voids. Values: each speed's success over all eight void fractions.
-# Dashed: above the training range (stated in the caption).
-# Compact: speeds only, two columns; each speed's success over all voids
-# (LEGEND_B values, = the prose macros) goes in the caption.
-LEGEND_B_SHORT = [f"{v:.2f}" for v in SPEEDS]
-LEGEND_B_SHORT[0] += " m/s"
-leg_b = ax_b.legend(handles=handles_b, labels=LEGEND_B_SHORT, loc="lower left", ncol=2,
-                    frameon=False, fontsize=6.3, handlelength=1.7, handletextpad=0.35,
-                    labelspacing=0.15, columnspacing=0.7, borderaxespad=0.25, borderpad=0.1)
-print("caption, (b) success over all voids per speed:", LEGEND_B)
+# (b) by speed; 0.25 m/s is above the training range (shaded x band)
+style_axes(ax_b, SPEEDS, 0.0225, "Commanded speed [m/s]")
+ax_b.set_xticklabels([f"{s:.2f}" for s in SPEEDS])
+ax_b.set_ylabel("")              # same axis as (a); its label is there
+ax_b.axvspan(TRAINED_MAX_SPEED + 0.025, SPEEDS[-1] + 0.04, color="#F3F4F6", zorder=0, lw=0)
+ax_b.set_title("(b) By speed, all void fractions", **TITLE)
+for m in ("GaitNet-Single", "OCS2's own trot", "GaitNet"):
+    (lines["b"][m],) = ax_b.plot(SPEEDS, [float(pct(k, N)) for k in BY_SPEED[m]], label=m,
+                                 **STYLE[m])
 
-# ---------------------------------------------------------------- (c) earlier benchmark
-C_TEAL, C_LIGHT_INDIGO, C_LIGHT_GRAY = "#0D9488", "#A5B4FC", "#B6BCC6"
-C_BARS = [("GaitNet", "GaitNet", dict(color=GAITNET)),
-          ("GaitNet-Single", "GaitNet-\nSingle", dict(color=C_LIGHT_INDIGO)),
-          ("Per-candidate + IDM", "Per-candidate\n+ IDM", dict(color=C_TEAL)),
-          ("GaitNet, no IDM", "GaitNet,\nno IDM", dict(color="#CBD5E1")),   # not white+indigo: that is Fig. 2's rerun
-          ("OCS2's own trot", "OCS2's\nown trot", dict(color=TROT))]
-for yi, (key, _, kw) in enumerate(C_BARS):
-    val = float(pct(early_k[key], EARLY_N))
-    ax_c.barh(yi, val, height=0.62, zorder=2, **kw)
-    ax_c.annotate(EARLY_LABELS[key], (val, yi), xytext=(1.5, 0), textcoords="offset points",
-                  ha="left", va="center", fontsize=VALUE_PT, color=INK, zorder=3)
-ax_c.set_yticks(range(len(C_BARS)))
-ax_c.set_yticklabels([lab for _, lab, _ in C_BARS], fontsize=6.5, linespacing=0.95)
-ax_c.tick_params(axis="y", length=0, pad=2)
-ax_c.invert_yaxis()
-ax_c.set_xlim(0, 100)
-ax_c.set_xticks([0, 50, 100])
-ax_c.set_xlabel("Success [%]", labelpad=2)
-for g in (25, 50, 75, 100):
-    ax_c.axvline(g, color=GRIDLINE, lw=0.5, zorder=0)
-ax_c.spines[["top", "right", "left"]].set_visible(False)
-ax_c.set_title("(c) Earlier checkpoint", x=-GAP_BC / W_C + 0.02, **TITLE)
+# One legend for both panels, a column between them.
+order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "GaitNet, no IDM", "Per-candidate + IDM"]
+leg = fig.legend(handles=[lines["a"][m] for m in order], labels=order, loc="center left",
+                 ncol=1, frameon=False, handlelength=1.7, fontsize=6.8,
+                 bbox_to_anchor=((LEFT + W_A + LEG_X) / FIG_W,
+                                 (BOTTOM + 0.5 * (FIG_H - TOP - BOTTOM)) / FIG_H),
+                 borderaxespad=0.0, borderpad=0.0, labelspacing=0.45, handletextpad=0.45)
 
-# ---------------------------------------------------------------- (a) values
-# Each value is placed at the first candidate position around its marker that
+# ---------------------------------------------------------------- GaitNet's values
+# Each value goes to the first candidate position around its marker that
 # overlaps no line, marker, legend, title or earlier value and stays inside
-# the axes. GaitNet prefers above its marker, the trot below (GaitNet's curve
-# lies above the trot's).
+# the axes; preferred above the marker (GaitNet's line is mostly the top one).
 fig.canvas.draw()
 renderer = fig.canvas.get_renderer()
 px_per_pt = fig.dpi / 72
-
-
-def polyline_px(line):
-    xy = line.get_xydata()
-    return ax_a.transData.transform(xy)
-
-
-def hits_polyline(box: Bbox, pts) -> bool:
-    """True if any segment of the polyline passes through the box."""
-    for p, q in zip(pts[:-1], pts[1:]):
-        t = np.linspace(0, 1, 400)[:, None]
-        s = p + t * (q - p)
-        inside = ((s[:, 0] > box.x0) & (s[:, 0] < box.x1)
-                  & (s[:, 1] > box.y0) & (s[:, 1] < box.y1))
-        if inside.any():
-            return True
-    return False
 
 
 def grow(box: Bbox, pt: float) -> Bbox:
@@ -400,97 +236,89 @@ def grow(box: Bbox, pt: float) -> Bbox:
     return Bbox.from_extents(box.x0 - d, box.y0 - d, box.x1 + d, box.y1 + d)
 
 
-obstacle_boxes = [leg_a.get_window_extent(renderer), ax_a.title.get_window_extent(renderer)]
-marker_boxes = []
-for (_, ys, _, _, ms), _ in zip(series_a, lines_a):
-    for x, y in zip(VOIDS, ys):
-        cx, cy = ax_a.transData.transform((x, y))
-        r = 0.5 * ms * px_per_pt
-        marker_boxes.append(Bbox.from_extents(cx - r, cy - r, cx + r, cy + r))
-polylines = [polyline_px(ln) for ln in lines_a]
-ax_box = ax_a.get_window_extent(renderer)
-placed = []
+def hits_polyline(box: Bbox, pts) -> bool:
+    """True if any segment of the polyline passes through the box."""
+    for p, q in zip(pts[:-1], pts[1:]):
+        t = np.linspace(0, 1, 400)[:, None]
+        s = p + t * (q - p)
+        if ((s[:, 0] > box.x0) & (s[:, 0] < box.x1)
+                & (s[:, 1] > box.y0) & (s[:, 1] < box.y1)).any():
+            return True
+    return False
 
 
-def candidates(r_pt: float, prefer_up: bool):
-    """(name, offset [pt], ha, va) around a marker of half-extent r_pt."""
-    d = e = r_pt + PAD_PT          # box-to-box clearance along both axes
-    f = SHIFT_PT                   # small sideways shift, still under the marker
-    up = [("N", (0, d), "center", "bottom"), ("N<", (-f, d), "center", "bottom"),
-          ("N>", (f, d), "center", "bottom"), ("NE", (e, e), "left", "bottom"),
-          ("NW", (-e, e), "right", "bottom")]
-    down = [("S", (0, -d), "center", "top"), ("S<", (-f, -d), "center", "top"),
-            ("S>", (f, -d), "center", "top"), ("SW", (-e, -e), "right", "top"),
-            ("SE", (e, -e), "left", "top")]
-    side = [("E", (d, 0), "left", "center"), ("W", (-d, 0), "right", "center")]
-    return (up + side + down) if prefer_up else (down + side + up)
+def candidates(r_pt: float):
+    d = r_pt + PAD_PT
+    f = SHIFT_PT
+    return [("N", (0, d), "center", "bottom"), ("N<", (-f, d), "center", "bottom"),
+            ("N>", (f, d), "center", "bottom"), ("NE", (d, d), "left", "bottom"),
+            ("NW", (-d, d), "right", "bottom"), ("E", (d, 0), "left", "center"),
+            ("W", (-d, 0), "right", "center"), ("S", (0, -d), "center", "top"),
+            ("SE", (d, -d), "left", "top"), ("SW", (-d, -d), "right", "top")]
 
 
-def blocked_by(box: Bbox):
-    """None if the label box is free, else what it hits."""
-    if not (box.x0 >= ax_box.x0 and box.x1 <= ax_box.x1
-            and box.y0 >= ax_box.y0 and box.y1 <= ax_box.y1):
-        return "outside axes"
-    g = grow(box, 0.4)
-    if any(g.overlaps(b) for b in obstacle_boxes):
-        return "legend or title"
-    if any(g.overlaps(b) for b in marker_boxes):
-        return "marker"
-    if any(g.overlaps(b) for b in placed):
-        return "value label"
-    # Lines: 0.4 pt of air plus half the line's width.
-    if any(hits_polyline(grow(box, 0.4 + 0.5 * ln.get_linewidth()), pl)
-           for ln, pl in zip(lines_a, polylines)):
-        return "line"
-    return None
-
-
-choice = {}
-R_CLEAR_PT = 0.5 * max(s[4] for s in series_a)
-for si, (name, ys, labels, style, ms) in enumerate(series_a):
-    for x, y, text in zip(VOIDS, ys, labels):
+def place_values(ax, xs, ks, panel_lines):
+    ax_box = ax.get_window_extent(renderer)
+    markers = []
+    for m, ln in panel_lines.items():
+        r = 0.5 * EXTENT[m] * px_per_pt
+        for cx, cy in ax.transData.transform(ln.get_xydata()):
+            markers.append(Bbox.from_extents(cx - r, cy - r, cx + r, cy + r))
+    polys = [(ln, ax.transData.transform(ln.get_xydata())) for ln in panel_lines.values()]
+    obstacles = [leg.get_window_extent(renderer), ax.title.get_window_extent(renderer)]
+    placed, chosen = [], []
+    for x, k in zip(xs, ks):
+        y, text = float(pct(k, N)), value_label(k)
         tried = []
-        # Offsets clear the larger of the two markers: at 0 and 10 % they coincide.
-        for cname, off, ha, va in candidates(R_CLEAR_PT, prefer_up=(si == 0)):
-            t = ax_a.annotate(text, (x, y), xytext=off, textcoords="offset points",
-                              ha=ha, va=va, fontsize=VALUE_PT, color=style["color"],
-                              zorder=6)
-            box = t.get_window_extent(renderer)
-            why = blocked_by(box)
-            if why is None:
-                placed.append(box)
-                choice[(si, x)] = cname
+        for name, off, ha, va in candidates(0.5 * max(EXTENT.values())):
+            t = ax.annotate(text, (x, y), xytext=off, textcoords="offset points", ha=ha, va=va,
+                            fontsize=VALUE_PT, color=GAITNET, zorder=6)
+            b = t.get_window_extent(renderer)
+            g = grow(b, 0.4)
+            if not (b.x0 >= ax_box.x0 and b.x1 <= ax_box.x1 and b.y0 >= ax_box.y0
+                    and b.y1 <= ax_box.y1):
+                why = "outside axes"
+            elif any(g.overlaps(o) for o in obstacles):
+                why = "legend or title"
+            elif any(g.overlaps(o) for o in markers):
+                why = "marker"
+            elif any(g.overlaps(o) for o in placed):
+                why = "value label"
+            elif any(hits_polyline(grow(b, 0.4 + 0.5 * ln.get_linewidth()), pl)
+                     for ln, pl in polys):
+                why = "line"
+            else:
+                placed.append(b)
+                chosen.append(name)
                 break
-            tried.append(f"{cname}: {why}")
+            tried.append(f"{name}: {why}")
             t.remove()
         else:
-            raise AssertionError(f"no free place for {name!r} {text} at {x} %: {tried}")
-print("label positions:", choice)
+            raise AssertionError(f"no free place for GaitNet {text} at {x}: {tried}")
+    return chosen
+
+
+print("label positions (a):", place_values(ax_a, VOIDS, BY_VOID["GaitNet"], lines["a"]))
+print("label positions (b):", place_values(ax_b, SPEEDS, BY_SPEED["GaitNet"], lines["b"]))
 
 # ---------------------------------------------------------------- checks
-# Nothing may leave the figure; (b)'s legend must not touch a line of (b);
-# (c)'s category labels must not reach into (b).
+# Nothing may leave the figure; the legend must not touch either panel or a
+# tick label of (b).
 fig.canvas.draw()
 fig_box = fig.bbox
-for artist in [leg_a, leg_b, ax_a.title, ax_b.title, ax_c.title, ax_a.yaxis.label,
-               ax_a.xaxis.label, ax_b.xaxis.label, ax_c.xaxis.label] + ax_a.texts + ax_c.texts \
-        + ax_c.get_yticklabels():
+for artist in [leg, ax_a.title, ax_b.title, ax_a.xaxis.label, ax_b.xaxis.label,
+               ax_a.yaxis.label, ax_b.yaxis.label] + ax_a.texts + ax_b.texts:
     b = artist.get_window_extent(renderer)
-    assert (b.x0 >= 0 and b.y0 >= 0 and b.x1 <= fig_box.x1 and b.y1 <= fig_box.y1), \
-        (artist, b, fig_box)
-_lb = grow(leg_b.get_window_extent(renderer), 0.6)
-for ln in handles_b:
-    assert not hits_polyline(_lb, ax_b.transData.transform(ln.get_xydata())), ln.get_label()
-_bx1 = ax_b.get_window_extent(renderer).x1
-for t in ax_c.get_yticklabels():
-    assert t.get_window_extent(renderer).x0 > _bx1 + 2, t.get_text()
-assert ax_c.title.get_window_extent(renderer).x0 > ax_b.title.get_window_extent(renderer).x1
-assert not ax_c.title.get_window_extent(renderer).overlaps(ax_b.title.get_window_extent(renderer))
+    assert b.x0 >= 0 and b.y0 >= 0 and b.x1 <= fig_box.x1 and b.y1 <= fig_box.y1, artist
+_lb = grow(leg.get_window_extent(renderer), 0.6)
+assert _lb.x0 > ax_a.get_window_extent(renderer).x1, "legend reaches into (a)"
+_bleft = min([t.get_window_extent(renderer).x0 for t in ax_b.get_yticklabels() if t.get_text()]
+             + [ax_b.yaxis.label.get_window_extent(renderer).x0])
+assert _lb.x1 < _bleft - 1, "legend reaches (b)'s y labels"
+assert ax_b.title.get_window_extent(renderer).x0 > ax_a.title.get_window_extent(renderer).x1
 
 fig.savefig(HERE / "fig_sweep.png", dpi=300)
-# Matplotlib embeds the OpenType (CFF) Fira Sans in a way some PDF checkers
-# flag, so the PDF that goes into the paper has its text converted to
-# outlines with Inkscape, like Fig. 1.
+# Text to outlines with Inkscape, like Figs. 1 and 2.
 raw = HERE / "fig_sweep.raw.pdf"
 fig.savefig(raw)
 subprocess.run(["inkscape", str(raw), "--export-type=pdf", "--export-text-to-path",

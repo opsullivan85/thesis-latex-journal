@@ -93,28 +93,29 @@
 \maketitle
 
 \begin{abstract}%
-  % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
-  A quadruped crossing ground with holes, or voids, must decide which leg
-  to lift, when, where, and for how long. Model-based controllers track
-  such steps well but usually follow a fixed gait. Choosing contacts
-  inside them makes their optimization mixed-integer. We present
-  GaitNet, a learned planner that makes these choices outside the
-  controller, with no gait schedule. Every \corlControlTickMs\,ms, it may
-  start one step, choosing the leg, swing time, and safe foothold, even
-  while another leg swings. An inverse footstep model (IDM), fitted on
-  logged steps, turns the chosen foothold into the command that lands
-  the foot there, and a margin around voids must cover the error it
-  cannot predict. Trained by reinforcement learning on a convex model
-  predictive controller (MPC), GaitNet ran frozen on OCS2's nonlinear MPC
+  % 2026-11-04: review R06, R19, R23; author's facts of 2026-11-04.
+  Model-based legged controllers usually follow a fixed gait, and a
+  footstep planner learned on one controller may miss footholds on
+  another. We present GaitNet, a learned planner that chooses the gait
+  outside a model-based controller, with no gait schedule, and moves
+  frozen to a new one. Every \corlControlTickMs\,ms, it may start one
+  step, choosing the leg, swing time, and safe foothold, even while
+  another leg swings. An inverse footstep model (IDM), fitted on each
+  controller's logged steps, turns the foothold into a command expected
+  to land the foot there; a hand-set margin around voids must cover the
+  error it cannot predict. Trained by reinforcement learning on a convex
+  model predictive controller (MPC), GaitNet ran on OCS2's nonlinear MPC
   and whole-body controller with only the IDM refitted. In
   \corlBenchTrialsPerArm{} Gazebo trials per run on shared worlds, with a
   simulated depth camera, it succeeded in \corlBenchFull\% against
   \corlBenchTrot\% for OCS2's own trot, and in \corlBenchFullDense\%
-  against \corlBenchTrotDense\% at \corlBenchVoidHigh\% voids. It kept
-  most of its convex-MPC success of \corlBenchIsaacIdm\% but failed on
-  both controllers without the IDM. In successful trials, it almost always
-  swung diagonal leg pairs, like the trot, but on its own timing. Restricted to them, it stayed
-  only about three percentage points above the trot.%
+  against \corlBenchTrotDense\% on the densest voids
+  (\corlBenchVoidHigh\%). Across the change of controller, simulator, and terrain sensing,
+  it kept most of its convex-MPC success of \corlBenchIsaacIdm\%, but
+  without the IDM it failed in most trials on both controllers. When it
+  swung two legs at once in successful trials, they were almost always a
+  diagonal pair, as in
+  the trot, but on its own timing.%
 \end{abstract}
 
 \begin{keywords}%

@@ -10,21 +10,19 @@ header for the column meanings, the definitions, and the caveats:
     swings are about 0.235 s against its scheduled 0.3 s.
   * Statistics are taken on the void field, from field entry to 20 s.
 
-Panels ((b) and (c) of the benchmark figure since 2026-11-04; its (a), the
-pooled success bars, is fig_bench.pdf):
+The swing figure of App. E (fig:gait). A step-rate panel (c) was removed at the
+author's request the same day ("remove ... steprate"); its numbers are still
+in gait_stats.py's report (steps_per_s) and the \corlGaitSteps* macros.
   (b) Footfall diagram. One world seed, the same for both arms, in the
       hardest cell (49 % voids, 0.20 m/s), the first WINDOW_S seconds after
       field entry. One row per leg, rows ordered FL, RR, FR, RL so that
       diagonal partners sit next to each other. A bar is a measured swing
       (foot up); white space is stance. Filled bars are the FL+RR pair and
-      open bars the FR+RL pair (no light shade here: in (c) the light indigo
-      means 0.10 m/s).
+      open bars the FR+RL pair (no light shade: light indigo means
+      GaitNet-Diagonal in (a)).
       The seed is not hand-picked: among the seeds that succeeded in that
       cell for BOTH arms, it is the one whose GaitNet feet-up shares
       (0 / 1 / 2 feet up) are closest (L1) to the cell's pooled shares.
-  (c) Steps per second against void fraction, GaitNet at each speed and the
-      trot (pooled over both speeds, since it does not change with either:
-      6.66-6.67 steps/s in every cell). Lines are labelled at their right end.
 
 The diagonal share of the two-feet-up time (GaitNet 99.1 %, trot 100 %) is
 reported in App. E (\corlGaitDiagTimePct). A feet-in-swing panel (share of time with 0 / 1 / 2 feet up)
@@ -57,10 +55,6 @@ df = gs.load()
 gs.sanity(df)
 trials = gs.all_trials(df)
 POOLED = {a: gs.summarize(trials, df, gs.cell_sel(a)) for a in gs.ARMS}
-STEPS = {(a, v, p): gs.summarize(trials, df, gs.cell_sel(a, v, p))["steps_per_s"]
-         for a in gs.ARMS for v in gs.SPEEDS for p in gs.VOIDS}
-TROT_STEPS = {p: gs.summarize(trials, df, lambda k, p=p: k[0] == "trot" and k[2] == p)["steps_per_s"]
-              for p in gs.VOIDS}
 
 EX_SPEED, EX_VOID = 0.2, 49
 WINDOW_S = 3.0
@@ -100,44 +94,22 @@ VALUE_PT = 7.0
 PAD_PT = 1.5
 HALO = dict(boxstyle="square,pad=0.1", facecolor="white", edgecolor="none")
 ARM_COLOR = {"c0": (INDIGO, LIGHT_INDIGO), "trot": (GRAY, LIGHT_GRAY)}   # (FL+RR, FR+RL)
-# Both GaitNet speeds in indigo (0.10 m/s dotted): in (a), light indigo means
-# GaitNet-Diagonal, whose gait was not measured.
-SPEED_STYLE = {0.1: dict(color=INDIGO, marker="o", ls=(0, (1, 1.6))),
-               0.2: dict(color=INDIGO, marker="o")}
 
 # ---------------------------------------------------------------- layout [mm]
 MM = 1 / 25.4
-# Since 2026-11-04 this is the right part, (b) and (c), of the benchmark figure
-# (fig:bench); its (a) is fig_bench.pdf (52 mm wide), placed to the left in
-# LaTeX with a 2 mm gap. Both are scaled by \textwidth / 152 mm, so the heights
-# and the TOP and BOTTOM margins must match fig_bench.py's (checked below).
-FIG_W, FIG_H = 98.0, 40.0
+# Since 2026-11-04 (final): a standalone figure in App. E (fig:gait). It was
+# briefly part (b) of Fig. 2, side by side with fig_bench.pdf; the author then
+# restored Fig. 2's per-cell panels and this figure moved back to App. E.
+FIG_W, FIG_H = 120.0, 40.0
 LEFT, RIGHT, TOP, BOTTOM = 17.0, 3.0, 5.0, 9.0
-RATIOS = (2.2, 1.0)
-WSPACE = 0.38
-XTICK_PAD = 3.5                         # pt; must equal fig_bench.py's
-_bench = (HERE / "fig_bench.py").read_text()
-_fw, _fh = map(float, re.search(r"^FIG_W, FIG_H = ([\d.]+), ([\d.]+)", _bench, re.M).groups())
-_bl, _br, _bt, _bb = map(float, re.search(
-    r"^LEFT, RIGHT, TOP, BOTTOM = ([\d.]+), ([\d.]+), ([\d.]+), ([\d.]+)", _bench, re.M).groups())
-assert (_fh, _bt, _bb) == (FIG_H, TOP, BOTTOM), "fig_bench.py and fig_gait.py must share height and margins"
-_bpad = float(re.search(r"^XTICK_PAD = ([\d.]+)", _bench, re.M).group(1))
-assert _bpad == XTICK_PAD, "x tick pads differ: the x labels of (a) and (b, c) would not line up"
-# The LaTeX widths must be FIG_W / 152 of \textwidth for both parts.
-_res = (HERE.parent / "results.tex").read_text()
-for _name, _w in (("bench", _fw), ("gait", FIG_W)):
-    _m = re.search(r"\\includegraphics\[width=([\d.]+)\\textwidth\]\{figures/fig_" + _name + r"\}", _res)
-    assert _m and abs(float(_m.group(1)) * 152 - _w) < 0.05, ("LaTeX width of fig_" + _name, _m and _m.group(1))
-# The example seed must equal the caption's macro.
+XTICK_PAD = 3.5                         # pt, as in fig_bench.py
 _macros = dict(re.findall(r"\\newcommand\{\\(corl\w+)\}\{([^}]*)\}", (HERE.parent / "constants.tex").read_text()))
 assert str(EX_SEED) == _macros["corlGaitExampleSeed"], (EX_SEED, _macros["corlGaitExampleSeed"])
-assert _fw + FIG_W <= 150.0, "the two parts must fit in 152 mm with a 2 mm gap"
 
 fig = plt.figure(figsize=(FIG_W * MM, FIG_H * MM))
-gsp = fig.add_gridspec(1, 2, width_ratios=RATIOS, wspace=WSPACE)
 fig.subplots_adjust(left=LEFT / FIG_W, right=1 - RIGHT / FIG_W,
                     top=1 - TOP / FIG_H, bottom=BOTTOM / FIG_H)
-ax_a, ax_b = (fig.add_subplot(gsp[i]) for i in range(2))
+ax_a = fig.add_subplot(111)          # one panel, placed by subplots_adjust
 
 
 def title(ax, text, x=0.0):
@@ -189,45 +161,8 @@ for a, name in (("c0", "GaitNet"), ("trot", "OCS2's\nown trot")):
                   xytext=(-17, 0), textcoords="offset points", ha="right", va="center",
                   fontsize=7.5, fontweight="semibold", color=ARM_COLOR[a][0], linespacing=1.0)
 # Starts over the arm labels, as (a) starts over its row labels.
-title(ax_a, f"(b) Swings, {EX_VOID} % voids, {EX_SPEED:.2f} m/s",
+title(ax_a, f"Swings, {EX_VOID} % voids, {EX_SPEED:.2f} m/s",
       x=-(LEFT - 1.0) / (ax_a.get_position().width * FIG_W))
-
-# ---------------------------------------------------------------- (c) steps/s
-for v in gs.SPEEDS:
-    ys_ = [STEPS[("c0", v, p)] for p in gs.VOIDS]
-    ax_b.plot(gs.VOIDS, ys_, lw=1.3, ms=3.0, mew=0, zorder=3, **SPEED_STYLE[v])
-    above = v == 0.2            # 0.10 m/s values go below its line, clear of the trot's
-    for p, val in zip(gs.VOIDS, ys_):
-        ax_b.annotate(f"{val:.1f}", (p, val), xytext=(0, 3.0 if above else -3.0),
-                      textcoords="offset points", ha="center",
-                      va="bottom" if above else "top", fontsize=VALUE_PT, color=INK, zorder=4,
-                      bbox=HALO)
-ys_t = [TROT_STEPS[p] for p in gs.VOIDS]
-ax_b.plot(gs.VOIDS, ys_t, color=GRAY, lw=1.2, ls=(0, (3.2, 1.8)), marker="s", ms=2.6, mew=0, zorder=3)
-for p, val in zip(gs.VOIDS, ys_t):
-    ax_b.annotate(f"{val:.1f}", (p, val), xytext=(0, -3.0), textcoords="offset points",
-                  ha="center", va="top", fontsize=VALUE_PT, color=INK, zorder=4, bbox=HALO)
-ax_b.set_xticks(gs.VOIDS)
-ax_b.spines["bottom"].set_bounds(gs.VOIDS[0] - 5, gs.VOIDS[-1] + 5)
-# Direct labels right of the last point instead of a legend.
-for txt, yv, col in (("0.20", STEPS[("c0", 0.2, 49)], INDIGO),
-                     ("0.10", STEPS[("c0", 0.1, 49)], INDIGO),
-                     ("trot", TROT_STEPS[49], GRAY)):
-    ax_b.annotate(txt, (gs.VOIDS[-1], yv), xytext=(7, 0), textcoords="offset points",
-                  ha="left", va="center", fontsize=VALUE_PT, color=col, fontweight="semibold",
-                  bbox=HALO)
-ax_b.set_xlim(21, 66)
-ax_b.set_ylim(4.0, 8.4)
-ax_b.set_yticks([4, 5, 6, 7, 8])
-ax_b.spines["left"].set_bounds(4, 8)
-ax_b.set_xlabel("Void fraction [%]", labelpad=2)
-ax_b.tick_params(axis="x", pad=XTICK_PAD)
-ax_b.set_ylabel("Steps per second", labelpad=2)
-for g in (5, 6, 7, 8):
-    ax_b.axhline(g, color=GRID, lw=0.5, zorder=0)
-ax_b.spines[["top", "right"]].set_visible(False)
-title(ax_b, "(c) Step rate")   # line labels: speed in m/s (caption)
-
 
 # ---------------------------------------------------------------- layout checks
 def layout_problems(fig):
@@ -269,4 +204,3 @@ except (FileNotFoundError, subprocess.CalledProcessError) as e:
     print("inkscape failed, kept matplotlib PDF:", e)
 print("wrote", HERE / "fig_gait.pdf")
 print("diagonal share of two-up time", {a: round(DIAG_TIME[a], 2) for a in gs.ARMS})
-print("steps/s", {k: round(v, 2) for k, v in STEPS.items()}, "trot by void", {k: round(v, 2) for k, v in TROT_STEPS.items()})

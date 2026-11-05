@@ -41,8 +41,7 @@ Data conventions:
 Open \\verify items that touch this figure's data:
 - OCS2 with IDM at 49 %/0.20 m/s is 77, as in the G125 main table; the author
   confirmed 77 on 2026-11-03 (the Gazebo-vs-Isaac table's 87 is superseded).
-  The speed x void sweep's tile size and success criterion (\\verify) do not
-  enter this figure.
+  The sweep (Fig. 3) does not enter this figure.
 
 usage: ~/miniforge3/envs/manim/bin/python -B fig_transfer_ablations.py
        (writes fig_transfer_ablations.pdf and .png next to this file)

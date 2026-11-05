@@ -14,16 +14,17 @@ in stance (on the ground), as an input or a constraint.
 \looseness=-1 At each tick, the planner takes the no-step option $\varnothing$ or
 starts a step \mbox{$a_k = (\ell, \mathbf u^\star, T)$}, which lifts leg
 $\ell$ and should land it at the desired foothold $\mathbf u^\star$ after
-a swing of duration $T \in [T_{\min}, T_{\max}]$. Since the step starts a
-fixed \emph{lead} $\tau_c$ after its decision, one decision fixes which
-leg steps, where, for how long, and when. Leg $\ell$ may step
+a swing of duration $T \in [T_{\min}, T_{\max}]$. Since the step starts at
+the tick it is chosen, one decision fixes which leg steps, where, for how
+long, and when. Leg $\ell$ may step
 only if at least \numberstringnum{\corlMinContactLegs} legs, $\ell$ among
 them, are in stance in the \emph{contact schedule} set by the planner's
-earlier steps. A chosen leg that has not yet lifted off counts as
-lifted. Hence at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs
-swing at once. The foothold $\mathbf u^\star$ must be one of the leg's
+earlier steps. A chosen leg that the controller has not yet lifted,
+as it may lift late, counts as lifted. Hence at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs
+swing at once: without a gait schedule, contacts are still constrained.
+The foothold $\mathbf u^\star$ must be one of the leg's
 candidates $\mathcal C_k^\ell$, cells near the hip drawn at random from
-those that a terrain mask with candidate margin $m_c$ marks as safe
+those that a terrain mask with candidate margin $m$ marks as safe
 (Sec.~\ref{subsec:method-step}). The planner observes the robot's state,
 a short window of its recent motion (the history), and the
 candidates (Sec.~\ref{subsec:method-network}). It sees neither the rest
@@ -55,13 +56,11 @@ the foot in a void although $\mathbf u^\star$ is safe. An
 this. Its IDM $I^c$, fitted to controller $c$, sends the command
 $\mathbf u = I^c(\zeta, \mathbf u^\star)$ expected to land the foot at
 $\mathbf u^\star$, where $\zeta = (\mathbf h_{\text{last}}, \ell, T)$
-holds the newest tick of the history, the leg, and the swing time. The
-layer also applies the lead.
+holds the newest tick of the history, the leg, and the swing time.
 
 \noindent\textbf{Problem 1 (planning on the training controller).}
 \looseness=-1 The planner is trained with the \emph{training controller} $c_0$, the
-convex MPC of \citet{dicarlo_dynamic_2018}, with no lead ($\tau_{c_0} =
-0$). The controller's parameters, including its lift-off delay, are
+convex MPC of \citet{dicarlo_dynamic_2018}. The controller's parameters, including its lift-off delay, are
 redrawn at every reset (Sec.~\ref{subsec:method-training}). With
 $I^{c_0}$ fitted beforehand and frozen, we seek the planner that
 maximizes the expected discounted return $\mathbb E[\sum_{k \ge 0}
@@ -76,14 +75,11 @@ or track-completion term, the return is only a proxy for trial success
 (Sec.~\ref{subsec:exp-setup}).
 
 \noindent\textbf{Problem 2 (deployment on a new controller).}
-\looseness=-1 The \emph{new controller} $c_1$ is OCS2's NMPC and WBC,
-with a lead $\tau_{c_1}$. The planner is frozen, and
-only $I^{c_1}$ is fitted, by regression on steps that $c_1$ executed
+\looseness=-1 The \emph{new controller} $c_1$ is OCS2's NMPC and WBC.
+The planner is frozen, and only $I^{c_1}$ is fitted, by regression on steps that $c_1$ executed
 (Sec.~\ref{subsec:method-idm}). The goal is that the planner succeeds on
 held-out worlds (Sec.~\ref{subsec:exp-setup}) at a rate comparable to or
 above that of $c_1$ with its own gait. Moving to $c_1$ also changes the
-simulator, odometry, and terrain source (a depth camera), and in one of
-our tests the tile size. The lead and the candidate margins are set by
-hand, $m_{c_0}$ for exact terrain and $m_{c_1}$ for a map built from the
-depth images (App.~\ref{app:settings}). We tuned $\tau_{c_1}$ and $m_{c_1}$ with
-the same planner on separate worlds.
+simulator, odometry, and terrain source (a depth camera). No planner
+setting is tuned for $c_1$: the hand-set candidate margin $m$ stays the
+same on the depth map that all methods share (App.~\ref{app:deployment}).

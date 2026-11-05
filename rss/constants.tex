@@ -4,8 +4,8 @@
 % Source of truth: gaitnet-docs/ (methodology.md, training-setup.md,
 % experiment-setup.md, results.md, runs.md), state of 2026-10-13. Each block
 % names the file and section it comes from. The policy is SC-idm@1590
-% (inverse footstep model in the loop); the OCS2 benchmark instead uses a
-% ~600-iteration seeded run of the final preset (author, 2026-10-16). The paper calls the method GaitNet;
+% (inverse footstep model in the loop); the OCS2 evaluation instead uses
+% iteration 350 of one of five seeded runs (author, 2026-11-03/04). The paper calls the method GaitNet;
 % gaitnet-docs calls the same network GaitNet-T.
 %
 % Convention: every macro below holds a bare value (a number, or a short
@@ -137,8 +137,7 @@
 \newcommand{\corlIdmStartIteration}{890}
 \newcommand{\corlTotalTransitions}{1.63 \times 10^{8}}
 % Author, 2026-11-03: training the benchmark checkpoint (350 iterations)
-% took about 4 h on one RTX GPU (350 x 33.4 s = 3.2 h of PPO). Was 5.5 h for
-% the ~600-iteration run of 2026-10-16.
+% took about 4 h on one RTX GPU (350 x 33.4 s = 3.2 h of PPO).
 \newcommand{\corlTrainHours}{4}
 % Seconds per PPO iteration on one RTX PRO 6000 Blackwell (training-setup.md 11: 33-35 s; r3 rerun 33.4 s).
 \newcommand{\corlTrainSecPerIter}{33}
@@ -256,58 +255,40 @@
 % still to confirm (\verify in results.tex).
 % The trot's 12 % at 70 % voids was confirmed by the author on 2026-10-14.
 \newcommand{\corlOcsTrialsPerPoint}{80}
-% Author, 2026-10-16: the GaitNet checkpoint is a seeded run of the final
-% preset (--preset sc_idm: from scratch, IDM in the loop from iteration 0,
-% forward commands), at about 600 iterations, where it peaked; seed and
-% exact iteration still to confirm. This replaces the 2026-10-14 statement
-% "SC-idm@1000 (unseeded run, IDM in the loop from iteration 890)".
 % Author, 2026-10-14: per-candidate = first of several seeded runs of the
 % same recipe; track 3 m, time limit 1.5 x (3 m / commanded speed); world
 % seeds disjoint from tuning, IDM-data and camera-development seeds; OCS2
 % landing error RMS 6 cm without the IDM, 2 cm with it.
-% Author, 2026-11-03: the benchmark checkpoint is iteration 350 of one of
-% five seeded runs, picked at random; training took about 4 h on one RTX GPU.
-% (Replaces the ~600-iteration run of 2026-10-16.) How the iteration was
-% chosen is still to confirm (\verify in results.tex).
+% Author, 2026-11-03/04: the checkpoint is iteration 350 of one of five
+% seeded runs, the run picked at random and 350 its best checkpoint on the
+% training controller in Isaac, fixed before any OCS2 trial; training took
+% about 4 h on one RTX PRO 6000 Blackwell GPU. The 80-trial sweep (Fig. 3)
+% used the same checkpoint (author, 2026-11-04).
 \newcommand{\corlOcsCheckpoint}{350}
 \newcommand{\corlNumSeedsGaitNet}{five}
 \newcommand{\corlOcsTrackM}{3}
 \newcommand{\corlOcsTimeFactor}{1.5}
 \newcommand{\corlOcsLandRmsNoIdm}{6}
 \newcommand{\corlOcsLandRmsIdm}{2}
-% Author, 2026-10-14: steps per metre walked on OCS2, GaitNet-Single vs
-% GaitNet; OCS2 IDM fitted on fewer than 20k logged steps (seeds 61-110);
+% Author, 2026-10-14: steps per metre walked on OCS2 in the sweep's
+% successful trials, GaitNet-Single vs GaitNet; OCS2 IDM fitted on fewer than 20k logged steps (seeds 61-110);
 % anchoring and the foothold region are not used with the OCS2 IDM.
 \newcommand{\corlOcsStepsPerMSingle}{45.6}
 \newcommand{\corlOcsStepsPerMFull}{32.4}
 \newcommand{\corlOcsMaxVoidPct}{70}
 \newcommand{\corlOcsSpeedMin}{0.05}
 \newcommand{\corlOcsSpeedMax}{0.25}
-% 2026-11-03: GaitNet's sweep numbers below are the new c0 sweep (iteration
-% 350, 100 trials per cell, voids 0-70 %, 0.05-0.30 m/s); by void they pool
-% the five commands 0.05-0.25 m/s (500 trials per point) to match the trot's
-% void sweep, which is the earlier benchmark's data (author, 2026-11-03:
-% "the trot sweep is the existing data"; 80 trials per point).
-%   c0 by void  (/500): 499 498 490 476 465 399 302 132
-%   c0 by speed (/800, all eight voids): 703 685 669 631 573 493
-\newcommand{\corlOcsAllFull}{82}      % c0, 0-70 % voids, 3261/4000 = 81.5
+% Sweep (Fig. 3): 80 trials per point for every method; counts at \corlSweep*.
 \newcommand{\corlOcsAllTrot}{64}      % 410/640 = 64.1
-% *Ci* macros in the next lines: unused in the text since 2026-11-03 (no p-values or intervals, user); kept for the record
-\newcommand{\corlOcsDenseFull}{65}    % c0, 40-70 % voids, 1298/2000 = 64.9
-\newcommand{\corlOcsDenseFullCiLow}{63}
-\newcommand{\corlOcsDenseFullCiHigh}{67}
+% *Ci* macros: Wilson 95 % intervals, kept for the record; the text prints its intervals as literals.
+\newcommand{\corlOcsDenseFull}{70}    % c0, 40-70 % voids, 225/320 = 70.3 (80-trial sweep)
+\newcommand{\corlOcsDenseFullCiLow}{65}   % Wilson 95 %, 225/320
+\newcommand{\corlOcsDenseFullCiHigh}{75}
 \newcommand{\corlOcsDenseTrot}{38}    % 120/320 = 37.5
 \newcommand{\corlOcsDenseTrotCiLow}{32}
 \newcommand{\corlOcsDenseTrotCiHigh}{43}
-\newcommand{\corlSweepSpeedMax}{0.30}
-\newcommand{\corlSweepTrialsPerCell}{100}
-\newcommand{\corlSweepTrialsPerVoid}{500}
-\newcommand{\corlSweepTrialsPerSpeed}{800}
-\newcommand{\corlSweepFullSlowest}{88}   % 703/800 at 0.05 m/s
-\newcommand{\corlSweepFullTwentyFive}{72} % 573/800 at 0.25 m/s
-\newcommand{\corlSweepFullThirty}{62}    % 493/800 at 0.30 m/s
-% Stale since 2026-11-03: arms of the ~600-iteration checkpoint that were not
-% rerun on iteration 350. Kept for the record; no longer cited in the text.
+% Integer-rounded sweep rates of the other methods (the text uses \corlSweep*);
+% kept for the record.
 \newcommand{\corlOcsAllSingle}{60}    % 381/640 = 59.5
 \newcommand{\corlOcsAllNoIdm}{55}     % 352/640 = 55.0
 \newcommand{\corlOcsAllMlp}{74}       % 471/640 = 73.6
@@ -425,31 +406,34 @@
 \newcommand{\corlTrotSwing}{0.3}
 \newcommand{\corlTrotPeriod}{0.6}
 
-% ---- Earlier benchmark and checkpoint (Fig. 3c; restored 2026-11-04) -----
-% The author's OCS2 benchmark of 2026-10-14 (figure of the 2026-10-28 draft,
-% git 486a92a:figures/plot_ocs2_results.py): an earlier GaitNet checkpoint
-% (about 600 iterations of a seeded run of the same preset, \verify) and its
-% variants on the SAME worlds as OCS2's own trot of Fig. 3a; depth-camera
-% terrain, OCS2 IDM, 0-70 % voids x 80 trials (= 640 per method) spread over
-% 0.05-0.25 m/s; 3 m track within 1.5x the commanded time. Counts recovered
-% from that figure's percentages (unique under round-half-even) and equal to
-% that draft's macros. Per void fraction 0, 10, ..., 70 % (of 80):
+% ---- Sweep (Fig. 3; author's answers of 2026-11-04) ------------------------
+% The author's OCS2 sweep of 2026-10-14 (figure of the 2026-10-28 draft, git
+% 486a92a:figures/plot_ocs2_results.py). Author, 2026-11-04: GaitNet is the
+% benchmark checkpoint (iteration 350); GaitNet-Single was TRAINED with one leg
+% in swing at a time (same training seed); "GaitNet, no IDM" is GaitNet's
+% weights with the IDM switched off; Per-candidate + IDM (one training seed)
+% was trained WITHOUT the IDM in the loop and runs with the OCS2 IDM; all on the
+% same worlds, 12.5 cm tiles, success = 3 m within 1.5x the nominal time.
+% Void sweep: 80 trials per void fraction spread over 0.05-0.25 m/s. Speed
+% sweep: 80 per speed, 10 at each void fraction. Counts recovered from that
+% figure's percentages (unique under round-half-even), equal to its macros.
+% Per void fraction 0, 10, ..., 70 % (of 80):
 %   GaitNet        80 80 72 72 73 64 48 40  = 529
 %   GaitNet-Single 69 59 66 53 54 34 24 22  = 381
 %   Per-cand.+IDM  78 74 75 56 53 56 42 37  = 471 (one training seed)
 %   GaitNet no IDM 77 64 51 45 35 30 29 21  = 352
 %   OCS2 trot      80 80 70 60 56 30 24 10  = 410
-% Speed sweep (separate trials, 0.05-0.25 m/s, of 80): GaitNet 67 71 69 65 53,
-% GaitNet-Single 59 54 50 43 32, trot 63 63 59 51 41.
-\newcommand{\corlEarlyCheckpoint}{600}     % "about 600 iterations" (author, 2026-10-16)
-\newcommand{\corlEarlyTrials}{640}         % per method, void sweep
-\newcommand{\corlEarlyFull}{82.7}          % 529/640
-\newcommand{\corlEarlySingle}{59.5}        % 381/640
-\newcommand{\corlEarlyMlp}{73.6}           % 471/640
-\newcommand{\corlEarlyNoIdm}{55.0}         % 352/640
-\newcommand{\corlEarlyTrot}{64.1}          % 410/640
+% Per speed 0.05-0.25 m/s (of 80): GaitNet 67 71 69 65 53, GaitNet-Single
+% 59 54 50 43 32, trot 63 63 59 51 41. 95 % Wilson intervals (prose): GaitNet
+% 82.7 [79.5, 85.4], Single 59.5 [55.7, 63.3], trot 64.1 [60.3, 67.7].
+\newcommand{\corlSweepTrialsPerMethod}{640}         % per method, void sweep
+\newcommand{\corlSweepFull}{82.7}          % 529/640
+\newcommand{\corlSweepSingle}{59.5}        % 381/640
+\newcommand{\corlSweepMlp}{73.6}           % 471/640
+\newcommand{\corlSweepNoIdm}{55.0}         % 352/640
+\newcommand{\corlSweepTrot}{64.1}          % 410/640
 % GaitNet-Single's step length: \corlOcsStepsPerMSingle (45.6) against
-% \corlOcsStepsPerMFull (32.4) steps per metre for the earlier GaitNet, in
+% \corlOcsStepsPerMFull (32.4) steps per metre for GaitNet, in
 % successful trials. One leg at a time, swings >= \corlSwingDurationMin s and
 % starts only on \corlControlTickMs ms ticks cap it at about 8 steps/s; at
 % 0.25 m/s it would need 0.25 x 45.6 = 11.4 (binds from about 0.20 m/s:
@@ -485,3 +469,21 @@
 \newcommand{\corlGaitNonDiagEasy}{0.1}     % 26 % voids, 0.10 m/s (0.11)
 \newcommand{\corlGaitNonDiagMildTrials}{53} % 0.20 m/s, 26 %: trials with >= 1 non-diagonal pair ...
 \newcommand{\corlGaitNonDiagMildOf}{96}     % ... of 96 successful trials (GaitNet-Diagonal lost 0 points in this cell)
+
+% ---- Sweep (Fig. 3), 2026-11-04 -------------------------------------------
+% The paper's sweep is the 80-trial-per-point data (author, 2026-11-04): the
+% benchmark checkpoint (iteration 350), all methods on the same worlds, 12.5 cm
+% tiles, success = 3 m within 1.5x the nominal time; speed sweep: 10 trials at
+% each of the eight void fractions. The \corlSweep* macros above (renamed from
+% \corlEarly*) are its pooled rates. Removed: the macros of a 500-trial GaitNet
+% sweep that had an evaluation mistake (author):
+%   \newcommand{\corlSweepTrialsPerCell}{100}
+%   \newcommand{\corlSweepTrialsPerVoid}{500}
+%   \newcommand{\corlSweepTrialsPerSpeed}{800}
+%   \newcommand{\corlSweepFullSlowest}{88}   % 703/800 at 0.05 m/s
+%   \newcommand{\corlSweepFullTwentyFive}{72} % 573/800 at 0.25 m/s
+%   \newcommand{\corlSweepFullThirty}{62}    % 493/800 at 0.30 m/s
+%   \newcommand{\corlSweepFullAllVoids}{81.5} % the same, one decimal: GaitNet over Fig. 3a (checked by fig_sweep.py)
+%   \newcommand{\corlSweepSpeedMax}{0.30}
+%   \newcommand{\corlEarlyCheckpoint}{600}     % "about 600 iterations" (author, 2026-10-16)
+%   \newcommand{\corlOcsAllFull}{82}      % c0, 0-70 % voids, 3261/4000 = 81.5

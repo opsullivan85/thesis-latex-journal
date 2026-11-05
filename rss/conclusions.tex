@@ -3,26 +3,21 @@
 % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 
 \looseness=-1 Trained on a convex MPC, GaitNet ran frozen on OCS2 with
-only its IDM refitted. On the benchmark, it beat OCS2's own trot,
-most on the densest voids, and kept most of its success from the
-training controller, but it failed on both controllers without the IDM.
-All results are in simulation, on one pair of controllers
-\pending{(GaitNet has not yet run on a Unitree Go1)}, and the lead and
-margin were tuned with the same planner. Only one of GaitNet's
-\corlNumSeedsGaitNet{} training seeds ran on OCS2, while the
-per-candidate network's four seeds spread over 14 percentage points, so
-which network transfers better is open. In its successful trials,
-GaitNet almost always swung diagonal pairs, on its own timing, and we
-did not log its failed trials, so why GaitNet-Diagonal lost success
-mainly in the hardest cell remains open. We have not compared the
-refitted IDM with the training controller's IDM or a constant or
-speed-dependent offset per leg, a comparison that would show how much of
-the gain needs learning. Nor have we measured landing errors next to
-voids, where the candidate margin must cover what the IDM's inputs do
-not predict
-(Sec.~\ref{subsec:idm-theory}). Our tests are mild, with speeds up to
-\corlSweepSpeedMax\,m/s and noise-free depth images, and the
-benchmark's success criterion does not penalize a robot that stops
-halfway, unlike the sweep's. Future work will test whether fewer logged
-steps \citep{xie_fada_2026} or relogging with the deployed IDM
+only its IDM refitted. On the benchmark, it beat OCS2's own trot, most
+on the densest voids, and kept most of its success from the training
+controller, but without the IDM it failed in most trials on both
+controllers. In successful trials, it kept the trot's
+diagonal pairing but chose its own timing. \emph{Policies:}
+only one of GaitNet's \corlNumSeedsGaitNet{} training seeds ran on OCS2,
+while the per-candidate network's four spread over 14 percentage
+points, so which network transfers better is open. \emph{Controllers:}
+we tested one pair, in simulation (GaitNet has not yet run on a
+Unitree Go1), and have not compared the refitted IDM with the training
+controller's IDM or a constant or speed-dependent offset per leg. \emph{Terrain:} flat
+ground with square voids of one size, at speeds up to
+\corlOcsSpeedMax\,m/s; the benchmark's success criterion does not
+penalize a robot that stops halfway, unlike the sweep's.
+\emph{Perception:} depth images were noise-free, and we have not
+measured landing errors next to voids (Sec.~\ref{subsec:idm-theory}). Future work will test whether fewer
+logged steps \citep{xie_fada_2026} or relogging with the deployed IDM
 \citep{christiano_transfer_2016} cheapens the refit.

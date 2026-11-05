@@ -12,18 +12,20 @@ Setting: OCS2 in Gazebo, simulated depth-camera terrain, 12.5 cm tiles,
 trials, so a cell's success count equals its success rate in percent.
 Success: no fall and at least half of v * duration walked.
 
-Panels (since 2026-11-04; author: drop the per-cell panels, the sweep of
-Fig. fig:sweep covers the trend over void fractions):
-  (a) All six cells: one horizontal bar per arm, its pooled rate printed at
-      the bar end. (b) and (c) of the same figure are fig_gait.pdf, placed to
-      the right in LaTeX. The per-cell counts are no longer drawn; they are
-      still checked below and printed for App. D. The former panels showed
-      GaitNet, GaitNet-Diagonal and the trot per cell at 0.10 and 0.20 m/s.
+Panels:
+  (a) 0.10 m/s and (b) 0.20 m/s: grouped bars by void fraction, one bar per
+      arm (GaitNet, GaitNet-Diagonal, OCS2's own trot), the cell's success
+      count printed on top of every bar.
+  (c) All six cells: one horizontal bar per arm, its pooled rate printed at
+      the bar end.
 
 Design rule (user, 2026-11-03, after commit 098def2): no error bars, whiskers,
 confidence bands or heatmaps. Plain bars starting at 0, with the values a
-reader needs printed on the marks. Run-to-run variation is shown only by the
-rerun bar in (a) and is put into words in the prose.
+reader needs printed on the marks. The rerun is not drawn (author,
+2026-11-04: "remove gaitnet rerun"); its counts stay below and are checked;
+the prose states 95 % intervals instead. History: on 2026-11-04 the per-cell
+panels were dropped for a swing diagram, then restored at the author's
+request ("then add back the image"); the swing diagram is in App. E.
 
 Arms (names as in the paper):
   GaitNet          = c0, iteration 350 of one of five seeded runs, OCS2 IDM.
@@ -40,7 +42,7 @@ Arms (names as in the paper):
 Data conventions:
   * Counts are integers. Every rate is Fraction(100 * k, n) rounded half up
     (decimal.ROUND_HALF_UP): integers for cells, one decimal for pools.
-  * Per-candidate + IDM appears only pooled: no claim uses its per-cell means,
+  * Per-candidate + IDM appears only in (c): no claim uses its per-cell means,
     and a bare mean next to GaitNet's cells would rank the two networks cell
     by cell, which the paper does not do.
 
@@ -68,6 +70,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
+from matplotlib.patches import Patch
 from matplotlib.text import Text
 from matplotlib.transforms import Bbox
 
@@ -112,13 +115,12 @@ def pool(counts, idx) -> tuple[int, int]:
 
 
 SLOW, FAST, ALL = (0, 1, 2), (3, 4, 5), tuple(range(6))
-BAR_ARMS = ("GaitNet", "GaitNet-Diagonal", "OCS2's own trot")   # per-cell checks (App. D)
+BAR_ARMS = ("GaitNet", "GaitNet-Diagonal", "OCS2's own trot")   # (a), (b)
 
-# Per arm, the three cell counts (= rates in %, n = 100) at 0.10 and at 0.20 m/s;
-# no longer drawn (former panels a, b), kept for the checks and App. D.
+# (a), (b): per arm, the three cell counts (= rates in %, n = 100).
 PANEL_A = {a: CELLS[a][:3] for a in BAR_ARMS}
 PANEL_B = {a: CELLS[a][3:] for a in BAR_ARMS}
-# Panel (a): per arm, the exact pooled rate over all six cells.
+# (c): per arm, the exact pooled rate over all six cells.
 MLP_K = sum(sum(s) for s in PER_CANDIDATE_SEEDS)
 MLP_N = N_CELL * 6 * len(PER_CANDIDATE_SEEDS)
 # Equal trials per seed, so the pooled rate equals the mean of seed rates.
@@ -210,15 +212,15 @@ INK, GRID = "#1F2937", "#E5E7EB"
 INDIGO, GRAY, TEAL = "#4F46E5", "#4B5563", "#0D9488"
 LIGHT_INDIGO = "#A5B4FC"
 VALUE_PT = 7.0                          # value labels on the bars
-ROW_PT = 7.0                            # row labels of (a)
+ROW_PT = 7.0                            # row labels of (c)
 PAD_PT = 1.5                            # gap between a bar end and its value [pt]
 # A white box behind every value label cuts the light grid lines where a label
-# crosses one. Its
+# crosses one (the label of the 63 % bar in (b) reaches the 75 % line). Its
 # pad (0.1 x 7 pt = 0.7 pt) is less than PAD_PT, so it never touches a bar.
 HALO = dict(boxstyle="square,pad=0.1", facecolor="white", edgecolor="none")
 # GaitNet and the trot are both dark (#4F46E5 and #4B5563 have about the same
-# luminance), GaitNet-Diagonal light. Light indigo means GaitNet-Diagonal only:
-# fig_gait.py draws both GaitNet speeds in (c) in indigo.
+# luminance), so GaitNet-Diagonal is light: every group reads dark-light-dark
+# in the same order, in colour and in grey.
 BAR_STYLE = {
     "GaitNet":             dict(facecolor=INDIGO, edgecolor=INDIGO),
     "GaitNet, rerun":      dict(facecolor="white", edgecolor=INDIGO),
@@ -226,42 +228,74 @@ BAR_STYLE = {
     "Per-candidate + IDM": dict(facecolor=TEAL, edgecolor=TEAL),
     "OCS2's own trot":     dict(facecolor=GRAY, edgecolor=GRAY),
 }
-EDGE_LW = 0.8                           # visible only on the open rerun bar
+EDGE_LW = 0.8                           # bar edge width (all bars filled; the rerun is not drawn)
 
 # ---------------------------------------------------------------- layout [mm]
-# Since 2026-11-04 (author: drop the per-cell panels, the sweep covers the void
-# trend) this script draws only the pooled panel, as (a) of a figure whose (b)
-# and (c) are fig_gait.pdf. The two PDFs sit side by side in one figure
-# environment, each scaled by \textwidth / 152 mm like every other figure, so
-# their heights and their TOP and BOTTOM margins must match fig_gait.py's
-# (checked there). The per-cell counts above stay: they are checked against
-# the source and printed in App. D (printed below for that paragraph).
-FIG_W, FIG_H = 52.0, 40.0               # left part of the 152 mm figure
-LEFT, RIGHT, TOP, BOTTOM = 22.0, 4.0, 5.0, 9.0   # LEFT: the row labels
-XTICK_PAD = 3.5                         # pt; must equal fig_gait.py's (x labels on one line)
-GRID_AT = (25, 50, 75)                  # light vertical lines behind the bars
+FIG_W, FIG_H = 152.0, 44.0              # \textwidth of the PMLR class x 44 mm
+LEFT, RIGHT, TOP, BOTTOM = 10.0, 3.0, 7.6, 8.8
+GAP = 3.0                               # between (a) and (b)
+GUTTER = 26.0                           # between (b) and (c): the row labels of (c)
+RATIOS = (1.0, 1.0, 0.64)               # widths of (a), (b), (c)
+# Width left for the three panels: GAP between (a) and (b), GUTTER between (b) and (c).
+_avail = FIG_W - LEFT - RIGHT - GAP - GUTTER
+WIDTHS = [r * _avail / sum(RATIOS) for r in RATIOS]
+# A GridSpec column for the gutter; wspace is a fraction of the mean column width.
+_cols = WIDTHS[:2] + [GUTTER - 2 * GAP] + WIDTHS[2:]
+WSPACE = GAP / (sum(_cols) / len(_cols))
+
+SLOT, BAR_W = 0.28, 0.25                # bar pitch and width within a group [groups]
+OFFSET = {"GaitNet": -SLOT, "GaitNet-Diagonal": 0.0, "OCS2's own trot": SLOT}
+Y_TOP = 114                             # headroom for the labels on 100 % bars
+GRID_AT = (25, 50, 75)                  # no line at 100: labels of 93-100 % bars cross it
 
 
 def title(ax, text):
-    """Panel title, left-aligned with the figure's left edge (over the row labels)."""
-    ax.set_title(text, loc="left", fontsize=7.5, fontweight="semibold", color=INK, pad=3,
-                 x=-(LEFT - 1.0) / (FIG_W - LEFT - RIGHT))
+    ax.set_title(text, loc="left", fontsize=7.5, fontweight="semibold", color=INK, pad=3)
+
+
+def draw_cells(ax, panel):
+    """Grouped bars by void fraction, the cell's value on top of every bar."""
+    for arm, counts in panel.items():
+        for i, k in enumerate(counts):
+            x = i + OFFSET[arm]
+            ax.bar(x, k, width=BAR_W, linewidth=0, zorder=2, **BAR_STYLE[arm])
+            ax.annotate(cell_text(k), (x, k), xytext=(0, PAD_PT),
+                        textcoords="offset points", ha="center", va="bottom",
+                        fontsize=VALUE_PT, color=INK, zorder=3, bbox=HALO)
+    ax.set_xlim(-0.5, len(VOIDS) - 0.5)
+    ax.set_xticks(range(len(VOIDS)))
+    ax.set_xticklabels([str(v) for v in VOIDS])
+    ax.tick_params(axis="x", length=0, pad=3)       # same 3 pt as (c): 2.5 + 0.5
+    ax.set_xlabel("Void fraction [%]", labelpad=2)
+    ax.set_ylim(0, Y_TOP)
+    ax.set_yticks(range(0, 101, 25))
+    ax.spines["left"].set_bounds(0, 100)
+    for g in GRID_AT:
+        ax.axhline(g, color=GRID, lw=0.5, zorder=0)
+    ax.spines[["top", "right"]].set_visible(False)
 
 
 MM = 1 / 25.4
 fig = plt.figure(figsize=(FIG_W * MM, FIG_H * MM))
-ax_c = fig.add_axes([LEFT / FIG_W, BOTTOM / FIG_H,
-                     (FIG_W - LEFT - RIGHT) / FIG_W, (FIG_H - TOP - BOTTOM) / FIG_H])
+# Columns: (a), (b), an empty gutter for the row labels of (c), (c).
+gs = fig.add_gridspec(1, 4, width_ratios=_cols, wspace=WSPACE)
+fig.subplots_adjust(left=LEFT / FIG_W, right=1 - RIGHT / FIG_W,
+                    top=1 - TOP / FIG_H, bottom=BOTTOM / FIG_H)
+ax_a = fig.add_subplot(gs[0])
+ax_b = fig.add_subplot(gs[1], sharey=ax_a)
+ax_c = fig.add_subplot(gs[3])
 
-# All six cells per arm, one row each, top to bottom; the pooled rate right of
-# the bar end. The rerun is the same checkpoint as GaitNet, so it keeps
-# GaitNet's colour as an open bar.
-ROWS = ("GaitNet", "GaitNet, rerun", "GaitNet-Diagonal", "Per-candidate + IDM",
-        "OCS2's own trot")
-# One two-line label only: rows are 5.2 mm apart, too close for two adjacent
-# two-line labels. The caption says what the rerun and the seed mean are.
-ROW_LABELS = {"GaitNet, rerun": "GaitNet rerun",
-              "Per-candidate + IDM": "Per-candidate\n+ IDM"}
+draw_cells(ax_a, PANEL_A)
+draw_cells(ax_b, PANEL_B)
+ax_a.set_ylabel("Success [%]", labelpad=2)
+ax_b.tick_params(labelleft=False)
+title(ax_a, "(a) 0.10 m/s")
+title(ax_b, "(b) 0.20 m/s")
+
+# (c) All six cells per arm, one row each, top to bottom; the pooled rate
+# right of the bar end. The rerun is not drawn (see the header).
+ROWS = ("GaitNet", "GaitNet-Diagonal", "Per-candidate + IDM", "OCS2's own trot")
+ROW_LABELS = {}                          # the caption says Per-candidate + IDM is a seed mean
 for r, arm in enumerate(ROWS):
     y, v = len(ROWS) - 1 - r, PANEL_C[arm]
     ax_c.barh(y, float(v), height=0.62, linewidth=EDGE_LW, zorder=2, **BAR_STYLE[arm])
@@ -275,18 +309,21 @@ ax_c.set_yticklabels([ROW_LABELS.get(a, a) for a in ROWS], fontsize=ROW_PT,
 ax_c.tick_params(axis="y", length=0, pad=3)
 ax_c.set_xlim(0, 100)
 ax_c.set_xticks(range(0, 101, 25))
-ax_c.set_xticklabels(["0", "", "50", "", "100"])
-ax_c.tick_params(axis="x", pad=XTICK_PAD)
+ax_c.tick_params(axis="x", pad=0.5)
 ax_c.spines["bottom"].set_bounds(0, 100)
 ax_c.set_xlabel("Success [%]", labelpad=2)
 for g in GRID_AT:
     ax_c.axvline(g, color=GRID, lw=0.5, zorder=0)
 ax_c.spines[["top", "right"]].set_visible(False)
-title(ax_c, "(a) Success, all six cells")
+title(ax_c, "(c) All six cells")
 
-# The per-cell counts for App. D (one sentence per arm, 0.10 then 0.20 m/s).
-for arm in ("GaitNet", "GaitNet, rerun", "GaitNet-Diagonal", "OCS2's own trot"):
-    print(f"App. D {arm}: " + ", ".join(cell_text(k) for k in CELLS[arm]))
+# Legend in its own strip above (a) and (b): every bar in (a) and (b) reaches
+# at least 59 %, so no area inside the panels is free.
+_x_mid = (ax_a.get_position().x0 + ax_b.get_position().x1) / 2
+fig.legend(handles=[Patch(label=a, linewidth=0, **BAR_STYLE[a]) for a in BAR_ARMS],
+           loc="upper center", bbox_to_anchor=(_x_mid, 1.0), ncol=3, frameon=False,
+           fontsize=7, handlelength=1.0, handleheight=0.9, handletextpad=0.4,
+           columnspacing=1.6, borderaxespad=0.0, borderpad=0.15)
 
 
 # ---------------------------------------------------------------- layout checks
@@ -328,11 +365,18 @@ def layout_problems(fig):
             if b.overlaps(b2):
                 out.append(f"text overlap: {t.get_text()!r} / {t2.get_text()!r}")
     values = [(t, extent(t)) for ax in fig.axes for t in ax.texts]
+    legend = fig.legends[0].get_window_extent(r)
     # Value labels may pass over a grid line: their white box (zorder 3) hides
     # it (zorder 0). Bars and spines they must clear.
     for ax, b2 in data_boxes(fig, r, grid=False):
         out += [f"value label on data: {t.get_text()!r}" for t, b in values
                 if b.overlaps(b2)]
+    for ax, b2 in data_boxes(fig, r):
+        if legend.overlaps(b2):
+            out.append("legend covers data")
+    out += [f"legend covers {t.get_text()!r}" for t, b in boxes
+            if t.figure is fig and t not in fig.legends[0].get_texts()
+            and legend.overlaps(b)]
     return sorted(set(out))
 
 
