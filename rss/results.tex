@@ -11,9 +11,9 @@
 % and tests: comments in constants.tex (\corlBench*, \corlAbl*).
 % Sweep (Fig. 3): the 80-trial data of all methods, iteration 350 (author,
 % 2026-11-04); a 500-trial GaitNet sweep had an evaluation mistake and is not used.
-% 2026-11-03 figure rewrite; no tables and no per-seed displays (user);
-% figures fig_bench, fig_sweep and fig_transfer_ablations hold the data
-% (the author's results of 2026-11-03) in their scripts.
+% 2026-11-05: results in Tables 1-2 (author asked for tables; no intervals,
+% no seed spread); Fig. 4 (fig_transfer_ablations) replaced by Table 2.
+% Every learned arm = mean of five training seeds at iteration 350 (author).
 % plain figures and no p-values (user, 2026-11-03)
 % 2026-11-03 clarity pass: plain-words rewrite for outside readers; same
 % claims, numbers, \verify items, and figure data.
@@ -51,13 +51,12 @@ the robot does not fall and walks at least half the commanded distance.
 None of these world seeds was used to log the OCS2 IDM's data or to
 develop the depth pipeline.
 
-\noindent\textbf{GaitNet's checkpoint.}
-\looseness=-1 We evaluate one of \corlNumSeedsGaitNet{} runs trained
-from scratch (Sec.~\ref{subsec:method-training}) with different training
-seeds, picked at random, at iteration \corlOcsCheckpoint, its best
-checkpoint on the training controller in Isaac, fixed before any trial
-on OCS2. It took about \corlTrainHours\,h to train on one NVIDIA RTX PRO
-6000 Blackwell GPU. Only this training seed ran on OCS2. For Q2, it also runs on the training controller in Isaac at
+\noindent\textbf{Training seeds.}
+\looseness=-1 We train every learned method from scratch
+(Sec.~\ref{subsec:method-training}) with \corlNumTrainSeeds{} training seeds and
+evaluate each seed at iteration \corlOcsCheckpoint, fixed before any trial
+on OCS2 (training time: App.~\ref{app:training}). Every seed runs all
+trials, and we report the mean over the \corlNumTrainSeeds{} seeds. For Q2, GaitNet also runs on the training controller in Isaac at
 matching nominal void fractions, with \corlBenchIsaacRobots{} robots per
 cell, one trial each, and the same criterion.
 
@@ -68,15 +67,15 @@ cell, one trial each, and the same criterion.
   \caption{Benchmark, every method on the same worlds. (a)~\corlBenchSpeedSlow\,m/s
     and (b)~\corlBenchSpeedFast\,m/s, per void fraction,
     \corlBenchTrialsPerCell{} trials per bar. (c)~All six cells,
-    \corlBenchTrialsPerArm{} trials per run; Per-candidate + IDM: mean of
-    four training seeds.}
+    \corlBenchTrialsPerArm{} trials per training seed; learned methods: mean of
+    \corlNumTrainSeeds{} training seeds.}
   \label{fig:bench}
 \end{figure*}
 
 % Trot period no longer \verify: the measured median same-leg lift-off
 % interval is \corlGaitTrotPeriodMeasured\,s (gait data, 2026-11-04); the
 % measured swing (0.235 s) is a detector effect, so the 0.3 s stays \verify.
-\noindent\textbf{Methods (Fig.~\ref{fig:bench}).}
+\noindent\textbf{Methods (Fig.~\ref{fig:bench}, Table~\ref{tab:results}).}
 \looseness=-1 All methods share the depth pipeline, NMPC, and WBC.
 \emph{GaitNet} runs as deployed, with the OCS2 IDM and up to two legs
 swinging in any pair. \emph{OCS2's own trot} is
@@ -85,19 +84,19 @@ with its own footholds, \corlTrotSwing\,s swings, and a
 \corlTrotPeriod\,s period. \emph{GaitNet-Diagonal} uses GaitNet's weights
 but starts a second swing only on the diagonal partner of the swinging
 leg. \emph{Per-candidate + IDM} is the per-candidate network of
-\citet{Sullivan2025} (Sec.~\ref{subsec:method-network}). We trained
-four networks, one per training seed, with GaitNet's recipe but without
-the IDM in the loop, for about \corlBenchMlpIterations{} iterations, more
-than GaitNet's \corlOcsCheckpoint, and ran each with the OCS2 IDM.
-\emph{GaitNet without the IDM} (Fig.~\ref{fig:transfer-ablations}a) uses
+\citet{Sullivan2025} (Sec.~\ref{subsec:method-network}). We trained it
+with GaitNet's recipe but without the IDM in the loop, and ran it with
+the OCS2 IDM.
+\emph{GaitNet without the IDM} uses
 GaitNet's weights and sends its desired foothold unchanged.
 
-\noindent\textbf{Retrained ablations (Fig.~\ref{fig:transfer-ablations}b).}
+\noindent\textbf{Retrained ablations (Table~\ref{tab:retrain}).}
 \looseness=-1 We retrained GaitNet under a separate training recipe,
-with two training seeds per version, and ran each on the benchmark. \emph{Full retrain} keeps every part, while \emph{No
+with \corlNumTrainSeeds{} training seeds per version, and ran each on the benchmark. \emph{Full retrain} keeps every part, while \emph{No
 history}, \emph{No candidate mixer}, and \emph{No IDM in training} each
 drop one part. Since their recipe differs from GaitNet's, the
-full retrain is the reference for the others. No IDM in
+full retrain is the reference for the others. We report means only,
+so differences of a few points may not hold across training seeds. No IDM in
 training runs on OCS2 twice, with no IDM and with the training
 controller's (Isaac) IDM, and the others with \verify{the OCS2 IDM}.
 
@@ -105,27 +104,16 @@ controller's (Isaac) IDM, and the others with \verify{the OCS2 IDM}.
 % Author, 2026-11-04: same checkpoint, same worlds for every method,
 % 12.5 cm tiles, 80 trials per point; GaitNet-Single trained one-swing.
 \looseness=-1 The sweep is a second set of trials with the same
-checkpoint and \corlBenchTileCm\,cm tiles, at eight nominal void
+checkpoints and \corlBenchTileCm\,cm tiles, at eight nominal void
 fractions (0 to \corlOcsMaxVoidPct\%; above \corlMaxVoidPct\%, beyond the
 training curriculum) and five speeds (\corlOcsSpeedMin{} to
 \corlOcsSpeedMax\,m/s), every method on the same worlds. Each method runs
 \corlOcsTrialsPerPoint{} trials per void fraction, spread over the
-speeds; GaitNet, GaitNet-Single, and the trot also run
-\corlOcsTrialsPerPoint{} per speed, 10 at each void fraction. A trial succeeds if the robot reaches the end of a
+speeds, and some also per speed (Fig.~\ref{fig:sweep}b). A trial succeeds if the robot reaches the end of a
 \corlOcsTrackM\,m track within \corlOcsTimeFactor{} times the time needed
-at the commanded speed. Besides GaitNet and the trot, the sweep runs
-GaitNet without the IDM, Per-candidate + IDM with one training seed, and
-\emph{GaitNet-Single}, trained with GaitNet's training seed and recipe
-but with only one leg allowed to swing at a time.
-
-\noindent\textbf{Variation.}
-\looseness=-1 Brackets give 95\% intervals over the trials of one
-checkpoint, for success rates \citep{wilson_probable_1927} and for gaps
-between two methods \citep{newcombe_interval_1998}. They treat trials as
-independent and omit training seeds, which can differ far more, as the
-per-candidate network's four did (\corlBenchMlpMin{} to
-\corlBenchMlpMax\%). Fig.~\ref{fig:transfer-ablations}b therefore shows
-the mean of two, and we conclude only from differences both share.
+at the commanded speed. The sweep also runs GaitNet without the IDM, Per-candidate + IDM,
+GaitNet-Diagonal, and \emph{GaitNet-Single}, trained with GaitNet's
+recipe but with one swing at a time (also run on the benchmark).
 
 \subsection{Results}
 \label{subsec:exp-transfer}
@@ -136,21 +124,66 @@ the mean of two, and we conclude only from differences both share.
 % confirmed by the author on 2026-11-03). At 49 % voids over both
 % commands: 173 vs 143 of 200 = 86.5 vs 71.5.
 \noindent\textbf{Q1. Against OCS2's own trot.}
-\looseness=-1 On the benchmark (Fig.~\ref{fig:bench}c), GaitNet succeeded
-in \corlBenchFull\% [89.0, 93.5] of trials against the trot's
-\corlBenchTrot\% [80.9, 86.7]. The gap is 7.5 percentage points
-[3.8, 11.2]. Since both methods share the terrain, NMPC, and WBC, the gap comes from
+\looseness=-1 On the benchmark, GaitNet succeeded in \corlBenchFull\% of
+trials against the trot's \corlBenchTrot\% (Table~\ref{tab:results},
+Fig.~\ref{fig:bench}c), a gap of 7.5 percentage points.
+Since both methods share the terrain, NMPC, and WBC, the gap comes from
 the planner and execution layer together, not from free leg pairing alone
-(Q3). Per cell
-(Fig.~\ref{fig:bench}a,\,b), GaitNet beat the trot by only 2 to 6 points at
-\corlBenchVoidLow{} and \corlBenchVoidMid\% voids but by 16 and 14
-points at \corlBenchVoidHigh\% voids. There, over both speeds, it
-succeeded in \corlBenchFullDense\% [81.1, 90.6] against
-\corlBenchTrotDense\% [64.9, 77.3], so two
-thirds of the gap came from \corlBenchVoidHigh\% voids. We
+(Q3). The gap was small at \corlBenchVoidLow{} and
+\corlBenchVoidMid\% voids and largest at \corlBenchVoidHigh\%
+(Fig.~\ref{fig:bench}a,\,b, App.~\ref{app:counts}), which held two
+thirds of the gap. We
 conjecture that the trot's fixed schedule can force a step with no safe
 foothold in reach, while GaitNet can wait, move another leg, or step
 farther.
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Success (\%). Every learned method is the mean of
+  \corlNumTrainSeeds{} training seeds at iteration \corlOcsCheckpoint, each run on all
+  trials: \corlBenchTrialsPerArm{} per seed on the benchmark,
+  640 in the sweep, and 720 robots on the training controller in Isaac.
+  ---: not run or not reported. Counts per cell: App.~\ref{app:counts}.}
+\label{tab:results}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{\thd{Benchmark, OCS2}} & \thd{Sweep, OCS2} & \thd{Isaac} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-4}\cmidrule(l){5-5}
+\thd{Method} & \thd{All cells} & \thd{\corlBenchVoidHigh\% voids} & \thd{All void fractions} & \thd{All cells} \\
+\midrule
+GaitNet & \corlBenchFull & \corlBenchFullDense & \corlSweepFull & \corlBenchIsaacIdm \\
+OCS2's own trot & \corlBenchTrot & \corlBenchTrotDense & \corlSweepTrot & --- \\
+GaitNet-Diagonal & \corlBenchDiag & \corlBenchDiagDense & \corlSweepDiag & --- \\
+GaitNet-Single & \corlBenchSingle & --- & \corlSweepSingle & \corlBenchIsaacSingle \\
+Per-candidate + IDM & \corlBenchMlpMean & --- & \corlSweepMlp & \corlBenchIsaacMlp \\
+GaitNet without the IDM & \corlBenchNoIdm & \corlBenchNoIdmDense & \corlSweepNoIdm & \corlBenchIsaacNoIdm \\
+\midrule
+GaitNet $-$ trot \unit{(percentage points)} & 7.5 & 15.0 & 18.6 & --- \\
+\bottomrule
+\end{tabular}
+
+\vspace{6pt}
+% Fig. 4 (fig_transfer_ablations) replaced by this table on 2026-11-05
+% (author: "use tables wherever needed in the results"); its panel (a) is in
+% Table 1 (pooled) and App. D (per cell). Seed means per command from the
+% cells in constants.tex: full retrain 92 / 72.5; no history 547/600 = 91.2,
+% 317/600 = 52.8; no mixer 520/600 = 86.7, 430/600 = 71.7; no IDM in
+% training, no IDM 461/600 = 76.8, 307/600 = 51.2; with the training IDM
+% 431/600 = 71.8, 337/600 = 56.2.
+\caption{Retrained versions on OCS2: success (\%), mean of \corlNumTrainSeeds{} training seeds.}
+\label{tab:retrain}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\thd{Retrained version} \unit{(300 trials per seed and speed)} & \thd{\corlBenchSpeedSlow\,m/s} & \thd{\corlBenchSpeedFast\,m/s} \\
+\midrule
+Full retrain & 92\phantom{.0} & 72.5 \\
+No history & 91.2 & 52.8 \\
+No candidate mixer & 86.7 & 71.7 \\
+No IDM in training, run without the IDM & 76.8 & 51.2 \\
+No IDM in training, run with the training IDM & 71.8 & 56.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure*}[t]
   \centering
@@ -165,24 +198,12 @@ farther.
 
 % Sweep numbers: comments at \corlSweep* in constants.tex (fig_sweep.py).
 \looseness=-1 The sweep showed the same trend over a wider range
-(Fig.~\ref{fig:sweep}). GaitNet succeeded in \corlSweepFull\% [79.5,
-85.4] of its trials against the trot's \corlSweepTrot\% [60.3, 67.7]. From
-30\% voids on, it beat the trot by 15 to 42.5 points, with
-\corlOcsDenseFull\% against \corlOcsDenseTrot\% success over
-40--\corlOcsMaxVoidPct\% voids, partly beyond its training curriculum, and it beat the trot at every speed, by 5
-to 17.5 points. Its success stayed between 81 and 89\% up to 0.20\,m/s
-and fell to 66\% at \corlOcsSpeedMax\,m/s, above its training range.
+(Fig.~\ref{fig:sweep}, Table~\ref{tab:results}). From 30\% voids on,
+GaitNet beat the trot by 15 to 42.5 points, most from 50\% voids on,
+beyond its training curriculum, and it beat the trot at every speed.
+Its success stayed above 80\% up to 0.20\,m/s and fell to 66\% at
+\corlOcsSpeedMax\,m/s, above its training range (App.~\ref{app:counts}).
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig_transfer_ablations}
-  \caption{(a)~GaitNet on OCS2 (\corlBenchTrialsPerCell{}
-    trials per cell) and on the training controller in Isaac
-    (\corlBenchIsaacRobots{} robots per cell), setups that also differ in
-    simulator, terrain, and worlds (Problem~2). (b)~Retrained versions,
-    mean of two training seeds, 300 trials per training seed and bar.}
-  \label{fig:transfer-ablations}
-\end{figure*}
 
 % Isaac per command = mean of its cell rates: 0.10 m/s (96.7 + 100 + 95.0)/3
 % = 97.2, 0.20 m/s (100 + 95.0 + 89.2)/3 = 94.7. OCS2 minus Isaac per cell
@@ -191,22 +212,18 @@ and fell to 66\% at \corlOcsSpeedMax\,m/s, above its training range.
 % loss against Isaac's 89.2 there is 12.2 points.
 \noindent\textbf{Q2. From the training controller to OCS2.}
 \looseness=-1 The frozen GaitNet kept most of its success in moving to
-OCS2 (Fig.~\ref{fig:transfer-ablations}a), with \corlBenchFull\% against
-\corlBenchIsaacIdm\% [94.3, 97.2] on the training controller in Isaac. Most of the gap
-came at \corlBenchSpeedFast\,m/s (\corlBenchFullFast{} against 94.7\%).
-Per cell (App.~\ref{app:counts}), it lost at most 8 points except in the
-hardest cell, \corlBenchVoidHigh\% voids at \corlBenchSpeedFast\,m/s,
-where it lost 12. The gap combines all changes of Problem~2, which we do not
-separate. As the checkpoint was its run's best in Isaac, its Isaac
-success may be optimistic.
+OCS2, with \corlBenchFull\% against \corlBenchIsaacIdm\% on the training
+controller in Isaac (Table~\ref{tab:results}). Most of the loss came at
+\corlBenchSpeedFast\,m/s (\corlBenchFullFast{} against 94.7\%), and the
+largest, 12 points, in the hardest cell (App.~\ref{app:counts}). The gap combines all changes of Problem~2, which we do not
+separate. As iteration \corlOcsCheckpoint{} was \verify{chosen on the training
+controller in Isaac}, its Isaac success may be optimistic.
 
 \noindent\phantomsection\label{subsec:exp-why}\textbf{Q3. IDM.}
-\looseness=-1 Without the IDM (Fig.~\ref{fig:transfer-ablations}a), the
-frozen GaitNet's success fell to \corlBenchNoIdm\% on OCS2, far below the
-trot, and to \corlBenchIsaacNoIdm\% on the training controller. In the
-sweep, it succeeded in \corlSweepNoIdm\% without the IDM
-(Fig.~\ref{fig:sweep}a), more than on the benchmark at the same nominal
-void fractions, a difference we have not explained. In a
+\looseness=-1 Without the IDM, the frozen GaitNet's success fell to
+\corlBenchNoIdm\% on OCS2, far below the trot, and similarly on the
+training controller (Table~\ref{tab:results}). It did better in the sweep at the
+same nominal void fractions (Fig.~\ref{fig:sweep}a), a difference we have not explained. In a
 separate flat-ground test without voids at \corlBenchSpeedSlow{} and
 \corlBenchSpeedFast\,m/s,
 OCS2's landing error, as the RMS of its length, was
@@ -225,11 +242,10 @@ dependence on the IDM, not the IDM's value alone.
 \looseness=-1 Retraining without the IDM asks a different question:
 whether a policy trained without it does as well, not how much the trained
 policy depends on it. Retrained and run without the IDM
-(Fig.~\ref{fig:transfer-ablations}b), GaitNet trailed the full retrain
-at both speeds, with 76.8 and 51.2\% against 92 and 72.5\%, and both
-its training seeds stayed below both of the full retrain's. Adding the training controller's IDM at deployment did
-not help overall, as success fell five points at \corlBenchSpeedSlow\,m/s
-and rose five at \corlBenchSpeedFast\,m/s. As we did not run this version with
+(Table~\ref{tab:retrain}), GaitNet trailed the full retrain
+at both speeds. Adding the training controller's IDM at deployment did
+not help overall: success fell at \corlBenchSpeedSlow\,m/s and rose by
+as much at \corlBenchSpeedFast\,m/s. As we did not run this version with
 the OCS2 IDM, the comparison with the full retrain shows that training and
 deploying with the IDM helped on OCS2, not that it must be in the
 training loop.
@@ -248,11 +264,10 @@ these partners lifted off a median \corlGaitLiftLagMs\,ms apart, about
 one tick (Sec.~\ref{subsec:method-step}). The time
 between a leg's lift-offs varied far more than the trot's (coefficient
 of variation \corlGaitStrideCv{} against \corlGaitStrideCvTrot).
-GaitNet-Diagonal succeeded in \corlBenchDiag\%
-[84.3, 89.6] (Fig.~\ref{fig:bench}c), 4.3 points [0.8, 7.9] below
-GaitNet. Most of the gap came from the hardest cell, with 59\% against
-77\% (Fig.~\ref{fig:bench}b). Over all cells, GaitNet-Diagonal
-stayed about three points [$-0.8$, 7.2] above the trot. Never trained
+GaitNet-Diagonal trailed GaitNet by 4.3 points
+(Table~\ref{tab:results}), mostly in the hardest cell
+(Fig.~\ref{fig:bench}b), and stayed about three points above the trot,
+too close to rank them. Never trained
 with this restriction, GaitNet may rely on non-diagonal pairs on dense
 voids at the faster speed; free pairing need not be better in general.
 
@@ -264,15 +279,16 @@ voids at the faster speed; free pairing need not be better in general.
 % 0.25 m/s 11.4, 0.15 m/s only 6.8.
 \noindent\textbf{Q3. Overlapping swings.}
 \looseness=-1 Trained to swing one leg at a time, GaitNet-Single
-succeeded in \corlSweepSingle\% [55.7, 63.3] of the sweep's trials
-against GaitNet's \corlSweepFull\% (Fig.~\ref{fig:sweep}), less often at
-every void fraction and speed. It took shorter steps,
+succeeded in \corlSweepSingle\% of the sweep's trials against GaitNet's
+\corlSweepFull\% (Table~\ref{tab:results}, Fig.~\ref{fig:sweep}), less
+often at every void fraction and speed, and also trailed it on the
+benchmark. It took shorter steps,
 \corlOcsStepsPerMSingle{} per metre against \corlOcsStepsPerMFull{} for
 GaitNet in successful trials. Its one swing at a time, of at least
 \corlSwingDurationMin\,s and started on ticks, caps it near eight steps
 per second, too few only from about 0.20\,m/s, so the cap cannot explain
-its 21-point gap at 0.10\,m/s. With one training
-seed each, this suggests that overlapping swings helped on these voids.
+its 21-point gap at 0.10\,m/s. Averaged over
+\corlNumTrainSeeds{} training seeds each, this suggests that overlapping swings helped on these voids.
 
 % Seed means per command (Fig. 4b): no history 547/600 = 91.2 and
 % 317/600 = 52.8; no mixer 520/600 = 86.7 and 430/600 = 71.7; full retrain
@@ -281,22 +297,18 @@ seed each, this suggests that overlapping swings helped on these voids.
 % the full retrains (82.3, 82.5), the other (75.3) is below both.
 \noindent\textbf{Q3. History and candidate mixer.}
 \looseness=-1 Retrained without the history
-(Fig.~\ref{fig:transfer-ablations}b), GaitNet matched the full retrain at
-\corlBenchSpeedSlow\,m/s (91.2 against 92\%) but fell well behind at
-\corlBenchSpeedFast\,m/s (52.8 against 72.5\%), where both its training
-seeds stayed below both of the full retrain's. The retrained GaitNet thus needed the
+(Table~\ref{tab:retrain}), GaitNet matched the full retrain at
+\corlBenchSpeedSlow\,m/s but fell well behind at
+\corlBenchSpeedFast\,m/s. The retrained GaitNet thus needed the
 history only at the faster speed, for unmeasured reasons. Without the
-mixer, the two training seeds disagreed, matching the full retrain and
-falling below it, so the mixer's effect is open.
+mixer, it trailed the full retrain at \corlBenchSpeedSlow\,m/s and matched it
+at \corlBenchSpeedFast\,m/s, so the mixer's effect is open.
 
 % GaitNet minus the best per-candidate seed: 91.5 - 89.7 = 1.8 points.
 % Seed spread 89.7 - 75.5 = 14.2 points; GaitNet minus the seed mean 7.0.
 \noindent\textbf{Per-candidate network.}
-\looseness=-1 The four training seeds of Per-candidate + IDM averaged
-\corlBenchMlpMean\% (Fig.~\ref{fig:bench}c), about the trot's
-\corlBenchTrot\%, ranging from \corlBenchMlpMin{} to
-\corlBenchMlpMax\%. GaitNet beat all four, the best by under two points
-[$-1.5$, 5.2]. With one GaitNet training seed on OCS2,
-the benchmark cannot rank the two networks, which also differ
-in mixer, history, size (App.~\ref{app:settings}), and the IDM in
-training.
+\looseness=-1 Per-candidate + IDM succeeded about as often as the trot on
+the benchmark and trailed GaitNet by 7 points (Table~\ref{tab:results}).
+The two networks also differ in size (App.~\ref{app:settings}) and in
+the IDM in training, so this gap is not the effect of the mixer and
+history alone.

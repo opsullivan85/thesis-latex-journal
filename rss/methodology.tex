@@ -16,10 +16,10 @@ misses. The unsafe region is
 then grown by $k$ cells on every side, so
 that no unsafe ray lies within the candidate margin $m = kh$
 of a remaining safe cell along the grid axes
-(Sec.~\ref{subsec:idm-theory}). No other reach, edge, or kinematic rule
-is applied. For each leg that may step,
-GaitNet draws $K$ safe cells at random without
-repeats and ignores empty slots when a leg has fewer. With the no-step
+(Sec.~\ref{subsec:idm-theory}). \verify{No other reach, edge, or kinematic rule
+is applied.} For each leg that may step,
+GaitNet picks \corlTrainCandidatesPerLeg{} safe cells that cover the safe region
+(App.~\ref{app:sampler}) and ignores empty slots when a leg has fewer. With the no-step
 option, they form the choices of a tick.
 
 \subsection{Network}
@@ -31,20 +31,20 @@ linear and angular velocity, the commanded velocity, each leg's
 scheduled contact, and projected gravity, all in the trunk frame except
 the height. Candidate $i$ is described by $\mathbf q_i$, a one-hot code
 of its leg and its offset from the hip. The history $\mathbf h$ covers
-the last $H$ ticks of base
+the last \corlHistSeconds\,s of base
 velocities, foot positions relative to the hips from the joint encoders,
 scheduled contacts, and each leg's last \emph{touchdown error}, the
-foot's position at its scheduled touchdown minus the command $\mathbf u$.
+foot's position at its scheduled touchdown minus the command.
 All of these can be estimated on a real robot. Encoders $f_s$, $f_h$,
 and $f_c$ embed the state, the history, and each candidate, and each
-choice $i$ becomes a token $\mathbf t_i$,
+choice becomes a token $\mathbf t_i$,
 \begin{equation}
   \mathbf z = f_s(\mathbf x_g) + W_h\, f_h(\mathbf h), \qquad
   \mathbf t_i = \mathrm{ReLU}\big(W_t [\mathbf z; f_c(\mathbf q_i)]\big),
   \label{eq:context}
 \end{equation}
 with a learned embedding in place of $f_c(\mathbf q_i)$ for the no-step
-option $\varnothing$.
+option.
 
 \looseness=-1 The candidate mixer, a small pre-norm transformer encoder
 \citep{vaswani_attention_2017}, lets the tokens attend to each other,
@@ -58,14 +58,13 @@ choice a score and a swing time,
   \label{eq:heads}
 \end{equation}
 with $\tilde{\mathbf t}_i$ the mixed token and
-$\operatorname{sig}$ the logistic function. Each valid choice has
-probability $\pi(i) \propto \exp(\alpha_i)$. In training, GaitNet samples
-a choice and an unclipped swing time $T \sim \mathcal N(T_i,
-\sigma_T^2)$, and at deployment it takes the top-scoring choice
-and $T_i$. The projection $W_h$, the attention output projections, and the
+$\operatorname{sig}$ the logistic function. A softmax of the scores
+over the valid choices is the policy. In training, GaitNet samples
+a choice and an unclipped swing time from a Gaussian around the predicted one, and at deployment it takes the top-scoring choice
+and its predicted swing time. The projection $W_h$, the attention output projections, and the
 last layer of each feed-forward block start at zero, so GaitNet begins
 as exactly the per-candidate network of \citet{Sullivan2025}, which
-scores each candidate alone from $\mathbf x_g$ and $\mathbf q_i$ (whose
+scores each candidate alone from the state and the candidate (whose
 last entry, a cost, is zero in both). That the history and
 the mixer help is a hypothesis that Sec.~\ref{sec:experiments} tests.
 
@@ -76,21 +75,21 @@ the mixer help is a hypothesis that Sec.~\ref{sec:experiments} tests.
 relative to the hip, which moves forward, so the foot
 lands past the commanded point, more so at higher speed, where the
 overshoot exceeds the candidate margin (App.~\ref{app:settings}). OCS2 instead fixes the target in the world at
-command time. For controller $c$, the layer sends
+command time. For each controller, the layer sends
 \begin{equation}
   \mathbf u = I^c(\zeta, \mathbf u^\star),
   \qquad\text{so that}\qquad
   F_c(\mathbf s, \ell, T, \mathbf u) \approx \mathbf u^\star .
   \label{eq:idm}
 \end{equation}
-We log the steps that $c$ executes as tuples $(\zeta, \mathbf u,
-\mathbf o)$. Whatever foothold a command $\mathbf u$ was meant
+We log the steps that the controller executes as tuples $(\zeta, \mathbf u,
+\mathbf o)$. Whatever foothold a command was meant
 to reach, it landed the foot at $\mathbf o$, so in hindsight every logged
 step is an example of the inverse map from landing to command
 \citep{jordan_forward_1992, andrychowicz_hindsight_2017}, as in
-\citet{akizhanov_learning_2024}. We therefore fit $I^c$ with the landing
-$\mathbf o$ as input and the command $\mathbf u$ as target, since the
-desired foothold $\mathbf u^\star$ takes the landing's place at
+\citet{akizhanov_learning_2024}. We therefore fit the IDM with the landing
+as input and the command as target, since the
+desired foothold takes the landing's place at
 deployment,
 \begin{equation}
   \min_\theta \; \mathbb E\,
@@ -110,7 +109,7 @@ policies without controller randomization, with Gaussian command noise
 \label{subsec:idm-theory}
 
 \looseness=-1 The IDM sees $\zeta$ but not the full state $\mathbf s$.
-Given $(\zeta,\mathbf u)$, the landing is therefore random even though
+Given $\zeta$ and the command, the landing is therefore random even though
 $F_c$ is deterministic, and we split it into its conditional mean and a
 zero-mean residual $\boldsymbol\eta$,
 \begin{equation}
@@ -118,7 +117,7 @@ zero-mean residual $\boldsymbol\eta$,
   \bar F_c(\zeta,\mathbf u) := \mathbb E[\mathbf o \mid \zeta,\mathbf u].
   \label{eq:mean-forward}
 \end{equation}
-For the command $\mathbf u = I^c(\zeta, \mathbf u^\star)$, the
+For the IDM's command, the
 \emph{landing error} splits into two parts,
 \begin{equation}
   \mathbf e := \mathbf o - \mathbf u^\star
@@ -140,16 +139,15 @@ policy seldom reached (Proposition~\ref{prop:idm-shrink} in App.~\ref{app:idm-pr
 
 \looseness=-1 Let the \emph{clearance} $d(\mathbf u^\star) :=
 \inf_{\mathbf p \in \mathcal V} \|\mathbf p - \mathbf u^\star\|_\infty$
-be the foothold's distance to the nearest void point. If the
+be the foothold's distance to the nearest point of the voids $\mathcal V$. If the
 Euclidean norms satisfy $\|\boldsymbol\beta\| + \|\boldsymbol\eta\| <
 d(\mathbf u^\star)$, the foot cannot land in a void
 (Proposition~\ref{prop:idm-void} in App.~\ref{app:idm-proofs}). The
 candidate margin must therefore cover both the error the IDM leaves
-in $\boldsymbol\beta$ and the residual $\boldsymbol\eta$. With exact
+and the residual. With exact
 terrain, the mask of Sec.~\ref{subsec:method-step} gives every candidate
-a clearance of at least $m - \tfrac h2|\sin 2\varphi|$,
-with $\varphi$ the angle between the void edges and the grid axes, that
-is, $m$ for parallel edges and $m - h/2$ at $45^\circ$
+a clearance of at least $m$ for void edges parallel to the grid
+axes and no less than $m - h/2$, at $45^\circ$, the worst angle
 (Lemma~\ref{lem:idm-grid}), for square voids at least $2\sqrt2\,h$
 wide, as all our tiles are. It is a geometric
 bound for exact terrain, not a guarantee of safe touchdowns: perception

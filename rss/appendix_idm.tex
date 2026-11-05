@@ -294,7 +294,8 @@ $c_\perp$ then lands in it with probability $\Phi(-c_\perp/\sigma)$,
 because only the error component normal to the edge matters. An edge at
 $\infty$-norm distance $d$ with unit normal $\mathbf n$ has $c_\perp =
 d\|\mathbf n\|_1 \ge d$. For our candidates, Lemma~\ref{lem:idm-grid}(c)
-with $k = 2$ gives, for $0 \le \varphi \le 45^\circ$ and by symmetry at every angle, $c_\perp \ge (2 - \tfrac12\sin 2\varphi)(\sin\varphi +
+with $k = 2$ gives, with $\varphi$ the angle between the void edges
+and the grid axes, for $0 \le \varphi \le 45^\circ$ and by symmetry at every angle, $c_\perp \ge (2 - \tfrac12\sin 2\varphi)(\sin\varphi +
 \cos\varphi)\,h \ge 2h = m$, with equality for edges parallel to the grid,
 so such an edge at $d = m$ is the worst straight edge. The
 \corlOcsLandRmsIdm\,cm is the RMS of $\|\mathbf e\|$, so $\sigma =
@@ -373,10 +374,10 @@ Rotations by multiples of $90^\circ$ about $\mathbf p$ permute these four
 signed directions cyclically, keep $\varphi$, and also map the lattice to
 a translate of itself, so we may take the two directions to be $+\mathbf
 d_1$ and $+\mathbf d_2$. Then $\mathcal Q$ contains the quarter square
-$\mathcal C := \{\gamma_1 \mathbf d_1 + \gamma_2\mathbf d_2 : 0 \le
+$\mathcal W := \{\gamma_1 \mathbf d_1 + \gamma_2\mathbf d_2 : 0 \le
 \gamma_1,\gamma_2 \le s/2\}$.
 
-\emph{Step 2: an axis-aligned unit square inside $\mathcal C$.} Let $B :=
+\emph{Step 2: an axis-aligned unit square inside $\mathcal W$.} Let $B :=
 [x_0, x_0+1] \times [y_0, y_0+1]$ with $x_0 = -\sin^2\varphi$ and $y_0 =
 \sin\varphi\cos\varphi$. Its lower corners are $(\cos^2\varphi, y_0) =
 \cos\varphi\,\mathbf d_1$ and $(x_0, y_0) = \sin\varphi\,\mathbf d_2$, and
@@ -385,7 +386,7 @@ its upper corners add $(0,1) = \sin\varphi\,\mathbf d_1 +
 four corners are $(\cos\varphi, 0)$, $(0, \sin\varphi)$, $(\cos\varphi +
 \sin\varphi, \cos\varphi)$ and $(\sin\varphi, \sin\varphi + \cos\varphi)$:
 all have $0 \le \gamma_1, \gamma_2 \le \sin\varphi + \cos\varphi \le \sqrt2
-\le s/2$. By convexity, $B \subseteq \mathcal C \subseteq \mathcal Q$, and
+\le s/2$. By convexity, $B \subseteq \mathcal W \subseteq \mathcal Q$, and
 every point of $B$ lies within $\infty$-norm distance $\max(\sin^2\varphi,
 \cos^2\varphi, 1 + y_0) = 1 + \tfrac12\sin 2\varphi$ of $\mathbf 0$.
 

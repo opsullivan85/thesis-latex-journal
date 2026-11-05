@@ -40,6 +40,23 @@
 \newcommand{\corlNumLegs}{4}
 \newcommand{\corlTrainCandidatesPerLeg}{16}
 \newcommand{\corlTotalCandidates}{65}
+% Coverage sampler (author, 2026-11-05; replaces the random draw of earlier
+% drafts; spec: gaitnet-video/notes/sampler_coverage_author_2026-11-05.md).
+\newcommand{\corlNomLiftS}{0.02}       % s, until lift-off (prior constant, not a step lead)
+\newcommand{\corlNomSwingS}{0.18}      % s, swing (prior)
+\newcommand{\corlNomHalfStanceS}{0.09} % s, half of a stance as long as the swing (prior)
+\newcommand{\corlNomHorizonS}{0.29}    % s, sum: Raibert neutral point at touchdown
+\newcommand{\corlAnnealSteps}{4}
+\newcommand{\corlAnnealTauStartCm}{2}  % sqrt(tau_0)
+\newcommand{\corlAnnealTauEndCm}{0.5}  % sqrt(tau_end)
+\newcommand{\corlAnnealRound}{16}      % targets rounded to 1/16 cell
+\newcommand{\corlAnnealGapCmSq}{0.69}  % tau_end log K, cm^2 per cell
+% Measured by the author (50% voids, 12.5 cm tiles); sample not stated: \verify.
+\newcommand{\corlCovVoidPct}{50}
+\newcommand{\corlCovRadiusRandCm}{13.8}
+\newcommand{\corlCovRadiusCovCm}{5.8}
+\newcommand{\corlCovMeanRandCm}{3.9}
+\newcommand{\corlCovMeanCovCm}{2.65}
 
 % --- Observation (methodology.md 4) ---
 \newcommand{\corlStateDim}{25}
@@ -368,6 +385,24 @@
 \newcommand{\corlBenchNoIdm}{25.2}         % 151/600
 \newcommand{\corlBenchIsaacIdm}{96.0}      % 691/720
 \newcommand{\corlBenchIsaacNoIdm}{21.3}    % 153/720 (cell 49 %/0.10 = 10/120)
+% Author, 2026-11-05: EVERY learned arm is the mean of five training seeds at
+% iteration 350, each seed run on all trials (benchmark 5x600, sweep 5x640,
+% Isaac 5x720); "one of five seeds picked at random" was a miscommunication.
+% The per-seed records below (4 per-candidate seeds @1599, 2 retrain seeds)
+% are superseded; 84.5 and the Table 2 values are 5-seed means (author).
+% No seed spread and no confidence intervals in the paper (author).
+% New values (author, 2026-11-05): Diagonal sweep 73.2; Single benchmark
+% 82.8, Isaac 72.1; Per-candidate + IDM in Isaac 80.3.
+% From the per-cell means: Diagonal at 49 % voids (89 + 59)/200 = 74.0; no
+% IDM at 49 % (11 + 8)/200 = 9.5; GaitNet - trot at 49 % 86.5 - 71.5 = 15.0,
+% in the sweep 82.7 - 64.1 = 18.6.
+\newcommand{\corlBenchDiagDense}{74.0}
+\newcommand{\corlBenchNoIdmDense}{9.5}
+\newcommand{\corlSweepDiag}{73.2}
+\newcommand{\corlBenchSingle}{82.8}
+\newcommand{\corlBenchIsaacSingle}{72.1}
+\newcommand{\corlBenchIsaacMlp}{80.3}
+\newcommand{\corlNumTrainSeeds}{five}
 \newcommand{\corlBenchMlpMean}{84.5}       % mean of the four seeds
 \newcommand{\corlBenchMlpMin}{75.5}        % seed 4
 \newcommand{\corlBenchMlpMax}{89.7}        % seed 3; CMH vs c0 p = 0.31

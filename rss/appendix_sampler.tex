@@ -1,0 +1,203 @@
+% ---------------------------------------------------------------------------
+% Appendix: the candidate sampler. Added 2026-11-05 (author: "we are not
+% sampling randomly ... add this as a separate section in the paper"). The
+% sampler was used in training and evaluation; earlier drafts said the
+% candidates were drawn at random. Source: the author's specification,
+% gaitnet-video/notes/sampler_coverage_author_2026-11-05.md. A numpy port of
+% it (gaitnet-video/anim/gn_base.py, coverage_candidates) was checked for
+% distinct safe cells, the pinned slot, determinism and mirror symmetry.
+% ---------------------------------------------------------------------------
+\section{Candidate Sampling}
+\label{app:sampler}
+
+At every tick, for each leg that may step, GaitNet places its
+candidates so that they cover the leg's safe cells, instead of drawing
+them at random. The sampler is deterministic and the same for every leg.
+
+\paragraph{Objective.}
+Let $S$ be the safe cells of the leg's grid
+(Sec.~\ref{subsec:method-step}), in the yaw frame of the hip\verify{,
+within the reach and box limits when these are set}. The sampler returns
+$K = \corlTrainCandidatesPerLeg$ distinct safe cells, the candidates
+$Q = \{\mathbf q_0, \dots, \mathbf q_{K-1}\}$, or all safe cells if
+there are fewer, leaving the other slots empty. It aims at the quantization energy
+\begin{equation}
+E(Q) = \frac{1}{|S|} \sum_{\mathbf s \in S} \min_i
+\|\mathbf s - \mathbf q_i\|^2,
+\label{eq:sampler-energy}
+\end{equation}
+the $k$-means objective restricted to the safe cells, with the first
+candidate pinned. A low energy means that, on average, a safe cell has a
+candidate close by. The minimizer has no closed form, so the sampler
+approximates it in the four steps below.
+
+\paragraph{Nominal foothold.}
+The first candidate is pinned near where a regular stride would put the
+foot:
+\begin{equation*}
+\mathbf q_{\text{nom}} = T_{\text{nom}}\, \mathbf v_{\text{cmd}}
++ (0,\ y_{\text{foot}} - y_{\text{hip}}), \qquad
+\mathbf q_0 = \arg\min_{\mathbf s \in S}
+\|\mathbf s - \mathbf q_{\text{nom}}\|.
+\end{equation*}
+The first term follows the commanded base velocity $\mathbf v_{\text{cmd}}$, and the second keeps
+the foot's current lateral distance from the hip. The horizon $T_{\text{nom}}$,
+\corlNomHorizonS\,s, is a fixed prior, not a fitted value:
+\corlNomLiftS\,s to lift-off, a \corlNomSwingS\,s swing, and half of a
+stance as long as the swing, which puts the nominal foothold at
+Raibert's neutral point at touchdown. The \corlNomLiftS\,s is part of
+this prior only; steps still start at the tick they are chosen. The
+first candidate does not move afterwards.
+
+\paragraph{Spread.}
+The other candidates are added one at a time by farthest-point sampling,
+the greedy $k$-centre method of \citet{gonzalez_clustering_1985}: each
+takes the safe cell farthest from all candidates chosen so far,
+\begin{equation*}
+\mathbf q_k = \arg\max_{\mathbf s \in S \setminus
+\{\mathbf q_0, \dots, \mathbf q_{k-1}\}} \ \min_{i < k}
+\|\mathbf s - \mathbf q_i\|, \qquad k = 1, \dots, K-1.
+\end{equation*}
+From any first point, the pinned one included, the covering radius
+\begin{equation*}
+r(Q) = \max_{\mathbf s \in S} \min_i \|\mathbf s - \mathbf q_i\|,
+\end{equation*}
+the largest distance from a safe cell to its nearest candidate, is then
+at most twice the smallest radius that any $K$
+cells reach \citep{gonzalez_clustering_1985}. Its picks, however, lie on
+the boundary of the safe region, at the candidate margin of voids and at
+the corners of the grid.
+
+\paragraph{Refinement.}
+\corlAnnealSteps{} steps of deterministic annealing
+\citep{rose_deterministic_1998}, a soft $k$-means, then pull the
+candidates inward. The temperature falls geometrically over the steps,
+\begin{equation*}
+\tau_t = \tau_0 \left(\tau_{\text{end}} / \tau_0\right)^{t/3},
+\qquad t = 0, \dots, 3, \qquad
+\tau_0 = (\corlAnnealTauStartCm\,\text{cm})^2, \quad
+\tau_{\text{end}} = (\corlAnnealTauEndCm\,\text{cm})^2.
+\end{equation*}
+At step $t$, each safe cell $\mathbf s_j$ is shared among the candidates,
+and each candidate moves to the mean of its share:
+\begin{equation}
+p_{ij} = \frac{\exp(-\|\mathbf s_j - \mathbf q_i\|^2 / \tau_t)}
+{\sum_{k} \exp(-\|\mathbf s_j - \mathbf q_k\|^2 / \tau_t)}, \qquad
+\tilde{\mathbf q}_i = \frac{\sum_j p_{ij}\, \mathbf s_j}{\sum_j p_{ij}}.
+\label{eq:sampler-update}
+\end{equation}
+The pinned candidate keeps its cell, and a candidate that holds no share
+stays where it is. Because the candidates compete for cells through the
+softmax, no repulsion term is needed. The starting temperature is small
+against the patch of cells each candidate covers, so the candidates do
+not collapse onto one mean, the usual failure of annealing started too
+hot.
+
+\paragraph{Projection.}
+After each step, every target returns to the nearest safe cell. When two
+candidates claim one cell, the one added earlier keeps it and the other
+takes the nearest cell not yet held. This greedy assignment, in the
+order the candidates were added, approximates the closest distinct
+assignment, ends after at most one round per candidate, and always finds
+a cell, since there are at least as many safe cells as candidates.
+Distances are computed in cell units, with targets rounded to
+1/\corlAnnealRound{} of a cell, so they are exact, and ties go to the
+lowest cell index. The candidates therefore do not depend on the batch
+size or the device.
+
+\paragraph{Left legs.}
+For the two left legs, the sampler solves the leg's problem mirrored
+left to right and maps the result back. Every step is
+deterministic, so mirrored terrain and commands give mirrored
+candidates.
+
+\paragraph{Coverage.}
+\verify{On grids with \corlCovVoidPct\% voids and 12.5\,cm tiles, the
+covering radius was \corlCovRadiusCovCm\,cm with this sampler, against
+\corlCovRadiusRandCm\,cm for the same number of cells drawn at random,
+and the mean distance from a safe cell to its nearest candidate was
+\corlCovMeanCovCm\,cm, against \corlCovMeanRandCm\,cm.}
+
+% Ablation planned 2026-11-05 (~/dev/repos/gaitNET/ablation-sampler-plan.md):
+% random-sampler retrains on the same seeds, same checkpoint rule, G125 protocol.
+\paragraph{Ablation.}
+\pending{Trained instead with the same number of cells drawn at random from the safe ones,
+on the same xx training seeds and with the same checkpoint rule, GaitNet
+succeeded in xx\% of the OCS2 benchmark's trials, against xx\% with
+coverage for the same training seed on the same worlds, and in xx\%
+against xx\% on the training controller in Isaac.}
+
+\paragraph{What the refinement minimizes.}
+Define the free energy
+\begin{equation*}
+F_\tau(Q) = -\tau \sum_{\mathbf s \in S} \log \sum_i
+\exp\!\left(-\|\mathbf s - \mathbf q_i\|^2 / \tau\right).
+\end{equation*}
+
+\begin{proposition}[Annealing]
+\label{prop:sampler-anneal}
+(a)~For every set of candidates $Q$,
+\begin{equation*}
+|S|\, E(Q) - \tau |S| \log K \le F_\tau(Q) \le |S|\, E(Q).
+\end{equation*}
+(b)~With $m_i = \sum_j p_{ij}$, the update of
+Eq.~\eqref{eq:sampler-update} is a scaled gradient step,
+\begin{equation*}
+\nabla_{\mathbf q_i} F_\tau = 2 m_i (\mathbf q_i - \tilde{\mathbf q}_i),
+\qquad \text{so} \qquad
+\tilde{\mathbf q}_i = \mathbf q_i - \frac{\nabla_{\mathbf q_i} F_\tau}{2 m_i}.
+\end{equation*}
+\end{proposition}
+
+\begin{idmproof}{Proposition~\ref{prop:sampler-anneal}}
+(a)~Fix $\mathbf s$, let $d_i = \|\mathbf s - \mathbf q_i\|^2$ and
+$d = \min_i d_i$. Then $e^{-d/\tau} \le \sum_i e^{-d_i/\tau} \le K
+e^{-d/\tau}$, so $d - \tau \log K \le -\tau \log \sum_i e^{-d_i/\tau}
+\le d$. Summing over $S$ gives (a).
+(b)~Differentiating, $\nabla_{\mathbf q_i} F_\tau = \sum_j p_{ij}\,
+2(\mathbf q_i - \mathbf s_j) = 2 (m_i \mathbf q_i - \sum_j p_{ij}
+\mathbf s_j) = 2 m_i (\mathbf q_i - \tilde{\mathbf q}_i)$.
+\end{idmproof}
+
+By (a), annealing minimizes a smoothed energy that sharpens into
+Eq.~\eqref{eq:sampler-energy} as the temperature falls; at the last step
+the gap is at most $\tau_{\text{end}} \log 16 \approx \corlAnnealGapCmSq$\,cm$^2$ per cell. By (b), each
+update is a gradient step on the free energy, with a step size set by the candidate's share,
+so there is no step size to tune, and at a fixed temperature it does not
+increase the free energy, as for any expectation-maximization step
+\citep{rose_deterministic_1998}. The projection after each step keeps
+the candidates on safe cells but voids this guarantee.
+
+\paragraph{Why coverage helps.}
+Let $f$ score each safe cell as the policy would, and let
+$\mathbf s^\star$ be the safe cell that $f$ scores highest.
+
+\begin{proposition}[Cost of offering few cells]
+\label{prop:sampler-regret}
+If $f$ is $L$-Lipschitz on $S$, then
+\begin{equation*}
+f(\mathbf s^\star) - \max_{\mathbf q \in Q} f(\mathbf q) \le L\, r(Q).
+\end{equation*}
+If, in addition, $\mathbf s^\star$ is uniformly distributed on $S$, then
+\begin{equation*}
+\mathbb E\big[f(\mathbf s^\star) - \max_{\mathbf q \in Q} f(\mathbf
+q)\big] \le L \sqrt{E(Q)}.
+\end{equation*}
+\end{proposition}
+
+\begin{idmproof}{Proposition~\ref{prop:sampler-regret}}
+Let $\mathbf q$ be the candidate nearest $\mathbf s^\star$. Then
+$f(\mathbf s^\star) - \max_Q f \le f(\mathbf s^\star) - f(\mathbf q) \le
+L \|\mathbf s^\star - \mathbf q\| \le L\, r(Q)$. For uniform
+$\mathbf s^\star$, Jensen's inequality gives $\mathbb E[\min_{\mathbf q}
+\|\mathbf s^\star - \mathbf q\|] \le (\mathbb E[\min_{\mathbf q}
+\|\mathbf s^\star - \mathbf q\|^2])^{1/2} = \sqrt{E(Q)}$.
+\end{idmproof}
+
+Farthest-point sampling thus bounds the worst case to within a factor of
+two, and the refinement lowers the bound on the average. The assumption
+is strong, and we use the proposition only to motivate the sampler.
+The score need not be Lipschitz where the terrain changes, at the edge of
+a void. With the candidate mixer, it depends on the whole offered set.
+And the bound concerns the offered choice, not where the controller lands
+the foot.

@@ -8,8 +8,8 @@
 \centering
 \includegraphics[width=0.87\textwidth]{figures/fig_overview}
 \caption{GaitNet overview. (a)~From the state $\mathbf x_g$ and the
-  history $\mathbf h$, a candidate mixer compares each sampled safe
-  candidate $\mathbf q_i$ and the no-step option $\varnothing$ before
+  history $\mathbf h$, a candidate mixer compares each safe
+  candidate $\mathbf q_i$ in the set $\mathcal C$ and the no-step option $\varnothing$ before
   GaitNet gives each a score and a swing time. (b)~Each controller's
   inverse footstep model (IDM) is fitted offline on logged steps.
   (c)~PPO training keeps the training controller's IDM frozen in the
