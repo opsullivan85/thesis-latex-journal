@@ -50,12 +50,12 @@ the \corlNumLevels{}
 curriculum levels span 0--\corlMaxVoidPct\% voids.
 
 \noindent\textbf{OCS2.}
-\looseness=-1 Of GaitNet and its execution layer, only the IDM is fitted for OCS2: steps
+\looseness=-1 Of GaitNet and its execution layer, only the IFM is fitted for OCS2: steps
 start at the tick they are chosen, as in training, and the candidate
-margin is the training margin. The OCS2 IDM has the network and training
-of the training controller's IDM and is fitted on \verify{fewer than
+margin is the training margin. The OCS2 IFM has the network and training
+of the training controller's IFM and is fitted on \verify{fewer than
 20{,}000 steps of the frozen GaitNet run on OCS2 with the training
-controller's IDM} \verify{(held-out error to be stated)}. The benchmark uses
+controller's IFM} \verify{(held-out error to be stated)}. The benchmark uses
 \corlBenchTileCm\,cm tiles and trials of \corlBenchTrialSeconds\,s, and
 a successful trial covers at least half the commanded distance. The
 sweep uses the same tiles and a \corlOcsTrackM\,m track with a time limit
@@ -91,8 +91,8 @@ At every reset, each robot's controller gets new random tracking gains,
 swing apex height (\corlRandApexMin--\corlRandApexMax\,m), a landing
 bias of up to \corlRandBiasCm\,cm, landing noise of
 \corlRandNoiseCm\,cm, and a lift-off delay. Every chosen candidate is
-first corrected by the IDM and then executed by this randomized controller. GaitNet's
-touchdown errors are measured against the IDM's output, so its history
+first corrected by the IFM and then executed by this randomized controller. GaitNet's
+touchdown errors are measured against the IFM's output, so its history
 reports how far the controller missed the corrected command.
 
 \section{Deployment Details}
@@ -111,124 +111,6 @@ OCS2's leg-based state estimator with a slip gate, which ignores feet
 whose velocity disagrees with the estimate. The base's pose reference,
 which integrates the commanded velocity, stays a short distance ahead of
 the base.
-
-\section{Success Counts}
-\label{app:counts}
-
-Tables~\ref{tab:counts-bench}--\ref{tab:counts-speed} give the counts
-behind Figs.~\ref{fig:bench} and~\ref{fig:sweep} and Table~\ref{tab:results}.
-Every method ran on the same worlds, and every learned method's value is
-the mean of its \corlNumTrainSeeds{} training seeds. A second run of GaitNet on the
-benchmark's worlds stayed within 4 points of the first in every cell. Isaac's void fractions are the nominal ones matched to
-the benchmark's (Sec.~\ref{subsec:exp-setup}).
-
-\begin{table}[h]
-\centering\small
-\caption{Benchmark: successful trials of \corlBenchTrialsPerCell{} per
-  cell on OCS2 (equal to the success rate in \%), and GaitNet's success
-  rate on the training controller in Isaac, \corlBenchIsaacRobots{}
-  robots per cell.}
-\label{tab:counts-bench}
-\begin{tabular}{@{}lrrrrrrr@{}}
-\toprule
- & \multicolumn{3}{c}{\thd{\corlBenchSpeedSlow\,m/s}} & \multicolumn{3}{c}{\thd{\corlBenchSpeedFast\,m/s}} & \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-7}
-\thd{Voids} & \corlBenchVoidLow\% & \corlBenchVoidMid\% & \corlBenchVoidHigh\% & \corlBenchVoidLow\% & \corlBenchVoidMid\% & \corlBenchVoidHigh\% & \thd{All (\%)} \\
-\midrule
-GaitNet & 100 & 93 & 96 & 96 & 87 & 77 & \corlBenchFull \\
-GaitNet, second run & 96 & 97 & 92 & 96 & 84 & 74 & \corlBenchRerun \\
-GaitNet-Diagonal & 99 & 96 & 89 & 96 & 84 & 59 & \corlBenchDiag \\
-OCS2's own trot & 97 & 89 & 80 & 94 & 81 & 63 & \corlBenchTrot \\
-\midrule
-GaitNet $-$ trot \unit{(points)} & 3 & 4 & 16 & 2 & 6 & 14 & 7.5 \\
-\midrule
-GaitNet in Isaac \unit{(\%)} & 96.7 & 100 & 95.0 & 100 & 95.0 & 89.2 & \corlBenchIsaacIdm \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering\small
-\caption{Sweep by void fraction: successful trials of
-  \corlOcsTrialsPerPoint{} per point on OCS2, spread over
-  \corlOcsSpeedMin--\corlOcsSpeedMax\,m/s, and the rate over all points.
-}
-\label{tab:counts-sweep}
-\begin{tabular}{@{}lrrrrrrrrr@{}}
-\toprule
-\thd{Nominal voids} & 0\% & 10\% & 20\% & 30\% & 40\% & 50\% & 60\% & 70\% & \thd{All (\%)} \\
-\midrule
-GaitNet & 80 & 80 & 72 & 72 & 73 & 64 & 48 & 40 & \corlSweepFull \\
-OCS2's own trot & 80 & 80 & 70 & 60 & 56 & 30 & 24 & 10 & \corlSweepTrot \\
-GaitNet-Single & 69 & 59 & 66 & 53 & 54 & 34 & 24 & 22 & \corlSweepSingle \\
-GaitNet without the IDM & 77 & 64 & 51 & 45 & 35 & 30 & 29 & 21 & \corlSweepNoIdm \\
-Per-candidate + IDM & 78 & 74 & 75 & 56 & 53 & 56 & 42 & 37 & \corlSweepMlp \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering\small
-\caption{Sweep by speed: successful trials of \corlOcsTrialsPerPoint{}
-  per speed on OCS2, 10 at each void fraction.}
-\label{tab:counts-speed}
-\begin{tabular}{@{}lrrrrr@{}}
-\toprule
-\thd{Speed (m/s)} & \corlOcsSpeedMin & 0.10 & 0.15 & 0.20 & \corlOcsSpeedMax \\
-\midrule
-GaitNet & 67 & 71 & 69 & 65 & 53 \\
-OCS2's own trot & 63 & 63 & 59 & 51 & 41 \\
-GaitNet-Single & 59 & 54 & 50 & 43 & 32 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{Gait}
-\label{app:gait}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.7895\textwidth]{figures/fig_gait}% 120 of 152 mm
-  \caption{Swings (bars) of GaitNet and OCS2's own trot in one successful
-    trial each (world seed \corlGaitExampleSeed, \corlBenchVoidHigh\%
-    voids, \corlBenchSpeedFast\,m/s), from when the rear feet reach the
-    voids. Filled: front-left (FL) and rear-right (RR) legs; open:
-    front-right (FR) and rear-left (RL).}
-  \label{fig:gait}
-\end{figure}
-
-\looseness=-1 Fig.~\ref{fig:gait} shows the gait, from the
-\corlGaitTrialsGaitNet{} successful trials of GaitNet and
-\corlGaitTrialsTrot{} of the trot (App.~\ref{app:counts}). The trial of
-Fig.~\ref{fig:gait}, at \corlBenchVoidHigh\% voids and
-\corlBenchSpeedFast\,m/s, was not picked by hand: of the world seeds
-that both methods passed in that cell, it is the one whose shares of
-time with none, one, and two of GaitNet's feet up lie closest to the
-cell's pooled shares. Swings come from the simulator's ground-truth foot
-heights, logged about every 21\,ms of simulated time, so lift-off times
-are known to about one tick. The statistics cover the time from when the
-rear feet reach the voids to the end of each \corlBenchTrialSeconds\,s
-trial; the front feet are already among the voids then. Failed trials
-were not logged. Detected swings are shorter than commanded ones: the
-trot's \corlTrotSwing\,s swings measure
-\corlGaitTrotSwingMeasured\,s, while its \corlTrotPeriod\,s period
-measures \corlGaitTrotPeriodMeasured\,s. For this reason the trot shows all four
-feet down for \corlGaitAllDownTrot\% of the time, which its schedule
-never has, and only comparisons between the two methods are meaningful.
-GaitNet kept all four feet down for \corlGaitAllDownSlow\% of the time
-at \corlBenchSpeedSlow\,m/s and \corlGaitAllDownFast\% at
-\corlBenchSpeedFast\,m/s.
-With two legs in swing, GaitNet's pair was diagonal for
-\corlGaitDiagTimePct\% of the time, against 100\% for the trot. Of its
-overlapping swing pairs, 227 paired the rear legs, 158 the legs of one
-side, and 38 the front legs, against 24{,}370 diagonal pairs. Pairs of
-other legs were most frequent in the hardest cell, \corlGaitNonDiagHard{}
-per successful trial against \corlGaitNonDiagEasy{} at
-\corlBenchVoidLow\% voids and \corlBenchSpeedSlow\,m/s, but they do not
-mark where GaitNet-Diagonal loses success:
-\corlGaitNonDiagMildTrials{} of the \corlGaitNonDiagMildOf{} successful
-trials at \corlBenchVoidLow\% voids and \corlBenchSpeedFast\,m/s had at
-least one, yet GaitNet-Diagonal lost nothing in that cell.
 
 \input{appendix_idm}
 

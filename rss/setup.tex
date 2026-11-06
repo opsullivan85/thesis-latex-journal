@@ -53,7 +53,7 @@ differs between controllers (Sec.~\ref{subsec:method-idm}), so sending
 the desired foothold unchanged can put
 the foot in a void although the foothold is safe. An
 \emph{execution layer} between planner and controller guards against
-this. Its IDM, fitted to the controller, sends the command
+this. Its IFM, fitted to the controller, sends the command
 $\mathbf u = I^c(\zeta, \mathbf u^\star)$ expected to land the foot at
 the desired foothold, where $\zeta$
 holds the newest tick of the history, the leg, and the swing time.
@@ -62,7 +62,7 @@ holds the newest tick of the history, the leg, and the swing time.
 \looseness=-1 The planner is trained with the \emph{training controller}, the
 convex MPC of \citet{dicarlo_dynamic_2018}. The controller's parameters, including its lift-off delay, are
 redrawn at every reset (Sec.~\ref{subsec:method-training}). With
-the training controller's IDM fitted beforehand and frozen, we seek the planner that
+the training controller's IFM fitted beforehand and frozen, we seek the planner that
 maximizes the expected discounted return $\mathbb E[\sum_{k \ge 0}
 \gamma^k r_k]$ when this controller executes its
 steps on random void worlds and commanded velocities. The reward $r_k$ at tick $k$
@@ -76,7 +76,7 @@ or track-completion term, the return is only a proxy for trial success
 
 \noindent\textbf{Problem 2 (deployment on a new controller).}
 \looseness=-1 The \emph{new controller} is OCS2's NMPC and WBC.
-The planner is frozen, and only the new controller's IDM is fitted, by regression on steps that OCS2 executed
+The planner is frozen, and only the new controller's IFM is fitted, by regression on steps that OCS2 executed
 (Sec.~\ref{subsec:method-idm}). The goal is that the planner succeeds on
 held-out worlds (Sec.~\ref{subsec:exp-setup}) at a rate comparable to or
 above that of OCS2 with its own gait. Moving to OCS2 also changes the

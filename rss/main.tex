@@ -100,19 +100,20 @@
   outside a model-based controller, with no gait schedule, and moves
   frozen to a new one. Every \corlControlTickMs\,ms, it may start one
   step, choosing the leg, swing time, and safe foothold, even while
-  another leg swings. An inverse footstep model (IDM), fitted on each
+  another leg swings. An inverse footstep model (IFM), fitted on each
   controller's logged steps, turns the foothold into a command expected
   to land the foot there; a hand-set margin around voids must cover the
   error it cannot predict. Trained by reinforcement learning on a convex
   model predictive controller (MPC), GaitNet ran on OCS2's nonlinear MPC
-  and whole-body controller with only the IDM refitted. In
+  and whole-body controller with only the IFM refitted. In
   \corlBenchTrialsPerArm{} Gazebo trials per run on shared worlds, with a
   simulated depth camera, it succeeded in \corlBenchFull\% against
-  \corlBenchTrot\% for OCS2's own trot, and in \corlBenchFullDense\%
+  \corlBenchTrot\% for OCS2's own trot and \corlBenchStaticWalk\% for its
+  static walk, and in \corlBenchFullDense\%
   against \corlBenchTrotDense\% on the densest voids
   (\corlBenchVoidHigh\%). Across the change of controller, simulator, and terrain sensing,
   it kept most of its convex-MPC success of \corlBenchIsaacIdm\%, but
-  without the IDM it failed in most trials on both controllers. When it
+  without the IFM it failed in most trials on both controllers. When it
   swung two legs at once in successful trials, they were almost always a
   diagonal pair, as in
   the trot, but on its own timing.%

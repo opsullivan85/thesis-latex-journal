@@ -34,12 +34,12 @@ E_{P_c}\|\mathbf u\|^2 < \infty$ throughout.
 given $(\zeta,\mathbf u)$ is the same when logging and at deployment,
 although the logging policy and GaitNet both choose commands from terrain
 that $\zeta$ omits. Two parts of our pipeline strain our assumptions. The
-training controller's IDM is fitted without the controller randomization
+training controller's IFM is fitted without the controller randomization
 it later runs under (Sec.~\ref{subsec:method-training}), which changes
-that law. The OCS2 IDM is fitted on steps sent through the training
-controller's IDM, so its logged landings need not cover the deployed
+that law. The OCS2 IFM is fitted on steps sent through the training
+controller's IFM, so its logged landings need not cover the deployed
 targets, as Assumption~\ref{as:idm-exact}(iii) below requires; logging
-again with the deployed IDM \citep{christiano_transfer_2016} would reduce
+again with the deployed IFM \citep{christiano_transfer_2016} would reduce
 this gap.
 
 \subsection{When the Regression Inverts the Controller}
@@ -55,7 +55,7 @@ $(\zeta,\mathbf u)$ in that support and $\bar F_c(\zeta,\mathbf u) =
 (iii)~Every deployment pair $(\zeta,\mathbf u^\star)$ lies in the support
 of the logged $(\zeta,\mathbf o)$, and $\bar F_c$ (on the support of the
 logged pairs) and $I_\star$ have continuous versions, which we use.
-(iv)~The fitted IDM $I$ is continuous and equals $I_\star$ $P_c$-almost
+(iv)~The fitted IFM $I$ is continuous and equals $I_\star$ $P_c$-almost
 everywhere.
 \end{assumption}
 
@@ -98,7 +98,7 @@ and $\mathbb E[\mathbf u - I_\star \mid \zeta,\mathbf o] = \mathbf 0$, so
   \label{eq:app-orth}
 \end{equation}
 which is smallest exactly when $I = I_\star$ almost everywhere. In words,
-the held-out squared error of any IDM is the irreducible error plus its
+the held-out squared error of any IFM is the irreducible error plus its
 mean squared distance from $I_\star$.
 
 (b)~We use that the support of a distribution is the smallest closed
@@ -178,7 +178,7 @@ $\|\mathbf u^\star - \bar{\mathbf o}\|_{S^{-1}}$, so it can be largest for footh
 seldom reached. This is the attenuation bias of a regression on a noisy
 input \citep{fuller_measurement_1987}. Spreading the logged commands raises no eigenvalue of $\Lambda$,
 and in one dimension it shrinks the bias, a second reason, besides
-coverage, for the command noise in the training controller's IDM data
+coverage, for the command noise in the training controller's IFM data
 (App.~\ref{app:settings});
 in the plane, the bias at a given target can still grow.
 
@@ -218,7 +218,7 @@ not increase.
 Eq.~\eqref{eq:mean-forward} splits the landing error as $\mathbf e =
 \boldsymbol\beta + \boldsymbol\eta$. As
 $\boldsymbol\eta$ has mean zero given $(\zeta,\mathbf u)$, the mean error
-is $\boldsymbol\beta$, so an IDM with the inputs $\zeta$ can cancel at
+is $\boldsymbol\beta$, so an IFM with the inputs $\zeta$ can cancel at
 most $\boldsymbol\beta$. Treat the foot as a point at its contact
 position. If it lands in a void, then, since the
 clearance $d(\mathbf u^\star)$ is the $\infty$-norm distance from $\mathbf
@@ -242,7 +242,7 @@ u^\star)$, such as that of Lemma~\ref{lem:idm-grid}, may replace it.
 If $\bar F_c(\zeta,\cdot)$ is $L$-Lipschitz on the segment from
 $\tilde{\mathbf u}$ to $\mathbf u$, the first term is at most
 $L\|I(\zeta,\mathbf u^\star) - I_\star(\zeta,\mathbf u^\star)\|$: the
-IDM's fitting error, whose mean square over the logged landings is its
+IFM's fitting error, whose mean square over the logged landings is its
 held-out error minus the irreducible error (Eq.~\eqref{eq:app-orth}); at
 a given target, the held-out error speaks for it only where the logged
 landings cover that target (Assumption~\ref{as:idm-exact}(iii)). In the form of
@@ -257,7 +257,7 @@ Proposition~\ref{prop:idm-shrink}.
 
 \begin{remark}[Landing error against the margin]
 \label{rem:idm-numbers}
-On flat ground, the IDM cut OCS2's landing error from
+On flat ground, the IFM cut OCS2's landing error from
 \corlOcsLandRmsNoIdm\ to \corlOcsLandRmsIdm\,cm RMS
 (Sec.~\ref{subsec:exp-why}). Suppose $\mathbf e$ is zero-mean isotropic
 Gaussian with standard deviation $\sigma$ per axis. A foothold whose

@@ -29,11 +29,11 @@ overlap of steps are its own choice. A small transformer, the
 \emph{candidate mixer}, compares the candidates, and a one-second
 \emph{history} of the robot's motion is meant to show how the controller executes
 its steps. An \emph{execution layer} starts and lands these steps. Its only learned part, an \emph{inverse
-footstep model} (IDM), turns the chosen foothold into a command
+footstep model} (IFM), turns the chosen foothold into a command
 expected to land the foot there. Trained with proximal policy optimization (PPO)
 on the convex MPC, with no gait, foot-clearance, or posture reward,
 GaitNet then runs frozen on OCS2's nonlinear MPC (NMPC) and whole-body
-controller (WBC), with only the IDM refitted. We make three claims:
+controller (WBC), with only the IFM refitted. We make three claims:
 \begin{enumerate}\setlength{\itemsep}{0pt}
   \item A learned planner, GaitNet (Secs.~\ref{subsec:method-step}
     and~\ref{subsec:method-network}), can choose a model-based
@@ -41,13 +41,13 @@ controller (WBC), with only the IDM refitted. We make three claims:
     mixer and history to the per-candidate network of
     \citet{Sullivan2025}.
   \item Such a planner can move frozen to a new controller
-    when only the IDM is refitted on the new controller (Secs.~\ref{subsec:method-idm}
+    when only the IFM is refitted on the new controller (Secs.~\ref{subsec:method-idm}
     and~\ref{subsec:method-deployment}). The fit itself is direct inverse
     modelling \citep{jordan_forward_1992} with hindsight relabelling
     \citep{andrychowicz_hindsight_2017, ghosh_learning_2021}, as in
     \citet{akizhanov_learning_2024}; what we add is its use as the
     interface between a frozen planner and a new controller.
-  \item We give conditions under which the IDM's fit cancels the landing
+  \item We give conditions under which the IFM's fit cancels the landing
     error its inputs predict, and lower-bound, for exact terrain and a point
     foot, the void clearance that the \emph{candidate margin} leaves for the rest
     (Sec.~\ref{subsec:idm-theory}).
@@ -56,10 +56,11 @@ controller (WBC), with only the IDM refitted. We make three claims:
 \looseness=-1 On OCS2, averaged over \corlNumTrainSeeds{} training seeds of
 \corlBenchTrialsPerArm{} trials each on shared Gazebo worlds
 (Sec.~\ref{sec:experiments}), GaitNet succeeded in \corlBenchFull\%
-against \corlBenchTrot\% for OCS2's own trot, and in
+against \corlBenchTrot\% for OCS2's own trot and \corlBenchStaticWalk\%
+for its static walk, and in
 \corlBenchFullDense\% against \corlBenchTrotDense\% on the densest
 voids (\corlBenchVoidHigh\%). Across the change of controller and simulator,
 it came within five percentage points of its success on the convex MPC,
-but without the IDM it failed in most trials on both controllers. In successful trials, when it swung two legs at
+but without the IFM it failed in most trials on both controllers. In successful trials, when it swung two legs at
 once, they were almost always a diagonal pair, as in the trot, but on
 its own timing. All results are in simulation, on one pair of controllers.

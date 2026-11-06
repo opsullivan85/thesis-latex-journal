@@ -3,21 +3,21 @@
 % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 
 \looseness=-1 Trained on a convex MPC, GaitNet ran frozen on OCS2 with
-only its IDM refitted. On the benchmark, it beat OCS2's own trot, most
+only its IFM refitted. On the benchmark, it beat OCS2's own trot, most
 on the densest voids, and kept most of its success from the training
-controller, but without the IDM it failed in most trials on both
+controller, but without the IFM it failed in most trials on both
 controllers. In successful trials, it kept the trot's
 diagonal pairing but chose its own timing. \emph{Policies:}
 we report means over \corlNumTrainSeeds{} training seeds per method, without
 their spread, so differences of a few points between versions may not
 hold. \emph{Controllers:}
 we tested one pair, in simulation (GaitNet has not yet run on a
-Unitree Go1), and have not compared the refitted IDM with the training
-controller's IDM or a constant or speed-dependent offset per leg. \emph{Terrain:} flat
+Unitree Go1), and have not compared the refitted IFM with the training
+controller's IFM or a constant or speed-dependent offset per leg. \emph{Terrain:} flat
 ground with square voids of one size, at speeds up to
 \corlOcsSpeedMax\,m/s; the benchmark's success criterion does not
 penalize a robot that stops halfway, unlike the sweep's.
 \emph{Perception:} depth images were noise-free, and we have not
 measured landing errors next to voids (Sec.~\ref{subsec:idm-theory}). Future work will test whether fewer
-logged steps \citep{xie_fada_2026} or relogging with the deployed IDM
+logged steps \citep{xie_fada_2026} or relogging with the deployed IFM
 \citep{christiano_transfer_2016} cheapens the refit.

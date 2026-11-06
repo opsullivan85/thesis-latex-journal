@@ -403,6 +403,13 @@
 \newcommand{\corlBenchIsaacSingle}{72.1}
 \newcommand{\corlBenchIsaacMlp}{80.3}
 \newcommand{\corlNumTrainSeeds}{five}
+% OCS2 static walk (author, 2026-11-05): legged_control go1 gait.info
+% static_walk, one leg at a time, 0.3 s swings, 1.2 s period (LH, LF, RH, RF);
+% benchmark cells 0.10: 98 91 80 | 0.20: 90 73 51 = 483/600; 49 %: 131/200.
+\newcommand{\corlBenchStaticWalk}{80.5}
+\newcommand{\corlBenchStaticWalkDense}{65.5}
+\newcommand{\corlWalkSwing}{0.3}
+\newcommand{\corlWalkPeriod}{1.2}
 \newcommand{\corlBenchMlpMean}{84.5}       % mean of the four seeds
 \newcommand{\corlBenchMlpMin}{75.5}        % seed 4
 \newcommand{\corlBenchMlpMax}{89.7}        % seed 3; CMH vs c0 p = 0.31

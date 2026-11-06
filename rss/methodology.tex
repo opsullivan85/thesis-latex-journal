@@ -66,7 +66,7 @@ last layer of each feed-forward block start at zero, so GaitNet begins
 as exactly the per-candidate network of \citet{Sullivan2025}, which
 scores each candidate alone from the state and the candidate (whose
 last entry, a cost, is zero in both). That the history and
-the mixer help is a hypothesis that Sec.~\ref{sec:experiments} tests.
+the mixer help is a hypothesis that we do not test in isolation.
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}
@@ -87,7 +87,7 @@ We log the steps that the controller executes as tuples $(\zeta, \mathbf u,
 to reach, it landed the foot at $\mathbf o$, so in hindsight every logged
 step is an example of the inverse map from landing to command
 \citep{jordan_forward_1992, andrychowicz_hindsight_2017}, as in
-\citet{akizhanov_learning_2024}. We therefore fit the IDM with the landing
+\citet{akizhanov_learning_2024}. We therefore fit the IFM with the landing
 as input and the command as target, since the
 desired foothold takes the landing's place at
 deployment,
@@ -99,7 +99,7 @@ deployment,
   \label{eq:idm-loss}
 \end{equation}
 \looseness=-1 where $\Delta_\theta$ is a small multilayer perceptron whose last
-layer starts at zero, so an untrained IDM sends GaitNet's choice
+layer starts at zero, so an untrained IFM sends GaitNet's choice
 unchanged. For the training controller, we log steps of two earlier
 policies without controller randomization, with Gaussian command noise
 (App.~\ref{app:settings}). For OCS2, we log steps on worlds separate from the evaluation
@@ -108,11 +108,11 @@ policies without controller randomization, with Gaussian command noise
 \subsection{What the Inverse Footstep Model Can Correct}
 \label{subsec:idm-theory}
 
-\looseness=-1 The IDM sees $\zeta$ but not the full state $\mathbf s$, so
+\looseness=-1 The IFM sees $\zeta$ but not the full state $\mathbf s$, so
 given $\zeta$ and the command the landing is random even though $F_c$ is
 deterministic. We split the landing into its conditional mean and a
 zero-mean residual $\boldsymbol\eta$, and the \emph{landing error} of
-the IDM's command into two parts:
+the IFM's command into two parts:
 \begin{equation}
 \begin{aligned}
   \mathbf o &= \bar F_c(\zeta,\mathbf u) + \boldsymbol\eta, &
@@ -122,9 +122,9 @@ the IDM's command into two parts:
 \end{aligned}
 \label{eq:mean-forward}
 \end{equation}
-The IDM acts only through $\boldsymbol\beta$, the part of the error that
+The IFM acts only through $\boldsymbol\beta$, the part of the error that
 its inputs predict, and a better fit shrinks only its fitting part; no
-IDM with these inputs removes $\boldsymbol\eta$. The regression of Eq.~\eqref{eq:idm-loss} cancels
+IFM with these inputs removes $\boldsymbol\eta$. The regression of Eq.~\eqref{eq:idm-loss} cancels
 $\boldsymbol\beta$ if the landing law is the same when logging and at
 deployment, the logged landings carry no residual, each landing is
 reached by a convex set of commands, the logged landings cover the
@@ -143,13 +143,13 @@ be the foothold's distance to the nearest point of the voids $\mathcal
 V$. Since $\|\mathbf e\|_\infty \le \|\boldsymbol\beta\| +
 \|\boldsymbol\eta\|$, with $\|\cdot\|$ Euclidean, a point foot cannot
 land in a void if this sum is below $d(\mathbf u^\star)$ (App.~\ref{app:idm-void}), so the candidate margin must
-cover both the error the IDM leaves and the residual. With exact
+cover both the error the IFM leaves and the residual. With exact
 terrain and a point foot, the mask of Sec.~\ref{subsec:method-step} gives
 every candidate a clearance of at least $m$ for void edges parallel to the grid axes and
 at least $m - h/2$ at any angle (Lemma~\ref{lem:idm-grid}), for square
 voids at least $2\sqrt2\,h$ wide, as all our tiles are. This is a
 point-foot geometric bound, not a hardware safety guarantee: the foot's
-radius and perception and odometry errors reduce it. On flat ground, the IDM
+radius and perception and odometry errors reduce it. On flat ground, the IFM
 cut OCS2's RMS landing error to about the margin
 (Sec.~\ref{subsec:exp-why}), so with a Gaussian error a foothold at the
 margin's edge still lands in a void with probability about 0.08
@@ -175,10 +175,10 @@ curriculum raises it. The reward per tick is
 \end{equation}
 with commanded ($usr$) and base ($b$) velocities, and no gait,
 foot-clearance, posture, or smoothness terms. The training controller's
-IDM sits frozen in the loop from the first iteration and corrects only
+IFM sits frozen in the loop from the first iteration and corrects only
 GaitNet's chosen candidate. At every reset, each
 robot's controller gets new tracking quality, swing height, landing bias and noise, and lift-off delay
-(App.~\ref{app:training}), a randomization absent from the IDM's data.
+(App.~\ref{app:training}), a randomization absent from the IFM's data.
 PPO's critic, a smaller network that estimates the return, reads
 the state and candidates only.
 
@@ -189,7 +189,7 @@ the state and candidates only.
 \texttt{legged\_control} stack \citep{leggedcontrol,
 grandia_perceptive_2022} in Gazebo, where OCS2's NMPC plans the motion
 and a weighted WBC tracks it with stock task settings. Its candidates
-are built as in training, with the same margin, and the OCS2 IDM corrects
+are built as in training, with the same margin, and the OCS2 IFM corrects
 its chosen candidate. Each step joins the steps already planned in OCS2's
 contact schedule and starts at the tick it is chosen. Terrain comes
 from a simulated RealSense D435 depth camera and odometry from OCS2's

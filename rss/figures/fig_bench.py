@@ -28,12 +28,12 @@ panels were dropped for a swing diagram, then restored at the author's
 request ("then add back the image"); the swing diagram is in App. E.
 
 Arms (names as in the paper):
-  GaitNet          = c0, iteration 350 of one of five seeded runs, OCS2 IDM.
+  GaitNet          = c0, iteration 350 of one of five seeded runs, OCS2 IFM.
   GaitNet, rerun   = c0b, the SAME checkpoint evaluated a second time. It is
                      run-to-run variation of the benchmark, not a training seed.
   GaitNet-Diagonal = #6, diagonal-only second swing.
   OCS2's own trot  = #7.
-  Per-candidate + IDM = #4, four training seeds at iteration 1599. The figure
+  Per-candidate + IFM = #4, four training seeds at iteration 1599. The figure
                      shows ONLY the mean over the four seeds (user rule of
                      2026-11-03: no per-seed markers, bars, rows or ranges in
                      figures). The per-seed counts are kept below only to
@@ -42,7 +42,7 @@ Arms (names as in the paper):
 Data conventions:
   * Counts are integers. Every rate is Fraction(100 * k, n) rounded half up
     (decimal.ROUND_HALF_UP): integers for cells, one decimal for pools.
-  * Per-candidate + IDM appears only in (c): no claim uses its per-cell means,
+  * Per-candidate + IFM appears only in (c): no claim uses its per-cell means,
     and a bare mean next to GaitNet's cells would rank the two networks cell
     by cell, which the paper does not do.
 
@@ -53,7 +53,7 @@ Open \\verify items that touch this figure:
     pooled.
   * The checkpoint was fixed \\verify{before any trial on OCS2}, and the world
     seeds are disjoint from those that tuned the execution layer, supplied
-    the OCS2 IDM's data or developed the camera pipeline
+    the OCS2 IFM's data or developed the camera pipeline
     \\verify{(confirm for the 12.5 cm worlds)}.
   The speed x void sweep's tile size and success criterion are open as
   well, but they do not enter this figure.
@@ -86,6 +86,7 @@ CELLS = {
     "GaitNet, rerun":   (96, 97, 92, 96, 84, 74),    # c0b, same checkpoint
     "GaitNet-Diagonal": (99, 96, 89, 96, 84, 59),    # #6
     "OCS2's own trot":  (97, 89, 80, 94, 81, 63),    # #7
+    "OCS2's static walk": (98, 91, 80, 90, 73, 51), # author, 2026-11-05 (deterministic, one run)
 }
 # Per-candidate + IDM (#4), one tuple per training seed (1-4), same order.
 # Used only for the mean over seeds; no seed is drawn.
@@ -115,7 +116,7 @@ def pool(counts, idx) -> tuple[int, int]:
 
 
 SLOW, FAST, ALL = (0, 1, 2), (3, 4, 5), tuple(range(6))
-BAR_ARMS = ("GaitNet", "GaitNet-Diagonal", "OCS2's own trot")   # (a), (b)
+BAR_ARMS = ("GaitNet", "GaitNet-Diagonal", "OCS2's own trot", "OCS2's static walk")   # (a), (b)
 
 # (a), (b): per arm, the three cell counts (= rates in %, n = 100).
 PANEL_A = {a: CELLS[a][:3] for a in BAR_ARMS}
@@ -127,7 +128,7 @@ MLP_N = N_CELL * 6 * len(PER_CANDIDATE_SEEDS)
 MLP_MEAN = rate(MLP_K, MLP_N)
 assert MLP_MEAN == sum(rate(sum(s), 600) for s in PER_CANDIDATE_SEEDS) / 4
 PANEL_C = {a: rate(*pool(CELLS[a], ALL)) for a in CELLS}
-PANEL_C["Per-candidate + IDM"] = MLP_MEAN
+PANEL_C["Per-candidate + IFM"] = MLP_MEAN
 
 
 # ---------------------------------------------------------------- checks
@@ -140,7 +141,8 @@ def check(got, want, what):
 # Data entry against the source's per-speed (integer) and pooled columns.
 SOURCE_ROWS = {"GaitNet": ("96", "87", "91.5"), "GaitNet, rerun": ("95", "85", "89.8"),
                "GaitNet-Diagonal": ("95", "80", "87.2"),
-               "OCS2's own trot": ("89", "79", "84.0")}
+               "OCS2's own trot": ("89", "79", "84.0"),
+               "OCS2's static walk": ("90", "71", "80.5")}
 for arm, (s10, s20, s_all) in SOURCE_ROWS.items():
     check(half_up(rate(*pool(CELLS[arm], SLOW)), "1"), s10, f"{arm} 0.10")
     check(half_up(rate(*pool(CELLS[arm], FAST)), "1"), s20, f"{arm} 0.20")
@@ -164,11 +166,12 @@ def pool_text(r: Fraction) -> str:
 
 # Every value the panel map prints, before plotting.
 SPEC_A = {"GaitNet": ("100", "93", "96"), "GaitNet-Diagonal": ("99", "96", "89"),
-          "OCS2's own trot": ("97", "89", "80")}
+          "OCS2's own trot": ("97", "89", "80"), "OCS2's static walk": ("98", "91", "80")}
 SPEC_B = {"GaitNet": ("96", "87", "77"), "GaitNet-Diagonal": ("96", "84", "59"),
-          "OCS2's own trot": ("94", "81", "63")}
+          "OCS2's own trot": ("94", "81", "63"), "OCS2's static walk": ("90", "73", "51")}
 SPEC_C = {"GaitNet": "91.5", "GaitNet, rerun": "89.8", "GaitNet-Diagonal": "87.2",
-          "Per-candidate + IDM": "84.5", "OCS2's own trot": "84.0"}
+          "Per-candidate + IFM": "84.5", "OCS2's own trot": "84.0",
+          "OCS2's static walk": "80.5"}
 for panel, spec, name in ((PANEL_A, SPEC_A, "(a)"), (PANEL_B, SPEC_B, "(b)")):
     for arm, want in spec.items():
         check(tuple(cell_text(k) for k in panel[arm]), want, f"{name} {arm}")
@@ -183,7 +186,7 @@ MACROS = dict(re.findall(r"\\newcommand\{\\(corlBench\w+)\}\{([^}]*)\}",
                          CONSTANTS_TEX.read_text()))
 for macro, arm in {"Full": "GaitNet", "Rerun": "GaitNet, rerun",
                    "Diag": "GaitNet-Diagonal", "Trot": "OCS2's own trot",
-                   "MlpMean": "Per-candidate + IDM"}.items():
+                   "MlpMean": "Per-candidate + IFM", "StaticWalk": "OCS2's static walk"}.items():
     name = "corlBench" + macro
     if name in MACROS:
         check(pool_text(PANEL_C[arm]), MACROS[name], "\\" + name)
@@ -211,7 +214,7 @@ plt.rcParams.update({
 INK, GRID = "#1F2937", "#E5E7EB"
 INDIGO, GRAY, TEAL = "#4F46E5", "#4B5563", "#0D9488"
 LIGHT_INDIGO = "#A5B4FC"
-VALUE_PT = 7.0                          # value labels on the bars
+VALUE_PT = 6.3                          # value labels on the bars
 ROW_PT = 7.0                            # row labels of (c)
 PAD_PT = 1.5                            # gap between a bar end and its value [pt]
 # A white box behind every value label cuts the light grid lines where a label
@@ -225,17 +228,18 @@ BAR_STYLE = {
     "GaitNet":             dict(facecolor=INDIGO, edgecolor=INDIGO),
     "GaitNet, rerun":      dict(facecolor="white", edgecolor=INDIGO),
     "GaitNet-Diagonal":    dict(facecolor=LIGHT_INDIGO, edgecolor=LIGHT_INDIGO),
-    "Per-candidate + IDM": dict(facecolor=TEAL, edgecolor=TEAL),
+    "Per-candidate + IFM": dict(facecolor=TEAL, edgecolor=TEAL),
     "OCS2's own trot":     dict(facecolor=GRAY, edgecolor=GRAY),
+    "OCS2's static walk":  dict(facecolor="#B8BEC8", edgecolor="#B8BEC8"),
 }
 EDGE_LW = 0.8                           # bar edge width (all bars filled; the rerun is not drawn)
 
 # ---------------------------------------------------------------- layout [mm]
-FIG_W, FIG_H = 152.0, 44.0              # \textwidth of the PMLR class x 44 mm
+FIG_W, FIG_H = 152.0, 47.0              # \textwidth of the PMLR class x 47 mm
 LEFT, RIGHT, TOP, BOTTOM = 10.0, 3.0, 7.6, 8.8
 GAP = 3.0                               # between (a) and (b)
 GUTTER = 26.0                           # between (b) and (c): the row labels of (c)
-RATIOS = (1.0, 1.0, 0.64)               # widths of (a), (b), (c)
+RATIOS = (1.0, 1.0, 0.52)               # widths of (a), (b), (c)
 # Width left for the three panels: GAP between (a) and (b), GUTTER between (b) and (c).
 _avail = FIG_W - LEFT - RIGHT - GAP - GUTTER
 WIDTHS = [r * _avail / sum(RATIOS) for r in RATIOS]
@@ -243,8 +247,9 @@ WIDTHS = [r * _avail / sum(RATIOS) for r in RATIOS]
 _cols = WIDTHS[:2] + [GUTTER - 2 * GAP] + WIDTHS[2:]
 WSPACE = GAP / (sum(_cols) / len(_cols))
 
-SLOT, BAR_W = 0.28, 0.25                # bar pitch and width within a group [groups]
-OFFSET = {"GaitNet": -SLOT, "GaitNet-Diagonal": 0.0, "OCS2's own trot": SLOT}
+SLOT, BAR_W = 0.245, 0.21              # bar pitch and width within a group [groups]
+OFFSET = {"GaitNet": -1.5 * SLOT, "GaitNet-Diagonal": -0.5 * SLOT,
+          "OCS2's own trot": 0.5 * SLOT, "OCS2's static walk": 1.5 * SLOT}
 Y_TOP = 114                             # headroom for the labels on 100 % bars
 GRID_AT = (25, 50, 75)                  # no line at 100: labels of 93-100 % bars cross it
 
@@ -294,8 +299,9 @@ title(ax_b, "(b) 0.20 m/s")
 
 # (c) All six cells per arm, one row each, top to bottom; the pooled rate
 # right of the bar end. The rerun is not drawn (see the header).
-ROWS = ("GaitNet", "GaitNet-Diagonal", "Per-candidate + IDM", "OCS2's own trot")
-ROW_LABELS = {}                          # the caption says Per-candidate + IDM is a seed mean
+ROWS = ("GaitNet", "GaitNet-Diagonal", "Per-candidate + IFM", "OCS2's own trot",
+        "OCS2's static walk")
+ROW_LABELS = {}                          # the caption says Per-candidate + IFM is a seed mean
 for r, arm in enumerate(ROWS):
     y, v = len(ROWS) - 1 - r, PANEL_C[arm]
     ax_c.barh(y, float(v), height=0.62, linewidth=EDGE_LW, zorder=2, **BAR_STYLE[arm])
@@ -321,7 +327,7 @@ title(ax_c, "(c) All six cells")
 # at least 59 %, so no area inside the panels is free.
 _x_mid = (ax_a.get_position().x0 + ax_b.get_position().x1) / 2
 fig.legend(handles=[Patch(label=a, linewidth=0, **BAR_STYLE[a]) for a in BAR_ARMS],
-           loc="upper center", bbox_to_anchor=(_x_mid, 1.0), ncol=3, frameon=False,
+           loc="upper center", bbox_to_anchor=(_x_mid, 1.0), ncol=4, frameon=False,
            fontsize=7, handlelength=1.0, handleheight=0.9, handletextpad=0.4,
            columnspacing=1.6, borderaxespad=0.0, borderpad=0.15)
 

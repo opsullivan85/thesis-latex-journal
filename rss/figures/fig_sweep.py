@@ -17,9 +17,9 @@ marks. Here only GaitNet's values are printed (five lines in (a), three in
 Panels
 - (a) Success vs void fraction (0-70 %), 80 trials per point spread over
   0.05-0.25 m/s: GaitNet, OCS2's own trot, GaitNet-Single (trained with one
-  leg in swing at a time, same training seed), GaitNet with the IDM switched
-  off (same weights), and Per-candidate + IDM (one training seed, trained
-  without the IDM in the loop, run with the OCS2 IDM).
+  leg in swing at a time, same training seed), GaitNet with the IFM switched
+  off (same weights), and Per-candidate + IFM (one training seed, trained
+  without the IFM in the loop, run with the OCS2 IFM).
 - (b) Success vs commanded speed (0.05-0.25 m/s), 80 trials per point, 10 at
   each of the eight void fractions: GaitNet, GaitNet-Single, OCS2's own trot.
   0.25 m/s is above GaitNet's 0.2 m/s training range (\\corlCmdVxMax).
@@ -57,8 +57,8 @@ BY_VOID = {          # successes of 80 per void fraction (spread over 0.05-0.25 
     "GaitNet":             [80, 80, 72, 72, 73, 64, 48, 40],
     "OCS2's own trot":     [80, 80, 70, 60, 56, 30, 24, 10],
     "GaitNet-Single":      [69, 59, 66, 53, 54, 34, 24, 22],
-    "GaitNet, no IDM":     [77, 64, 51, 45, 35, 30, 29, 21],
-    "Per-candidate + IDM": [78, 74, 75, 56, 53, 56, 42, 37],
+    "GaitNet, no IFM":     [77, 64, 51, 45, 35, 30, 29, 21],
+    "Per-candidate + IFM": [78, 74, 75, 56, 53, 56, 42, 37],
 }
 BY_SPEED = {         # successes of 80 per speed (10 at each void fraction)
     "GaitNet":         [67, 71, 69, 65, 53],
@@ -69,8 +69,8 @@ PCT_SOURCE = {       # the integer percentages printed in the 2026-10-28 figure
     "GaitNet":             [100, 100, 90, 90, 91, 80, 60, 50],
     "OCS2's own trot":     [100, 100, 88, 75, 70, 38, 30, 12],
     "GaitNet-Single":      [86, 74, 82, 66, 68, 42, 30, 28],
-    "GaitNet, no IDM":     [96, 80, 64, 56, 44, 38, 36, 26],
-    "Per-candidate + IDM": [98, 92, 94, 70, 66, 70, 52, 46],
+    "GaitNet, no IFM":     [96, 80, 64, 56, 44, 38, 36, 26],
+    "Per-candidate + IFM": [98, 92, 94, 70, 66, 70, 52, 46],
 }
 
 
@@ -98,11 +98,11 @@ for _m, _ks in BY_SPEED.items():
     assert len(_ks) == len(SPEEDS) and all(0 <= k <= N for k in _ks), _m
 TOTAL = {m: sum(ks) for m, ks in BY_VOID.items()}
 assert TOTAL == {"GaitNet": 529, "OCS2's own trot": 410, "GaitNet-Single": 381,
-                 "GaitNet, no IDM": 352, "Per-candidate + IDM": 471}, TOTAL
+                 "GaitNet, no IFM": 352, "Per-candidate + IFM": 471}, TOTAL
 N_ALL = N * len(VOIDS)                                  # 640 per method
 POOLED = {m: str(half_up(pct(k, N_ALL))) for m, k in TOTAL.items()}
 assert POOLED == {"GaitNet": "82.7", "OCS2's own trot": "64.1", "GaitNet-Single": "59.5",
-                  "GaitNet, no IDM": "55.0", "Per-candidate + IDM": "73.6"}, POOLED
+                  "GaitNet, no IFM": "55.0", "Per-candidate + IFM": "73.6"}, POOLED
 # Prose claims that come from these counts.
 dense = slice(4, 8)                                     # 40-70 % voids
 g_dense, t_dense = sum(BY_VOID["GaitNet"][dense]), sum(BY_VOID["OCS2's own trot"][dense])
@@ -112,7 +112,7 @@ gaps_t = [pct(g - t, N) for g, t in zip(G, T)]
 assert min(gaps_t) == 5 and max(gaps_t) == Fraction(35, 2)      # "by 5 to 17.5 points"
 assert all(g > s for g, s in zip(G, S))                 # Single lower at every speed
 assert all(g > s for g, s in zip(BY_VOID["GaitNet"], BY_VOID["GaitNet-Single"]))
-_gp = [g - p for g, p in zip(BY_VOID["GaitNet"], BY_VOID["Per-candidate + IDM"])]
+_gp = [g - p for g, p in zip(BY_VOID["GaitNet"], BY_VOID["Per-candidate + IFM"])]
 assert [v for v, d in zip(VOIDS, _gp) if d <= 0] == [20], _gp   # "except 20 %"
 _gt = [g - t for g, t in zip(BY_VOID["GaitNet"], BY_VOID["OCS2's own trot"])]
 assert _gt[:3] == [0, 0, 2], _gt                        # within 2.5 points up to 20 %
@@ -124,7 +124,7 @@ assert pct(G[1] - S[1], N) == Fraction(85, 4)           # 21.25: "21 points at 0
 MACROS = dict(re.findall(r"\\newcommand\{\\(corl\w+)\}\{([^}]*)\}",
                          CONSTANTS_TEX.read_text()))
 for _m, _macro in {"GaitNet": "corlSweepFull", "GaitNet-Single": "corlSweepSingle",
-                   "Per-candidate + IDM": "corlSweepMlp", "GaitNet, no IDM": "corlSweepNoIdm",
+                   "Per-candidate + IFM": "corlSweepMlp", "GaitNet, no IFM": "corlSweepNoIdm",
                    "OCS2's own trot": "corlSweepTrot"}.items():
     assert MACROS[_macro] == POOLED[_m], (_macro, MACROS[_macro], POOLED[_m])
 assert int(MACROS["corlSweepTrialsPerMethod"]) == N_ALL
@@ -157,13 +157,13 @@ VALUE_PT = 6.5                  # value labels of (a)
 PAD_PT = 0.8                    # gap between a marker's edge and its value [pt]
 SHIFT_PT = 3.0                  # sideways shift of a value off a line [pt]
 GAITNET_MS, TROT_MS, VARIANT_MS = 3.6, 4.0, 3.0      # marker sizes [pt]
-STYLE = {   # method -> plot style; teal = Per-candidate + IDM as in Fig. 2a
+STYLE = {   # method -> plot style; teal = Per-candidate + IFM as in Fig. 2a
     "GaitNet": dict(color=GAITNET, lw=1.6, marker="o", ms=GAITNET_MS, mew=0, zorder=5),
     "OCS2's own trot": dict(color=TROT, ls=(0, (3.2, 1.8)), lw=1.2, marker="s", ms=TROT_MS,
                             mfc="none", mec=TROT, mew=0.9, zorder=4),
     "GaitNet-Single": dict(color="#D97706", lw=1.0, marker="^", ms=VARIANT_MS, mew=0, zorder=3),
-    "GaitNet, no IDM": dict(color="#DB2777", lw=1.0, marker="v", ms=VARIANT_MS, mew=0, zorder=3),
-    "Per-candidate + IDM": dict(color="#0D9488", lw=1.0, marker="D", ms=VARIANT_MS, mew=0,
+    "GaitNet, no IFM": dict(color="#DB2777", lw=1.0, marker="v", ms=VARIANT_MS, mew=0, zorder=3),
+    "Per-candidate + IFM": dict(color="#0D9488", lw=1.0, marker="D", ms=VARIANT_MS, mew=0,
                                 zorder=3),
 }
 EXTENT = {m: s["ms"] + (s.get("mew", 0) if s.get("mfc") == "none" else 0)
@@ -201,7 +201,7 @@ def style_axes(ax, xs, pad, xlabel):
 style_axes(ax_a, VOIDS, 4.5, "Void fraction [%]")
 ax_a.set_title("(a) By void fraction, 0.05–0.25 m/s", **TITLE)
 lines = {"a": {}, "b": {}}
-for m in ("Per-candidate + IDM", "GaitNet, no IDM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
+for m in ("Per-candidate + IFM", "GaitNet, no IFM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
     (lines["a"][m],) = ax_a.plot(VOIDS, [float(pct(k, N)) for k in BY_VOID[m]], label=m, **STYLE[m])
 
 # (b) by speed; 0.25 m/s is above the training range (shaded x band)
@@ -215,7 +215,7 @@ for m in ("GaitNet-Single", "OCS2's own trot", "GaitNet"):
                                  **STYLE[m])
 
 # One legend for both panels, a column between them.
-order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "GaitNet, no IDM", "Per-candidate + IDM"]
+order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "GaitNet, no IFM", "Per-candidate + IFM"]
 leg = fig.legend(handles=[lines["a"][m] for m in order], labels=order, loc="center left",
                  ncol=1, frameon=False, handlelength=1.7, fontsize=6.8,
                  bbox_to_anchor=((LEFT + W_A + LEG_X) / FIG_W,
