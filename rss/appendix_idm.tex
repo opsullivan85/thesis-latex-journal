@@ -33,14 +33,15 @@ E_{P_c}\|\mathbf u\|^2 < \infty$ throughout.
 \looseness=-1 Throughout, we assume that the law of the landing $\mathbf o$
 given $(\zeta,\mathbf u)$ is the same when logging and at deployment,
 although the logging policy and GaitNet both choose commands from terrain
-that $\zeta$ omits. Two parts of our pipeline strain our assumptions. The
-training controller's IFM is fitted without the controller randomization
-it later runs under (Sec.~\ref{subsec:method-training}), which changes
-that law. The OCS2 IFM is fitted on steps sent through the training
-controller's IFM, so its logged landings need not cover the deployed
-targets, as Assumption~\ref{as:idm-exact}(iii) below requires; logging
-again with the deployed IFM \citep{christiano_transfer_2016} would reduce
-this gap.
+that $\zeta$ omits. Two parts of our pipeline depart from these
+assumptions. The training controller's IFM is fitted without the
+controller randomization it later runs under
+(Sec.~\ref{subsec:method-training}), which changes that law. The OCS2 IFM
+is fitted on steps sent through the training controller's IFM, so its
+logged landings cover the footholds GaitNet reached through that IFM
+rather than the deployed targets that Assumption~\ref{as:idm-exact}(iii)
+asks for. Logging again with the deployed IFM
+\citep{christiano_transfer_2016} would narrow this gap.
 
 \subsection{When the Regression Inverts the Controller}
 
@@ -272,14 +273,11 @@ and the grid axes, for $0 \le \varphi \le 45^\circ$ and by symmetry at every ang
 so such an edge at $d = m$ is the worst straight edge. The
 \corlOcsLandRmsIdm\,cm is the RMS of $\|\mathbf e\|$, so $\sigma =
 \sqrt2$\,cm, and at $d = \corlMarginCm$\,cm, the margin, this probability
-is $\Phi(-\sqrt2) \approx 0.079$. If ten of the roughly 97 footholds of a
-sweep trial (\corlOcsStepsPerMFull{} steps per metre over
-\corlOcsTrackM\,m) were this close to an edge, with independent errors,
-the trial would stay void-free with probability only $(1 - 0.079)^{10}
-\approx 0.44$. At a pillar corner, with voids beyond two perpendicular
+is $\Phi(-\sqrt2) \approx 0.079$. Under the same model, the
+\corlOcsLandRmsNoIdm\,cm error without the IFM gives $\sigma = 3\sqrt2$\,cm
+and $\Phi(-\sqrt2/3) \approx 0.32$, four times more. At a pillar corner, with voids beyond two perpendicular
 edges at distance $d$, a foothold lands in a void with probability $1 - (1
-- 0.079)^2 \approx 0.15$. We have
-not measured how close GaitNet's footholds come to voids.
+- 0.079)^2 \approx 0.15$.
 \end{remark}
 
 \subsection{Clearance of the Grown Mask}

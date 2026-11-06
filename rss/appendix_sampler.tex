@@ -16,8 +16,7 @@ them at random. The sampler is deterministic and the same for every leg.
 
 \paragraph{Objective.}
 Let $S$ be the safe cells of the leg's grid
-(Sec.~\ref{subsec:method-step}), in the yaw frame of the hip\verify{,
-within the reach and box limits when these are set}. The sampler returns
+(Sec.~\ref{subsec:method-step}), in the yaw frame of the hip. The sampler returns
 $K = \corlTrainCandidatesPerLeg$ distinct safe cells, the candidates
 $Q = \{\mathbf q_0, \dots, \mathbf q_{K-1}\}$, or all safe cells if
 there are fewer, leaving the other slots empty. It aims at the quantization energy
@@ -117,15 +116,6 @@ covering radius was \corlCovRadiusCovCm\,cm with this sampler, against
 \corlCovRadiusRandCm\,cm for the same number of cells drawn at random,
 and the mean distance from a safe cell to its nearest candidate was
 \corlCovMeanCovCm\,cm, against \corlCovMeanRandCm\,cm.}
-
-% Ablation planned 2026-11-05 (~/dev/repos/gaitNET/ablation-sampler-plan.md):
-% random-sampler retrains on the same seeds, same checkpoint rule, G125 protocol.
-\paragraph{Ablation.}
-\pending{Trained instead with the same number of cells drawn at random from the safe ones,
-on the same xx training seeds and with the same checkpoint rule, GaitNet
-succeeded in xx\% of the OCS2 benchmark's trials, against xx\% with
-coverage for the same training seed on the same worlds, and in xx\%
-against xx\% on the training controller in Isaac.}
 
 \paragraph{What the refinement minimizes.}
 At a fixed temperature, each update of Eq.~\eqref{eq:sampler-update} does

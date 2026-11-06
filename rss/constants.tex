@@ -403,6 +403,15 @@
 \newcommand{\corlBenchIsaacSingle}{72.1}
 \newcommand{\corlBenchIsaacMlp}{80.3}
 \newcommand{\corlNumTrainSeeds}{five}
+% legged_perceptive foothold authority (author, 2026-11-05: launch default used):
+% /gaitnet/foothold_authority_radius = 0.10 m (PerceptiveLeggedInterface.cpp:148).
+\newcommand{\corlAuthorityCm}{10}
+% Claim-2 controls (author, 2026-11-05): frozen GaitNet on the OCS2 benchmark,
+% mean of five training seeds; all six cells / 49 % voids.
+\newcommand{\corlBenchTrainIfm}{28.2}
+\newcommand{\corlBenchTrainIfmDense}{12.1}
+\newcommand{\corlBenchOffset}{11.2}
+\newcommand{\corlBenchOffsetDense}{1.2}
 % OCS2 static walk (author, 2026-11-05): legged_control go1 gait.info
 % static_walk, one leg at a time, 0.3 s swings, 1.2 s period (LH, LF, RH, RF);
 % benchmark cells 0.10: 98 91 80 | 0.20: 90 73 51 = 483/600; 49 %: 131/200.
@@ -469,9 +478,12 @@
 % 59 54 50 43 32, trot 63 63 59 51 41. 95 % Wilson intervals (prose): GaitNet
 % 82.7 [79.5, 85.4], Single 59.5 [55.7, 63.3], trot 64.1 [60.3, 67.7].
 \newcommand{\corlSweepTrialsPerMethod}{640}         % per method, void sweep
-\newcommand{\corlSweepFull}{82.7}          % 529/640
+% Author, 2026-11-05: sweep values are success [%] averaged over five training
+% seeds, rounded to whole percent; pooled = mean of the 8 void points (fig_sweep.py).
+% The sweep no-IFM run is not used (author: the benchmark no-IFM result is correct).
+\newcommand{\corlSweepFull}{82.6}          % mean of 100 100 90 90 91 80 60 50
 \newcommand{\corlSweepSingle}{59.5}        % 381/640
-\newcommand{\corlSweepMlp}{73.6}           % 471/640
+\newcommand{\corlSweepMlp}{73.5}           % mean of 98 92 94 70 66 70 52 46
 \newcommand{\corlSweepNoIdm}{55.0}         % 352/640
 \newcommand{\corlSweepTrot}{64.1}          % 410/640
 % GaitNet-Single's step length: \corlOcsStepsPerMSingle (45.6) against

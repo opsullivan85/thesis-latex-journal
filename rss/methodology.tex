@@ -16,8 +16,8 @@ misses. The unsafe region is
 then grown by $k$ cells on every side, so
 that no unsafe ray lies within the candidate margin $m = kh$
 of a remaining safe cell along the grid axes
-(Sec.~\ref{subsec:idm-theory}). \verify{No other reach, edge, or kinematic rule
-is applied.} For each leg that may step,
+(Sec.~\ref{subsec:idm-theory}). No other reach, edge, or kinematic rule
+is applied. For each leg that may step,
 GaitNet picks \corlTrainCandidatesPerLeg{} safe cells that cover the safe region
 (App.~\ref{app:sampler}) and ignores empty slots when a leg has fewer. With the no-step
 option, they form the choices of a tick.
@@ -64,9 +64,7 @@ a choice and an unclipped swing time from a Gaussian around the predicted one, a
 and its predicted swing time. The projection $W_h$, the attention output projections, and the
 last layer of each feed-forward block start at zero, so GaitNet begins
 as exactly the per-candidate network of \citet{Sullivan2025}, which
-scores each candidate alone from the state and the candidate (whose
-last entry, a cost, is zero in both). That the history and
-the mixer help is a hypothesis that we do not test in isolation.
+scores each candidate alone from the state and the candidate code.
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}
@@ -101,9 +99,9 @@ deployment,
 \looseness=-1 where $\Delta_\theta$ is a small multilayer perceptron whose last
 layer starts at zero, so an untrained IFM sends GaitNet's choice
 unchanged. For the training controller, we log steps of two earlier
-policies without controller randomization, with Gaussian command noise
-(App.~\ref{app:settings}). For OCS2, we log steps on worlds separate from the evaluation
-(App.~\ref{app:settings}).
+policies with Gaussian command noise. For OCS2, we log fewer than 20{,}000 steps of the frozen GaitNet
+with the training controller's IFM, on worlds separate from the
+evaluation (App.~\ref{app:settings}).
 
 \subsection{What the Inverse Footstep Model Can Correct}
 \label{subsec:idm-theory}
@@ -129,13 +127,19 @@ $\boldsymbol\beta$ if the landing law is the same when logging and at
 deployment, the logged landings carry no residual, each landing is
 reached by a convex set of commands, the logged landings cover the
 desired footholds, and the fit is exact
-(Proposition~\ref{prop:idm-mean} in App.~\ref{app:idm-proofs}). With a
+(Proposition~\ref{prop:idm-mean} in App.~\ref{app:idm-proofs}). Neither
+deployed IFM meets all of these, since the training controller's IFM is
+fitted without the controller randomization of training and the OCS2 IFM
+on the footholds that GaitNet reached through the training controller's
+IFM, so Sec.~\ref{subsec:exp-why} tests the refit beyond the proven
+case. With a
 residual, even an exact fit is biased: for Gaussian logged commands, a
 linear landing law, and a Gaussian residual independent of the command,
-it pulls the landing toward the mean logged landing in the logged landings' metric; this is the
-attenuation bias of a regression on a noisy input
-\citep{fuller_measurement_1987}, and it can be largest for footholds the
-logging policy seldom reached (Proposition~\ref{prop:idm-shrink}).
+it pulls the landing toward the mean logged landing, in the logged
+landings' metric, by an amount linear in the foothold's offset from that
+mean (Proposition~\ref{prop:idm-shrink}). This is the attenuation bias of
+a regression on a noisy input \citep{fuller_measurement_1987}, so it
+grows for footholds the logging policy seldom reached.
 
 \looseness=-1 Let the \emph{clearance} $d(\mathbf u^\star) :=
 \inf_{\mathbf p \in \mathcal V} \|\mathbf p - \mathbf u^\star\|_\infty$
@@ -147,14 +151,13 @@ cover both the error the IFM leaves and the residual. With exact
 terrain and a point foot, the mask of Sec.~\ref{subsec:method-step} gives
 every candidate a clearance of at least $m$ for void edges parallel to the grid axes and
 at least $m - h/2$ at any angle (Lemma~\ref{lem:idm-grid}), for square
-voids at least $2\sqrt2\,h$ wide, as all our tiles are. This is a
-point-foot geometric bound, not a hardware safety guarantee: the foot's
-radius and perception and odometry errors reduce it. On flat ground, the IFM
-cut OCS2's RMS landing error to about the margin
-(Sec.~\ref{subsec:exp-why}), so with a Gaussian error a foothold at the
-margin's edge still lands in a void with probability about 0.08
-(Remark~\ref{rem:idm-numbers}); we have not measured how close GaitNet's
-footholds come to voids.
+voids at least $2\sqrt2\,h$ wide, as all our tiles are. The foot's
+radius and perception and odometry errors reduce this clearance. On
+flat ground, the refitted IFM cut OCS2's RMS landing error from three
+times the margin to about the margin (Sec.~\ref{subsec:exp-why}). Under a
+Gaussian error model, this cuts the void probability at the margin's
+edge from about 0.32 to 0.08
+(Remark~\ref{rem:idm-numbers}).
 
 \subsection{Training}
 \label{subsec:method-training}
@@ -190,7 +193,11 @@ the state and candidates only.
 grandia_perceptive_2022} in Gazebo, where OCS2's NMPC plans the motion
 and a weighted WBC tracks it with stock task settings. Its candidates
 are built as in training, with the same margin, and the OCS2 IFM corrects
-its chosen candidate. Each step joins the steps already planned in OCS2's
+its chosen candidate. The NMPC receives the corrected command as a
+foot-placement constraint: the command is projected onto the nearest
+planar region of the segmented terrain map, and the foot must land in a
+box of $\pm$\corlAuthorityCm\,cm around that point inside the region,
+while the swing planner receives only touchdown heights. Each step joins the steps already planned in OCS2's
 contact schedule and starts at the tick it is chosen. Terrain comes
 from a simulated RealSense D435 depth camera and odometry from OCS2's
 leg-based state estimator (App.~\ref{app:deployment}).

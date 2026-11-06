@@ -19,8 +19,8 @@ the tick it is chosen, one decision fixes which leg steps, where, for how
 long, and when. A leg may step
 only if at least \numberstringnum{\corlMinContactLegs} legs, itself among
 them, are in stance in the \emph{contact schedule} set by the planner's
-earlier steps. A chosen leg that the controller has not yet lifted,
-as it may lift late, counts as lifted. Hence at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs
+earlier steps. A chosen leg counts as lifted from the tick it is
+chosen, even if the controller lifts it late. Hence at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs
 swing at once: without a gait schedule, contacts are still constrained.
 The foothold must be one of the leg's
 \emph{candidates} $\mathcal C$, cells near the hip chosen to cover
@@ -30,8 +30,7 @@ a short window of its recent motion (the history), and the
 candidates (Sec.~\ref{subsec:method-network}). It sees neither the rest
 of the terrain nor the controller's internal state, so the decision
 process is partially observed, with the controller as part of the
-environment \citep{yang_fast_2021}. A frozen planner must therefore
-infer from the history how the controller in use executes its steps.
+environment \citep{yang_fast_2021}.
 
 \noindent\textbf{Execution.}
 \looseness=-1 Given a \emph{command} $\mathbf u$, the foothold sent for
@@ -78,8 +77,7 @@ or track-completion term, the return is only a proxy for trial success
 \looseness=-1 The \emph{new controller} is OCS2's NMPC and WBC.
 The planner is frozen, and only the new controller's IFM is fitted, by regression on steps that OCS2 executed
 (Sec.~\ref{subsec:method-idm}). The goal is that the planner succeeds on
-held-out worlds (Sec.~\ref{subsec:exp-setup}) at a rate comparable to or
-above that of OCS2 with its own gait. Moving to OCS2 also changes the
+held-out worlds (Sec.~\ref{subsec:exp-setup}) at least as often as OCS2 with its own gait. Moving to OCS2 also changes the
 simulator, odometry, and terrain source (a depth camera). No planner
 setting is tuned for OCS2: the hand-set candidate margin stays the
 same on the depth map that all methods share (App.~\ref{app:deployment}).

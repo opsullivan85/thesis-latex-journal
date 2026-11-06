@@ -1,23 +1,18 @@
-\section{Conclusion and Limitations}
+\section{Conclusion and Future Work}
 \label{sec:conclusion}
 % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 
 \looseness=-1 Trained on a convex MPC, GaitNet ran frozen on OCS2 with
-only its IFM refitted. On the benchmark, it beat OCS2's own trot, most
-on the densest voids, and kept most of its success from the training
-controller, but without the IFM it failed in most trials on both
-controllers. In successful trials, it kept the trot's
-diagonal pairing but chose its own timing. \emph{Policies:}
-we report means over \corlNumTrainSeeds{} training seeds per method, without
-their spread, so differences of a few points between versions may not
-hold. \emph{Controllers:}
-we tested one pair, in simulation (GaitNet has not yet run on a
-Unitree Go1), and have not compared the refitted IFM with the training
-controller's IFM or a constant or speed-dependent offset per leg. \emph{Terrain:} flat
-ground with square voids of one size, at speeds up to
-\corlOcsSpeedMax\,m/s; the benchmark's success criterion does not
-penalize a robot that stops halfway, unlike the sweep's.
-\emph{Perception:} depth images were noise-free, and we have not
-measured landing errors next to voids (Sec.~\ref{subsec:idm-theory}). Future work will test whether fewer
-logged steps \citep{xie_fada_2026} or relogging with the deployed IFM
-\citep{christiano_transfer_2016} cheapens the refit.
+only its IFM refitted and succeeded in \corlBenchFull\% of benchmark
+trials, against \corlBenchTrot\% for OCS2's own trot and
+\corlBenchStaticWalk\% for its static walk, keeping most of its
+\corlBenchIsaacIdm\% success on the training controller. With the
+training controller's IFM, a constant offset per leg, or no IFM, it
+succeeded in at most \corlBenchTrainIfm\%, so the refit carried the
+transfer. These results come from simulation, with one pair of
+controllers, square voids of one size on flat ground, noise-free depth
+images, and speeds up to \corlOcsSpeedMax\,m/s. Future work will deploy
+GaitNet on a Unitree Go1, move it between further controllers, and test
+how few logged steps the refit needs \citep{xie_fada_2026} and whether
+relogging with the deployed IFM \citep{christiano_transfer_2016} improves
+its coverage of the deployed footholds.

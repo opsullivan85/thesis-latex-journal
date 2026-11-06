@@ -80,7 +80,9 @@ CONSTANTS_TEX = HERE.parent / "constants.tex"
 # ---------------------------------------------------------------- data
 VOIDS = (26, 38, 49)                    # void fraction of a cell [%]
 N_CELL = 100                            # \corlBenchTrialsPerCell
-# Successes out of N_CELL. Order: 0.10 m/s at 26/38/49 % voids, then 0.20 m/s.
+# Success [%] per cell, mean of five training seeds rounded to whole percent
+# (author, 2026-11-05), equal to successes of N_CELL for one run; pooled = mean of
+# the cells. Order: 0.10 m/s at 26/38/49 % voids, then 0.20 m/s.
 CELLS = {
     "GaitNet":          (100, 93, 96, 96, 87, 77),   # c0; 77, not 87 (see header)
     "GaitNet, rerun":   (96, 97, 92, 96, 84, 74),    # c0b, same checkpoint

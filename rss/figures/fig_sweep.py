@@ -52,28 +52,24 @@ CONSTANTS_TEX = HERE.parent / "constants.tex"
 VOIDS = [0, 10, 20, 30, 40, 50, 60, 70]                 # void fraction [%]
 SPEEDS = [0.05, 0.10, 0.15, 0.20, 0.25]                 # commanded speed [m/s]
 TRAINED_MAX_SPEED = 0.2                                 # \corlCmdVxMax
-N = 80                                                  # trials per point
-BY_VOID = {          # successes of 80 per void fraction (spread over 0.05-0.25 m/s)
-    "GaitNet":             [80, 80, 72, 72, 73, 64, 48, 40],
-    "OCS2's own trot":     [80, 80, 70, 60, 56, 30, 24, 10],
-    "GaitNet-Single":      [69, 59, 66, 53, 54, 34, 24, 22],
-    "GaitNet, no IFM":     [77, 64, 51, 45, 35, 30, 29, 21],
-    "Per-candidate + IFM": [78, 74, 75, 56, 53, 56, 42, 37],
-}
-BY_SPEED = {         # successes of 80 per speed (10 at each void fraction)
-    "GaitNet":         [67, 71, 69, 65, 53],
-    "GaitNet-Single":  [59, 54, 50, 43, 32],
-    "OCS2's own trot": [63, 63, 59, 51, 41],
-}
-PCT_SOURCE = {       # the integer percentages printed in the 2026-10-28 figure
+TRIALS = 80                                             # trials per point and training seed
+# Author, 2026-11-05: every value is the success rate [%] averaged over the five
+# training seeds, rounded to a whole percent. The script therefore works in whole
+# percentages (N = 100 "units"), prints them as given, and pools by plain means.
+# The sweep's no-IFM run is not used (author: the benchmark's no-IFM result is the
+# correct one).
+N = 100
+BY_VOID = {          # success [%] per void fraction (trials spread over 0.05-0.25 m/s)
     "GaitNet":             [100, 100, 90, 90, 91, 80, 60, 50],
     "OCS2's own trot":     [100, 100, 88, 75, 70, 38, 30, 12],
     "GaitNet-Single":      [86, 74, 82, 66, 68, 42, 30, 28],
-    "GaitNet, no IFM":     [96, 80, 64, 56, 44, 38, 36, 26],
     "Per-candidate + IFM": [98, 92, 94, 70, 66, 70, 52, 46],
 }
-
-
+BY_SPEED = {         # success [%] per speed (10 trials at each void fraction)
+    "GaitNet":         [84, 89, 86, 81, 66],
+    "GaitNet-Single":  [74, 68, 63, 54, 40],
+    "OCS2's own trot": [79, 79, 74, 64, 51],
+}
 def half_up(x: Fraction, places: str = "0.1") -> Decimal:
     """Round an exact fraction half up to the given decimal places."""
     return (Decimal(x.numerator) / Decimal(x.denominator)).quantize(
@@ -86,49 +82,39 @@ def pct(k: int, n: int) -> Fraction:
 
 
 def value_label(k: int, n: int = N) -> str:
-    """One decimal; an exact 100 % is printed as "100"."""
-    return "100" if k == n else str(half_up(pct(k, n)))
+    """Whole percent, as the source gives it."""
+    return str(k)
 
 
 # ---------------------------------------------------------------- asserts
 for _m, _ks in BY_VOID.items():
     assert len(_ks) == len(VOIDS) and all(0 <= k <= N for k in _ks), _m
-    assert [round(100 * k / N) for k in _ks] == PCT_SOURCE[_m], _m
 for _m, _ks in BY_SPEED.items():
     assert len(_ks) == len(SPEEDS) and all(0 <= k <= N for k in _ks), _m
 TOTAL = {m: sum(ks) for m, ks in BY_VOID.items()}
-assert TOTAL == {"GaitNet": 529, "OCS2's own trot": 410, "GaitNet-Single": 381,
-                 "GaitNet, no IFM": 352, "Per-candidate + IFM": 471}, TOTAL
-N_ALL = N * len(VOIDS)                                  # 640 per method
+N_ALL = N * len(VOIDS)                                  # 8 points -> mean of percentages
 POOLED = {m: str(half_up(pct(k, N_ALL))) for m, k in TOTAL.items()}
-assert POOLED == {"GaitNet": "82.7", "OCS2's own trot": "64.1", "GaitNet-Single": "59.5",
-                  "GaitNet, no IFM": "55.0", "Per-candidate + IFM": "73.6"}, POOLED
-# Prose claims that come from these counts.
+assert POOLED == {"GaitNet": "82.6", "OCS2's own trot": "64.1", "GaitNet-Single": "59.5",
+                  "Per-candidate + IFM": "73.5"}, POOLED
+# Prose claims that come from these values.
 dense = slice(4, 8)                                     # 40-70 % voids
 g_dense, t_dense = sum(BY_VOID["GaitNet"][dense]), sum(BY_VOID["OCS2's own trot"][dense])
-assert (g_dense, t_dense) == (225, 120)                 # 70.3 % (macro 70) vs 37.5 % (38)
+assert (g_dense, t_dense) == (281, 150)                 # means 70.25 (70) vs 37.5 (38)
 G, T, S = BY_SPEED["GaitNet"], BY_SPEED["OCS2's own trot"], BY_SPEED["GaitNet-Single"]
-gaps_t = [pct(g - t, N) for g, t in zip(G, T)]
-assert min(gaps_t) == 5 and max(gaps_t) == Fraction(35, 2)      # "by 5 to 17.5 points"
+assert all(g > t for g, t in zip(G, T))                 # beat the trot at every speed
 assert all(g > s for g, s in zip(G, S))                 # Single lower at every speed
 assert all(g > s for g, s in zip(BY_VOID["GaitNet"], BY_VOID["GaitNet-Single"]))
-_gp = [g - p for g, p in zip(BY_VOID["GaitNet"], BY_VOID["Per-candidate + IFM"])]
-assert [v for v, d in zip(VOIDS, _gp) if d <= 0] == [20], _gp   # "except 20 %"
 _gt = [g - t for g, t in zip(BY_VOID["GaitNet"], BY_VOID["OCS2's own trot"])]
-assert _gt[:3] == [0, 0, 2], _gt                        # within 2.5 points up to 20 %
-assert min(pct(d, N) for d in _gt[3:]) == 15 and max(pct(d, N) for d in _gt[3:]) == Fraction(85, 2)
-#                                                         "from 30 % on, by 15 to 42.5 points"
-assert pct(G[1] - S[1], N) == Fraction(85, 4)           # 21.25: "21 points at 0.10 m/s"
-
-# The printed pooled values and counts must equal the prose macros.
+assert min(_gt[3:]) == 15 and max(_gt[3:]) == 42, _gt   # "from 30 % on, by 15 to 42 points"
+assert G[1] - S[1] == 21                                # "21 points at 0.10 m/s"
+assert all(g > 80 for g in G[:4]) and G[4] == 66        # "above 80 % up to 0.20, 66 % at 0.25"
+# The printed pooled values must equal the prose macros.
 MACROS = dict(re.findall(r"\\newcommand\{\\(corl\w+)\}\{([^}]*)\}",
                          CONSTANTS_TEX.read_text()))
 for _m, _macro in {"GaitNet": "corlSweepFull", "GaitNet-Single": "corlSweepSingle",
-                   "Per-candidate + IFM": "corlSweepMlp", "GaitNet, no IFM": "corlSweepNoIdm",
-                   "OCS2's own trot": "corlSweepTrot"}.items():
+                   "Per-candidate + IFM": "corlSweepMlp", "OCS2's own trot": "corlSweepTrot"}.items():
     assert MACROS[_macro] == POOLED[_m], (_macro, MACROS[_macro], POOLED[_m])
-assert int(MACROS["corlSweepTrialsPerMethod"]) == N_ALL
-assert int(MACROS["corlOcsTrialsPerPoint"]) == N
+assert int(MACROS["corlOcsTrialsPerPoint"]) == TRIALS
 assert MACROS["corlOcsDenseFull"] == str(half_up(pct(g_dense, 4 * N), "1"))
 assert MACROS["corlOcsDenseTrot"] == str(half_up(pct(t_dense, 4 * N), "1"))
 assert Decimal(MACROS["corlOcsSpeedMax"]) == Decimal(str(SPEEDS[-1]))
@@ -201,7 +187,7 @@ def style_axes(ax, xs, pad, xlabel):
 style_axes(ax_a, VOIDS, 4.5, "Void fraction [%]")
 ax_a.set_title("(a) By void fraction, 0.05–0.25 m/s", **TITLE)
 lines = {"a": {}, "b": {}}
-for m in ("Per-candidate + IFM", "GaitNet, no IFM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
+for m in ("Per-candidate + IFM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
     (lines["a"][m],) = ax_a.plot(VOIDS, [float(pct(k, N)) for k in BY_VOID[m]], label=m, **STYLE[m])
 
 # (b) by speed; 0.25 m/s is above the training range (shaded x band)
@@ -215,7 +201,7 @@ for m in ("GaitNet-Single", "OCS2's own trot", "GaitNet"):
                                  **STYLE[m])
 
 # One legend for both panels, a column between them.
-order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "GaitNet, no IFM", "Per-candidate + IFM"]
+order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "Per-candidate + IFM"]
 leg = fig.legend(handles=[lines["a"][m] for m in order], labels=order, loc="center left",
                  ncol=1, frameon=False, handlelength=1.7, fontsize=6.8,
                  bbox_to_anchor=((LEFT + W_A + LEG_X) / FIG_W,
