@@ -1,8 +1,13 @@
 """Page-1 teaser: frames of GaitNet's MuJoCo-rendered run with schematic drawings.
 
-Source video: ~/gaitnet_videos/gaitnet_c0_g125_ramp10to60_0.15mps_mujoco.mp4
-(author, 2026-11-05: checkpoint c0, 12.5 cm tiles, voids rising from 10 % to
-60 % along the track, 0.15 m/s, rendered in MuJoCo; 1920x1080 at 60 fps).
+Source video: ~/gaitnet_videos/gaitnet_c0_g125_ramp10to60_0.15mps_mujoco_4k.mp4
+(author, 2026-11-05: an OCS2 trial with checkpoint c0, 12.5 cm tiles, voids
+rising from 10 % to 60 % along the track, 0.15 m/s, re-rendered in MuJoCo).
+The 4K clip (3840x2160, 60 fps, 2026-11-06) has the same camera and timing as
+the earlier 1920x1080 clip (checked: zero pixel shift, mean |diff| ~1 grey
+level after downscaling); the 1080p clip is the fallback if the 4K one is
+missing. Fetch the 4K clip with
+  rsync -avP sselvaraj@130.215.178.33:/scratch/sselvaraj/projects/gaitnet/paper_runs/gaitnet_c0_g125_ramp10to60_0.15mps_mujoco_4k.mp4 ~/gaitnet_videos/
 
 (a) one frame (t = 25.0 s) with SCHEMATIC drawings: candidate dots on a few
     safe tile tops near the near-side front leg, one of them marked as the
@@ -29,7 +34,9 @@ from PIL import Image, ImageFilter
 from scipy import ndimage as ndi
 
 HERE = Path(__file__).resolve().parent
-VIDEO = Path.home() / "gaitnet_videos" / "gaitnet_c0_g125_ramp10to60_0.15mps_mujoco.mp4"
+VIDEO_4K = Path.home() / "gaitnet_videos" / "gaitnet_c0_g125_ramp10to60_0.15mps_mujoco_4k.mp4"
+VIDEO_1080 = Path.home() / "gaitnet_videos" / "gaitnet_c0_g125_ramp10to60_0.15mps_mujoco.mp4"
+VIDEO = VIDEO_4K if VIDEO_4K.exists() else VIDEO_1080
 # Extracted frames are cached outside the repository.
 FRAMES = Path(tempfile.gettempdir()) / "gaitnet_teaser_frames"
 FRAMES.mkdir(exist_ok=True)
@@ -61,12 +68,15 @@ def frame(t: float) -> np.ndarray:
         if not src.exists():
             raise FileNotFoundError(f"{src} (set by GAITNET_TEASER_FRAMES)")
         return np.asarray(Image.open(src).convert("RGB"))
-    out = FRAMES / f"t_{t:05.2f}.png"
+    out = FRAMES / f"{VIDEO.stem}_t_{t:05.2f}.png"   # cache keyed by source clip
     if not out.exists():
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t}", "-i", str(VIDEO),
                         "-frames:v", "1", str(out)], check=True)
-    # H.264 frames are soft: a mild unsharp mask, nothing else.
-    img = Image.open(out).convert("RGB").filter(ImageFilter.UnsharpMask(radius=1.2, percent=70, threshold=2))
+    img = Image.open(out).convert("RGB")
+    if VIDEO == VIDEO_1080:
+        # The 1080p H.264 frames are soft: a mild unsharp mask, nothing else.
+        # The 4K frames are used as decoded.
+        img = img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=70, threshold=2))
     return np.asarray(img)
 
 
