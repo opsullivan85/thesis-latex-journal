@@ -1,5 +1,11 @@
 """Plot the G125 benchmark for Sec. 5.1 (Fig. fig:bench of the L4DC paper).
 
+PROVENANCE NOTE (2026-11-05): the author states that every learned value
+plotted here is the mean over five training seeds at iteration 350, each seed
+run on all trials; the per-seed logs are not in this repository. Comments below
+that describe a value as a single run or another iteration predate this
+statement and are kept as written.
+
 Source of every number: the author's final results of 2026-11-03 (full record on the cluster,
 /scratch/sselvaraj/gaitnet-runs/idm/inv/paper_exp/SUMMARY.md),
 the G125 tables. The prose macros
@@ -16,7 +22,10 @@ Panels:
   (a) 0.10 m/s and (b) 0.20 m/s: grouped bars by void fraction, one bar per
       arm (GaitNet, GaitNet-Diagonal, OCS2's own trot), the cell's success
       count printed on top of every bar.
-  (c) All six cells: one horizontal bar per arm, its pooled rate printed at
+  (c) REMOVED 2026-11-05 at the author's request: it repeated Table 1's
+      benchmark column. Its values are still computed and checked below
+      (PANEL_C, SPEC_C), because the \\corlBench* macros use them.
+  (c, former) All six cells: one horizontal bar per arm, its pooled rate printed at
       the bar end.
 
 Design rule (user, 2026-11-03, after commit 098def2): no error bars, whiskers,
@@ -217,7 +226,6 @@ INK, GRID = "#1F2937", "#E5E7EB"
 INDIGO, GRAY, TEAL = "#4F46E5", "#4B5563", "#0D9488"
 LIGHT_INDIGO = "#A5B4FC"
 VALUE_PT = 6.3                          # value labels on the bars
-ROW_PT = 7.0                            # row labels of (c)
 PAD_PT = 1.5                            # gap between a bar end and its value [pt]
 # A white box behind every value label cuts the light grid lines where a label
 # crosses one (the label of the 63 % bar in (b) reaches the 75 % line). Its
@@ -237,19 +245,14 @@ BAR_STYLE = {
 EDGE_LW = 0.8                           # bar edge width (all bars filled; the rerun is not drawn)
 
 # ---------------------------------------------------------------- layout [mm]
-FIG_W, FIG_H = 152.0, 47.0              # \textwidth of the PMLR class x 47 mm
+FIG_W, FIG_H = 152.0, 42.0              # \textwidth of the PMLR class x 42 mm
 LEFT, RIGHT, TOP, BOTTOM = 10.0, 3.0, 7.6, 8.8
-GAP = 3.0                               # between (a) and (b)
-GUTTER = 26.0                           # between (b) and (c): the row labels of (c)
-RATIOS = (1.0, 1.0, 0.52)               # widths of (a), (b), (c)
-# Width left for the three panels: GAP between (a) and (b), GUTTER between (b) and (c).
-_avail = FIG_W - LEFT - RIGHT - GAP - GUTTER
-WIDTHS = [r * _avail / sum(RATIOS) for r in RATIOS]
-# A GridSpec column for the gutter; wspace is a fraction of the mean column width.
-_cols = WIDTHS[:2] + [GUTTER - 2 * GAP] + WIDTHS[2:]
-WSPACE = GAP / (sum(_cols) / len(_cols))
+GAP = 4.0                               # between (a) and (b)
+# Two equal panels; wspace is a fraction of the panel width.
+_panel_w = (FIG_W - LEFT - RIGHT - GAP) / 2
+WSPACE = GAP / _panel_w
 
-SLOT, BAR_W = 0.245, 0.21              # bar pitch and width within a group [groups]
+SLOT, BAR_W = 0.20, 0.17               # bar pitch and width within a group [groups]
 OFFSET = {"GaitNet": -1.5 * SLOT, "GaitNet-Diagonal": -0.5 * SLOT,
           "OCS2's own trot": 0.5 * SLOT, "OCS2's static walk": 1.5 * SLOT}
 Y_TOP = 114                             # headroom for the labels on 100 % bars
@@ -272,7 +275,7 @@ def draw_cells(ax, panel):
     ax.set_xlim(-0.5, len(VOIDS) - 0.5)
     ax.set_xticks(range(len(VOIDS)))
     ax.set_xticklabels([str(v) for v in VOIDS])
-    ax.tick_params(axis="x", length=0, pad=3)       # same 3 pt as (c): 2.5 + 0.5
+    ax.tick_params(axis="x", length=0, pad=3)
     ax.set_xlabel("Void fraction [%]", labelpad=2)
     ax.set_ylim(0, Y_TOP)
     ax.set_yticks(range(0, 101, 25))
@@ -284,13 +287,12 @@ def draw_cells(ax, panel):
 
 MM = 1 / 25.4
 fig = plt.figure(figsize=(FIG_W * MM, FIG_H * MM))
-# Columns: (a), (b), an empty gutter for the row labels of (c), (c).
-gs = fig.add_gridspec(1, 4, width_ratios=_cols, wspace=WSPACE)
+# Columns: (a), (b).
+gs = fig.add_gridspec(1, 2, wspace=WSPACE)
 fig.subplots_adjust(left=LEFT / FIG_W, right=1 - RIGHT / FIG_W,
                     top=1 - TOP / FIG_H, bottom=BOTTOM / FIG_H)
 ax_a = fig.add_subplot(gs[0])
 ax_b = fig.add_subplot(gs[1], sharey=ax_a)
-ax_c = fig.add_subplot(gs[3])
 
 draw_cells(ax_a, PANEL_A)
 draw_cells(ax_b, PANEL_B)
@@ -299,31 +301,6 @@ ax_b.tick_params(labelleft=False)
 title(ax_a, "(a) 0.10 m/s")
 title(ax_b, "(b) 0.20 m/s")
 
-# (c) All six cells per arm, one row each, top to bottom; the pooled rate
-# right of the bar end. The rerun is not drawn (see the header).
-ROWS = ("GaitNet", "GaitNet-Diagonal", "Per-candidate + IFM", "OCS2's own trot",
-        "OCS2's static walk")
-ROW_LABELS = {}                          # the caption says Per-candidate + IFM is a seed mean
-for r, arm in enumerate(ROWS):
-    y, v = len(ROWS) - 1 - r, PANEL_C[arm]
-    ax_c.barh(y, float(v), height=0.62, linewidth=EDGE_LW, zorder=2, **BAR_STYLE[arm])
-    ax_c.annotate(pool_text(v), (float(v), y), xytext=(EDGE_LW / 2 + PAD_PT, 0),
-                  textcoords="offset points", ha="left", va="center",
-                  fontsize=VALUE_PT, color=INK, zorder=3, bbox=HALO)
-ax_c.set_ylim(-0.55, len(ROWS) - 0.45)
-ax_c.set_yticks(range(len(ROWS))[::-1])
-ax_c.set_yticklabels([ROW_LABELS.get(a, a) for a in ROWS], fontsize=ROW_PT,
-                     linespacing=1.0)
-ax_c.tick_params(axis="y", length=0, pad=3)
-ax_c.set_xlim(0, 100)
-ax_c.set_xticks(range(0, 101, 25))
-ax_c.tick_params(axis="x", pad=0.5)
-ax_c.spines["bottom"].set_bounds(0, 100)
-ax_c.set_xlabel("Success [%]", labelpad=2)
-for g in GRID_AT:
-    ax_c.axvline(g, color=GRID, lw=0.5, zorder=0)
-ax_c.spines[["top", "right"]].set_visible(False)
-title(ax_c, "(c) All six cells")
 
 # Legend in its own strip above (a) and (b): every bar in (a) and (b) reaches
 # at least 59 %, so no area inside the panels is free.

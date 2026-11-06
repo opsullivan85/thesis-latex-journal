@@ -9,18 +9,18 @@
 Sec.~\ref{sec:setup} allows against the no-step option and starts at
 most one, while the other legs keep their commands. Beyond these rules,
 its action names no gait phase, leg pair, or contact sequence; these
-follow from when it starts steps, and nothing ties steps to a cycle. To build candidates, vertical terrain rays on a
-grid of spacing $h$ around each hip mark a cell safe when the ground under it
+follow from when it starts steps. Vertical terrain rays on a
+grid of spacing $h = \corlScanResCm$\,cm around each hip mark a cell safe when the ground under it
 lies within reach below the hip, and unsafe when it is a void or the ray
 misses. The unsafe region is
-then grown by $k$ cells on every side, so
-that no unsafe ray lies within the candidate margin $m = kh$
+then grown by $k = 2$ cells on every side, so
+that no unsafe ray lies within the candidate margin $m = kh = \corlMarginCm$\,cm
 of a remaining safe cell along the grid axes
 (Sec.~\ref{subsec:idm-theory}). No other reach, edge, or kinematic rule
 is applied. For each leg that may step,
 GaitNet picks \corlTrainCandidatesPerLeg{} safe cells that cover the safe region
-(App.~\ref{app:sampler}) and ignores empty slots when a leg has fewer. With the no-step
-option, they form the choices of a tick.
+(App.~\ref{app:sampler}) and leaves slots empty when a leg has fewer. With the no-step
+option, they are a tick's choices.
 
 \subsection{Network}
 \label{subsec:method-network}
@@ -34,7 +34,8 @@ of its leg and its offset from the hip. The history $\mathbf h$ covers
 the last \corlHistSeconds\,s of base
 velocities, foot positions relative to the hips from the joint encoders,
 scheduled contacts, and each leg's last \emph{touchdown error}, the
-foot's position at its scheduled touchdown minus the command.
+foot's position at its scheduled touchdown minus the command, so that it
+reports the controller's own landing offset, not the IFM's correction.
 All of these can be estimated on a real robot. Encoders $f_s$, $f_h$,
 and $f_c$ embed the state, the history, and each candidate, and each
 choice becomes a token $\mathbf t_i$,
@@ -98,10 +99,12 @@ deployment,
 \end{equation}
 \looseness=-1 where $\Delta_\theta$ is a small multilayer perceptron whose last
 layer starts at zero, so an untrained IFM sends GaitNet's choice
-unchanged. For the training controller, we log steps of two earlier
-policies with Gaussian command noise. For OCS2, we log fewer than 20{,}000 steps of the frozen GaitNet
-with the training controller's IFM, on worlds separate from the
-evaluation (App.~\ref{app:settings}).
+unchanged. Fitting the inverse directly gives the command in one forward
+pass, with no search over a learned forward model. For the
+training controller, we log steps with Gaussian command noise. For OCS2,
+each seed's frozen GaitNet logs fewer than 20{,}000 steps with
+the training controller's IFM, on worlds separate from the evaluation,
+and gets its own IFM (App.~\ref{app:settings}).
 
 \subsection{What the Inverse Footstep Model Can Correct}
 \label{subsec:idm-theory}
@@ -133,13 +136,12 @@ fitted without the controller randomization of training and the OCS2 IFM
 on the footholds that GaitNet reached through the training controller's
 IFM, so Sec.~\ref{subsec:exp-why} tests the refit beyond the proven
 case. With a
-residual, even an exact fit is biased: for Gaussian logged commands, a
-linear landing law, and a Gaussian residual independent of the command,
-it pulls the landing toward the mean logged landing, in the logged
-landings' metric, by an amount linear in the foothold's offset from that
-mean (Proposition~\ref{prop:idm-shrink}). This is the attenuation bias of
-a regression on a noisy input \citep{fuller_measurement_1987}, so it
-grows for footholds the logging policy seldom reached.
+residual, even an exact fit is biased: in a linear-Gaussian model, it
+pulls the landing toward the mean logged landing by an amount linear in
+the foothold's offset from that mean (Proposition~\ref{prop:idm-shrink}),
+the attenuation bias of a regression on a noisy input
+\citep{fuller_measurement_1987, soderstrom_errors_2007}, largest for
+footholds the logging policy seldom reached.
 
 \looseness=-1 Let the \emph{clearance} $d(\mathbf u^\star) :=
 \inf_{\mathbf p \in \mathcal V} \|\mathbf p - \mathbf u^\star\|_\infty$
@@ -152,12 +154,10 @@ terrain and a point foot, the mask of Sec.~\ref{subsec:method-step} gives
 every candidate a clearance of at least $m$ for void edges parallel to the grid axes and
 at least $m - h/2$ at any angle (Lemma~\ref{lem:idm-grid}), for square
 voids at least $2\sqrt2\,h$ wide, as all our tiles are. The foot's
-radius and perception and odometry errors reduce this clearance. On
+radius and perception and odometry errors reduce this clearance; on
+OCS2, the depth map's own distance to unwalkable cells (App.~\ref{app:deployment}) adds to it. On
 flat ground, the refitted IFM cut OCS2's RMS landing error from three
-times the margin to about the margin (Sec.~\ref{subsec:exp-why}). Under a
-Gaussian error model, this cuts the void probability at the margin's
-edge from about 0.32 to 0.08
-(Remark~\ref{rem:idm-numbers}).
+times the margin to about the margin (Sec.~\ref{subsec:exp-why}).
 
 \subsection{Training}
 \label{subsec:method-training}
@@ -182,8 +182,8 @@ IFM sits frozen in the loop from the first iteration and corrects only
 GaitNet's chosen candidate. At every reset, each
 robot's controller gets new tracking quality, swing height, landing bias and noise, and lift-off delay
 (App.~\ref{app:training}), a randomization absent from the IFM's data.
-PPO's critic, a smaller network that estimates the return, reads
-the state and candidates only.
+PPO's critic reads the state and candidates only, without attention
+(App.~\ref{app:training}).
 
 \subsection{Deployment on OCS2}
 \label{subsec:method-deployment}
@@ -191,7 +191,7 @@ the state and candidates only.
 \looseness=-1 On OCS2, GaitNet replaces the gait scheduler of the
 \texttt{legged\_control} stack \citep{leggedcontrol,
 grandia_perceptive_2022} in Gazebo, where OCS2's NMPC plans the motion
-and a weighted WBC tracks it with stock task settings. Its candidates
+and a weighted WBC tracks it, with all OCS2 settings stock. Its candidates
 are built as in training, with the same margin, and the OCS2 IFM corrects
 its chosen candidate. The NMPC receives the corrected command as a
 foot-placement constraint: the command is projected onto the nearest

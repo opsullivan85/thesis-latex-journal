@@ -1,3 +1,11 @@
+% PROVENANCE NOTE (2026-11-05). The author states that every learned
+% value printed in the paper (Table 1, Figs. 3-4, prose) is the mean over
+% five training seeds at iteration 350, each seed run on all trials. The
+% per-seed logs are not in this repository. Older comments below that call
+% a value a single run, "one of five seeded runs", or another iteration
+% predate this statement and are kept as the record they were written from.
+% Re-derive every learned number from the per-seed logs before submission.
+%
 % Constants for the RSS paper (rss/*.tex).
 % The "corl" prefix is kept from the CoRL version of this paper.
 %
@@ -410,8 +418,14 @@
 % mean of five training seeds; all six cells / 49 % voids.
 \newcommand{\corlBenchTrainIfm}{28.2}
 \newcommand{\corlBenchTrainIfmDense}{12.1}
-\newcommand{\corlBenchOffset}{11.2}
-\newcommand{\corlBenchOffsetDense}{1.2}
+% Offset values corrected by the author on 2026-11-05: 31.2 / 21.2 (the
+% earlier 11.2 / 1.2 were entry errors). Offset = per leg, mean of command
+% minus landing over the OCS2 IFM's logged steps.
+\newcommand{\corlBenchOffset}{31.2}
+\newcommand{\corlBenchOffsetDense}{21.2}
+% Highest benchmark success among the three claim-2 controls (training IFM,
+% offset, no IFM): the offset arm. Used by every "at most" sentence.
+\newcommand{\corlBenchCtrlMax}{\corlBenchOffset}
 % OCS2 static walk (author, 2026-11-05): legged_control go1 gait.info
 % static_walk, one leg at a time, 0.3 s swings, 1.2 s period (LH, LF, RH, RF);
 % benchmark cells 0.10: 98 91 80 | 0.20: 90 73 51 = 483/600; 49 %: 131/200.
@@ -507,6 +521,7 @@
 \newcommand{\corlGaitTrialsTrot}{504}
 \newcommand{\corlGaitExampleSeed}{134} % world seed of Fig. 2b; chosen by fig_gait.py's L1 rule, asserted there
 \newcommand{\corlGaitDiagTimePct}{99}      % 99.05 % of GaitNet's two-feet-up time on a diagonal pair (trot 100 %)
+\newcommand{\corlGaitOverlapPairs}{24{,}793}  % overlapping swing pairs, successful trials (gait_stats.py)
 \newcommand{\corlGaitDiagPairPct}{98}      % 24370 of 24793 overlapping swing pairs = 98.3 % (rear 227, side 158, front 38)
 \newcommand{\corlGaitStepsSlow}{5.5}       % steps/s on the field at 0.10 m/s (5.48; cells 5.35 5.47 5.63)
 \newcommand{\corlGaitStepsFast}{7.2}       % at 0.20 m/s (7.16; cells 7.04 7.17 7.29)

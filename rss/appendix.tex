@@ -52,10 +52,10 @@ curriculum levels span 0--\corlMaxVoidPct\% voids.
 \noindent\textbf{OCS2.}
 \looseness=-1 Of GaitNet and its execution layer, only the IFM is fitted for OCS2: steps
 start at the tick they are chosen, as in training, and the candidate
-margin is the training margin. The OCS2 IFM has the network and training
-of the training controller's IFM and is fitted on fewer than
-20{,}000 steps of the frozen GaitNet run on OCS2 with the training
-controller's IFM. The benchmark uses
+margin is the training margin. Each training seed has its own OCS2 IFM,
+with the network and training of the training controller's IFM, fitted
+on fewer than 20{,}000 steps that this seed's frozen GaitNet took on
+OCS2 with the training controller's IFM. All OCS2 settings are stock. The benchmark uses
 \corlBenchTileCm\,cm tiles and trials of \corlBenchTrialSeconds\,s, and
 a successful trial covers at least half the commanded distance. The
 sweep uses the same tiles and a \corlOcsTrackM\,m track with a time limit
@@ -66,6 +66,22 @@ of \corlOcsTimeFactor{} times the nominal time.
 
 Each training seed took about \corlTrainHours\,h to reach iteration
 \corlOcsCheckpoint{} on one NVIDIA RTX PRO 6000 Blackwell GPU.
+
+\paragraph{Policy and critic.}
+The action is a slot $a$, a leg and candidate or the no-step option,
+and a swing time $d$. The policy factors as
+$\pi(a, d \mid s) = \pi(a \mid s)\,\mathcal N(d;\, \mu_a(s), \sigma_T^2)$,
+with $\pi(a \mid s)$ the softmax of the scores over the valid slots,
+$\mu_a$ the swing time of Eq.~\eqref{eq:heads}, and $\sigma_T =
+\corlDurationExploreStd$\,s fixed. PPO's ratio and clipping act on the joint
+log-probability. For the no-step option, the Gaussian term does not
+depend on the parameters. The critic has no attention and pools no
+embeddings. An MLP on the state embedding and each slot's candidate
+embedding gives one value per slot; the no-step option and empty slots
+share a learned embedding. A second MLP ($\corlTotalCandidates \to 32 \to
+32 \to 1$) maps the \corlTotalCandidates{} slot values to the value
+estimate. It reads the slots in a fixed order, in which the first slot of
+each leg holds the pinned nominal foothold (App.~\ref{app:sampler}).
 
 \paragraph{Episodes and failure.}
 An episode lasts up to \corlEpisodeSeconds\,s and fails earlier if the trunk tilts by more than \corlTiltLimitDeg$^\circ$, drops below

@@ -40,30 +40,29 @@ controller (WBC), with only the IFM refitted. We make three claims:
     model-based controller's steps without a gait schedule. It adds the
     candidate mixer and history to the per-candidate network of
     \citet{Sullivan2025}.
-  \item A frozen planner can move to a new controller with only its IFM
-    refitted on that controller's logged steps
-    (Secs.~\ref{subsec:method-idm} and~\ref{subsec:method-deployment}).
-    From the convex MPC to OCS2, the refit carried the transfer: with the
-    training controller's IFM, a constant offset per leg, or no IFM in its
-    place, the same GaitNet succeeded in at most \corlBenchTrainIfm\% of
-    trials (Sec.~\ref{subsec:exp-why}). The fit itself is direct inverse
+  \item From the convex MPC to OCS2, the frozen GaitNet moved with only
+    its IFM refitted on OCS2's logged steps
+    (Secs.~\ref{subsec:method-idm} and~\ref{subsec:method-deployment});
+    with the training controller's IFM, a constant offset per leg, or no
+    IFM, it succeeded in at most \corlBenchCtrlMax\%
+    (Sec.~\ref{subsec:exp-why}). The fit is direct inverse
     modelling \citep{jordan_forward_1992} with hindsight relabelling
     \citep{andrychowicz_hindsight_2017, ghosh_learning_2021}, as in
-    \citet{akizhanov_learning_2024}. Its use as the interface between a
-    frozen planner and a new controller is new.
-  \item We prove conditions under which hindsight regression inverts the
-    controller exactly,
-    derive its bias when landings are noisy in a linear-Gaussian
-    model, and lower-bound, for
-    exact terrain and a point foot, the void clearance that the
-    \emph{candidate margin} leaves (Sec.~\ref{subsec:idm-theory}).
+    \citet{akizhanov_learning_2024}. To our knowledge, no prior work moves
+    a gait-free footstep planner between model-based controllers by
+    refitting only an IFM.
+  \item An analysis of what the IFM can correct
+    (Sec.~\ref{subsec:idm-theory}): it states when hindsight regression
+    inverts the controller exactly, shows that landing noise biases it
+    toward the mean logged landing, and lower-bounds, for exact terrain
+    and a point foot, the clearance the \emph{candidate margin}
+    leaves. It motivates the IFM's inputs and the margin; neither deployed
+    IFM meets its conditions.
 \end{enumerate}
 
-\looseness=-1 On OCS2, averaged over \corlNumTrainSeeds{} training seeds
-on shared Gazebo worlds (Sec.~\ref{sec:experiments}), GaitNet succeeded
+\looseness=-1 On OCS2 (Sec.~\ref{sec:experiments}), GaitNet succeeded
 in \corlBenchFull\% against \corlBenchTrot\% for OCS2's own trot and
-\corlBenchStaticWalk\% for its static walk, beat both fixed gaits in every
-benchmark cell, and widened its lead over the trot to 15.0 percentage
-points on the densest voids. In a wider sweep, at
-\corlOcsMaxVoidPct\% voids, beyond its \corlMaxVoidPct\% training
-curriculum, it still succeeded in 50\% of trials against the trot's 12\%.
+\corlBenchStaticWalk\% for its static walk, led the trot by 15.0 points
+on the densest voids, and at \corlOcsMaxVoidPct\% voids, beyond its
+\corlMaxVoidPct\% curriculum, succeeded in 50\% of sweep trials against the
+trot's 12\%.

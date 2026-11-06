@@ -50,9 +50,9 @@ $\boldsymbol\delta_c$ includes the base's motion between the decision and
 touchdown. The offset is in general not zero, and it
 differs between controllers (Sec.~\ref{subsec:method-idm}), so sending
 the desired foothold unchanged can put
-the foot in a void although the foothold is safe. An
+the foot in a void. An
 \emph{execution layer} between planner and controller guards against
-this. Its IFM, fitted to the controller, sends the command
+this. Its IFM sends the command
 $\mathbf u = I^c(\zeta, \mathbf u^\star)$ expected to land the foot at
 the desired foothold, where $\zeta$
 holds the newest tick of the history, the leg, and the swing time.
@@ -69,9 +69,9 @@ steps on random void worlds and commanded velocities. The reward $r_k$ at tick $
 velocity and yaw rate, and charges for each step and failure. A
 failure, such as a foot dropping into a void, ends the episode, with no
 reward after it. A time-out is not a failure
-(App.~\ref{app:training}). Since the reward has no void-clearance, landing,
-or track-completion term, the return is only a proxy for trial success
-(Sec.~\ref{subsec:exp-setup}).
+(App.~\ref{app:training}). The reward has no void-clearance, landing,
+or track-completion term; trial success (Sec.~\ref{subsec:exp-setup})
+is judged by criteria outside it.
 
 \noindent\textbf{Problem 2 (deployment on a new controller).}
 \looseness=-1 The \emph{new controller} is OCS2's NMPC and WBC.

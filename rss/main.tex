@@ -92,32 +92,45 @@
 
 \maketitle
 
+\makeatletter\newcommand{\teasercaptype}{\def\@captype{figure}}\makeatother
+\vspace{-1.4em}
+\begin{center}
+\teasercaptype
+\includegraphics[width=\textwidth]{figures/fig_teaser}
+\caption{GaitNet on OCS2, on \corlBenchTileCm\,cm tiles with voids
+  rising from 10 to 60\% at 0.15\,m/s (one trial, re-rendered in
+  MuJoCo). (a)~Every
+  \corlControlTickMs\,ms, it takes the no-step option or starts one step,
+  choosing the leg, swing time, and a safe foothold; the drawn candidates
+  and swing are schematic. (b)~The voids get denser along the same run.}
+\label{fig:teaser}
+\end{center}
+\vspace{-0.8em}
+
 \begin{abstract}%
   % 2026-11-04: review R06, R19, R23; author's facts of 2026-11-04.
   Model-based legged controllers usually follow a fixed gait, and a
   footstep planner learned on one controller can miss footholds on
   another. We present GaitNet, a learned planner that chooses the gait
-  outside a model-based controller, with no gait schedule, and moves
-  frozen to a new one. Every \corlControlTickMs\,ms, it may start one
+  outside a model-based controller and runs frozen on a second one. Every \corlControlTickMs\,ms, it may start one
   step, choosing the leg, swing time, and safe foothold, even while
   another leg swings. An inverse footstep model (IFM), fitted on each
   controller's logged steps, turns the foothold into a command expected
-  to land the foot there, and we prove conditions under which this fit
-  inverts the controller exactly. Trained by reinforcement learning on a convex
+  to land the foot there; we analyse which part of the landing error this
+  fit can remove. Trained by reinforcement learning on a convex
   model predictive controller (MPC), GaitNet ran on OCS2's nonlinear MPC
   and whole-body controller with only the IFM refitted. In
   \corlBenchTrialsPerArm{} Gazebo trials per training seed, with a
   simulated depth camera, it succeeded in
   \corlBenchFull\% against \corlBenchTrot\% for OCS2's own trot and
-  \corlBenchStaticWalk\% for its static walk, and in
-  \corlBenchFullDense\% against \corlBenchTrotDense\% on the densest
-  voids (\corlBenchVoidHigh\%). Across the change of controller,
-  simulator, and terrain sensing, it kept most of its convex-MPC success
-  of \corlBenchIsaacIdm\%, and the refit carried this transfer: with the
+  \corlBenchStaticWalk\% for its static walk (\corlBenchFullDense\%
+  against \corlBenchTrotDense\% on the densest voids), and in
+  \corlBenchIsaacIdm\% on the convex MPC in Isaac. With the
   training controller's IFM, a constant offset per leg, or no IFM, it
-  succeeded in at most \corlBenchTrainIfm\%. Without a gait reward,
+  succeeded in at most \corlBenchCtrlMax\%. Without a gait reward,
   \corlGaitDiagPairPct\% of its overlapping swings in successful trials
-  paired diagonal legs, as in the trot, but on its own timing.%
+  paired diagonal legs, as in the trot, but with no fixed period between
+  a leg's lift-offs.%
 \end{abstract}
 
 \begin{keywords}%
@@ -137,9 +150,8 @@
 % that this statement describes their use of generative AI accurately.
 \subsection*{Generative AI Use}
 \verify{Generative AI tools were used for literature search, for checking
-the statistical analysis and the derivations, and for editing the
-writing. The authors reviewed and verified all AI-assisted content and
-take responsibility for the final content of the paper.}
+the arithmetic and the derivations, and for editing. The authors verified all
+AI-assisted content and take responsibility for the paper.}
 
 \bibliography{refs}
 

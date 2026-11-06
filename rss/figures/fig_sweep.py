@@ -1,5 +1,11 @@
 """Plot the OCS2 sweep (Fig. fig:sweep, Sec. 5 of the L4DC paper).
 
+PROVENANCE NOTE (2026-11-05): the author states that every learned value
+plotted here is the mean over five training seeds at iteration 350, each seed
+run on all trials; the per-seed logs are not in this repository. Comments below
+that describe a value as a single run or another iteration predate this
+statement and are kept as written.
+
 Source of every number: the author's OCS2 sweep data of 2026-10-14 (the figure
 of the 2026-10-28 draft, git 486a92a:figures/plot_ocs2_results.py), confirmed
 on 2026-11-04 as the paper's sweep: GaitNet is the benchmark checkpoint
@@ -184,7 +190,7 @@ def style_axes(ax, xs, pad, xlabel):
 
 
 # (a) by void fraction
-style_axes(ax_a, VOIDS, 4.5, "Void fraction [%]")
+style_axes(ax_a, VOIDS, 4.5, "Nominal void fraction [%]")
 ax_a.set_title("(a) By void fraction, 0.05–0.25 m/s", **TITLE)
 lines = {"a": {}, "b": {}}
 for m in ("Per-candidate + IFM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
