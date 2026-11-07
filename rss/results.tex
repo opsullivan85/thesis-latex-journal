@@ -140,28 +140,25 @@ the trot in when they step, where, and how commands are corrected.
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Success (\%). Learned methods: mean of
-  \corlNumTrainSeeds{} training seeds (\corlBenchTrialsPerArm{} trials per seed on the benchmark,
-  640 in the sweep, 720 in Isaac). ---: not run with five seeds, or not
-  applicable.}
+\caption{Success (\%) on the OCS2 benchmark. Learned methods: mean of
+  \corlNumTrainSeeds{} training seeds, \corlBenchTrialsPerArm{} trials per seed.
+  ---: not run with five seeds.}
 \label{tab:results}
-\begin{tabular}{@{}lrrrr@{}}
+% 2026-11-06 (author): Sweep and Isaac columns and the "GaitNet - trot" row
+% dropped; their numbers stay in the text (Q1-Q3) and the Fig. 4 caption.
+\begin{tabular}{@{}lrr@{}}
 \toprule
- & \multicolumn{2}{c}{\thd{Benchmark, OCS2}} & \thd{Sweep, OCS2} & \thd{Isaac} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-4}\cmidrule(l){5-5}
-\thd{Method} & \thd{All cells} & \thd{\corlBenchVoidHigh\% voids} & \thd{All void fractions} & \thd{All cells} \\
+\thd{Method} & \thd{All cells} & \thd{\corlBenchVoidHigh\% voids} \\
 \midrule
-GaitNet & \corlBenchFull & \corlBenchFullDense & \corlSweepFull & \corlBenchIsaacIdm \\
-OCS2's own trot & \corlBenchTrot & \corlBenchTrotDense & \corlSweepTrot & --- \\
-OCS2's static walk & \corlBenchStaticWalk & \corlBenchStaticWalkDense & --- & --- \\
-GaitNet-Diagonal & \corlBenchDiag & \corlBenchDiagDense & \corlSweepDiag & --- \\
-GaitNet-Single & \corlBenchSingle & --- & \corlSweepSingle & \corlBenchIsaacSingle \\
-Per-candidate + IFM & \corlBenchMlpMean & --- & \corlSweepMlp & \corlBenchIsaacMlp \\
-GaitNet without the IFM & \corlBenchNoIdm & \corlBenchNoIdmDense & --- & \corlBenchIsaacNoIdm \\
-GaitNet + training IFM & \corlBenchTrainIfm & \corlBenchTrainIfmDense & --- & --- \\
-GaitNet + offset & \corlBenchOffset & \corlBenchOffsetDense & --- & --- \\
-\midrule
-GaitNet $-$ trot \unit{(percentage points)} & 7.5 & 15.0 & 18.5 & --- \\
+GaitNet & \corlBenchFull & \corlBenchFullDense \\
+OCS2's own trot & \corlBenchTrot & \corlBenchTrotDense \\
+OCS2's static walk & \corlBenchStaticWalk & \corlBenchStaticWalkDense \\
+GaitNet-Diagonal & \corlBenchDiag & \corlBenchDiagDense \\
+GaitNet-Single & \corlBenchSingle & --- \\
+Per-candidate + IFM & \corlBenchMlpMean & --- \\
+GaitNet without the IFM & \corlBenchNoIdm & \corlBenchNoIdmDense \\
+GaitNet + training IFM & \corlBenchTrainIfm & \corlBenchTrainIfmDense \\
+GaitNet + offset & \corlBenchOffset & \corlBenchOffsetDense \\
 \bottomrule
 \end{tabular}
 
@@ -173,7 +170,7 @@ GaitNet $-$ trot \unit{(percentage points)} & 7.5 & 15.0 & 18.5 & --- \\
   \caption{Sweep on OCS2,
     \corlOcsTrialsPerPoint{} trials per point and seed; learned methods:
     five-seed means in whole percent, values for GaitNet only
-    (GaitNet-Diagonal: Table~\ref{tab:results}). (a)~By nominal void fraction
+    (GaitNet-Diagonal, not plotted: \corlSweepDiag\% overall). (a)~By nominal void fraction
     (\corlOcsSpeedMin--\corlOcsSpeedMax\,m/s). (b)~By speed, 10
     trials per void fraction; shaded: beyond training.}
   \label{fig:sweep}
@@ -202,7 +199,7 @@ against \corlBenchIsaacIdm\% on the training controller in Isaac, although
 the controller, simulator, odometry, and terrain source all changed; the
 loss was largest at \corlBenchSpeedFast\,m/s (\corlBenchFullFast{} against
 94.7\%) and in the hardest cell (77 against 89.2\%). GaitNet-Single and
-Per-candidate + IFM instead scored higher on OCS2 (Table~\ref{tab:results}).
+Per-candidate + IFM instead scored higher on OCS2 (Q3).
 
 \noindent\phantomsection\label{subsec:exp-why}\textbf{Q3. The refitted IFM.}
 \looseness=-1 Three controls keep GaitNet's weights and change how its
@@ -260,7 +257,7 @@ succeeded in \corlBenchDiag\% (Table~\ref{tab:results}) and lost most at \corlBe
 \noindent\textbf{Q3. Overlapping swings.}
 \looseness=-1 Trained to swing one leg at a time, GaitNet-Single
 succeeded in \corlSweepSingle\% of the sweep's trials against GaitNet's
-\corlSweepFull\% (Table~\ref{tab:results}, Fig.~\ref{fig:sweep}), less
+\corlSweepFull\% (Fig.~\ref{fig:sweep}), less
 often at every void fraction and speed. It also trailed GaitNet on the
 benchmark (\corlBenchSingle{} against \corlBenchFull\%) and on the
 training controller (\corlBenchIsaacSingle{} against

@@ -97,12 +97,15 @@
 \begin{center}
 \teasercaptype
 \includegraphics[width=\textwidth]{figures/fig_teaser}
-\caption{GaitNet on OCS2, on \corlBenchTileCm\,cm tiles with voids
-  rising from 10 to 60\% at 0.15\,m/s (one trial, re-rendered in
-  MuJoCo). (a)~Every
-  \corlControlTickMs\,ms, it takes the no-step option or starts one step,
-  choosing the leg, swing time, and a safe foothold; the drawn candidates
-  and swing are schematic. (b)~The voids get denser along the same run.}
+\caption{GaitNet chooses the steps of a model-based controller (posed
+  MuJoCo scene, illustrative step). (a)~Every \corlControlTickMs\,ms, it
+  takes the no-step option or starts one step, choosing the leg, the swing
+  time, and a foothold among safe candidates (dots: the front-right leg's,
+  by the rule of Sec.~\ref{subsec:method-step}). (b)~The controller swings
+  the leg there. (c)~Trained on a convex MPC, GaitNet runs
+  frozen on OCS2 with only its inverse footstep model (IFM) refitted;
+  circles: OCS2's RMS landing error on flat ground without the IFM and
+  with the refitted one.}
 \label{fig:teaser}
 \end{center}
 \vspace{-0.8em}
