@@ -49,7 +49,7 @@ combinations, a \emph{cell}, holds \corlBenchTrialsPerCell{} trials of
 \corlBenchSeedFirst--\corlBenchSeedLast, so each method runs
 \corlBenchTrialsPerArm{} trials on the same worlds. A trial succeeds if
 the robot does not fall and walks at least half the commanded distance.
-None of these world seeds was used to log the OCS2 IFM's data or to
+None of these world seeds were used to log the OCS2 IFM's data or to
 develop the depth pipeline.
 
 \noindent\textbf{Training seeds.}
@@ -262,7 +262,7 @@ often at every void fraction and speed. It also trailed GaitNet on the
 benchmark (\corlBenchSingle{} against \corlBenchFull\%) and on the
 training controller (\corlBenchIsaacSingle{} against
 \corlBenchIsaacIdm\%), so the gap is not due to the transfer. It
-took \corlOcsStepsPerMSingle{} steps per metre against
+took \corlOcsStepsPerMSingle{} steps per meter against
 \corlOcsStepsPerMFull{} for GaitNet in successful trials. Swinging
 one leg at a time, for at least \corlSwingDurationMin\,s and starting on
 ticks, it can take about eight steps per second, enough up to about
