@@ -1,4 +1,6 @@
-"""Gait timing statistics of the G125 benchmark from ../timming.md.
+"""CORRECTION 2026-11-12 (author): the checkpoint is iteration 300; every '350'
+below was a mistake.
+Gait timing statistics of the G125 benchmark from ../timming.md.
 
 Source: rss/timming.md (added by the author on 2026-11-04). Despite the .md
 extension it is a CSV with one row per recorded swing:

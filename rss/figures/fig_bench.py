@@ -89,24 +89,41 @@ CONSTANTS_TEX = HERE.parent / "constants.tex"
 # ---------------------------------------------------------------- data
 VOIDS = (26, 38, 49)                    # void fraction of a cell [%]
 N_CELL = 100                            # \corlBenchTrialsPerCell
-# Success [%] per cell, mean of five training seeds rounded to whole percent
-# (author, 2026-11-05), equal to successes of N_CELL for one run; pooled = mean of
-# the cells. Order: 0.10 m/s at 26/38/49 % voids, then 0.20 m/s.
-CELLS = {
-    "GaitNet":          (100, 93, 96, 96, 87, 77),   # c0; 77, not 87 (see header)
-    "GaitNet, rerun":   (96, 97, 92, 96, 84, 74),    # c0b, same checkpoint
-    "GaitNet-Diagonal": (99, 96, 89, 96, 84, 59),    # #6
-    "OCS2's own trot":  (97, 89, 80, 94, 81, 63),    # #7
-    "OCS2's static walk": (98, 91, 80, 90, 73, 51), # author, 2026-11-05 (deterministic, one run)
+# 2026-11-12: per-seed success counts (of N_CELL) from the author's filled
+# results_to_fill.md: five training seeds at iteration 300 per learned arm; the
+# trot and the static walk ran once. Order: 0.10 m/s at 26/38/49 % voids, then
+# 0.20 m/s. A learned arm's cell value is the exact mean over its seeds (a
+# Fraction), printed rounded half up to a whole percent; pooled = mean of seeds.
+SEEDS = {
+    "GaitNet": ((92, 88, 78, 90, 91, 69), (94, 91, 77, 93, 89, 73),
+                (94, 94, 75, 96, 92, 71), (98, 93, 80, 96, 93, 75),
+                (87, 85, 68, 83, 84, 63)),
+    "GaitNet-Diagonal": ((90, 88, 76, 90, 88, 68), (92, 90, 73, 90, 90, 65),
+                         (96, 95, 73, 92, 89, 70), (95, 91, 78, 94, 88, 72),
+                         (91, 86, 61, 78, 78, 60)),
 }
-# Per-candidate + IDM (#4), one tuple per training seed (1-4), same order.
-# Used only for the mean over seeds; no seed is drawn.
+# Per-candidate + IFM: one tuple per training seed (1-5), same order. Used only
+# for the mean over seeds; it is not drawn.
 PER_CANDIDATE_SEEDS = (
-    (98, 91, 82, 92, 80, 70),
-    (98, 95, 87, 93, 84, 68),
-    (99, 93, 88, 93, 88, 77),
-    (98, 87, 79, 83, 63, 43),
+    (81, 80, 70, 79, 77, 53),
+    (83, 81, 68, 73, 71, 55),
+    (81, 79, 65, 79, 75, 57),
+    (79, 75, 68, 75, 71, 51),
+    (82, 80, 72, 60, 62, 56),
 )
+
+
+def seed_mean(seeds):
+    """Exact per-cell mean over training seeds."""
+    return tuple(Fraction(sum(s[j] for s in seeds), len(seeds)) for j in range(6))
+
+
+CELLS = {
+    "GaitNet":            seed_mean(SEEDS["GaitNet"]),
+    "GaitNet-Diagonal":   seed_mean(SEEDS["GaitNet-Diagonal"]),
+    "OCS2's own trot":    (91, 72, 46, 88, 70, 40),   # one run (author, 2026-11-12)
+    "OCS2's static walk": (94, 78, 45, 80, 61, 35),   # one run (author, 2026-11-12)
+}
 
 
 # ---------------------------------------------------------------- arithmetic
@@ -137,7 +154,7 @@ MLP_K = sum(sum(s) for s in PER_CANDIDATE_SEEDS)
 MLP_N = N_CELL * 6 * len(PER_CANDIDATE_SEEDS)
 # Equal trials per seed, so the pooled rate equals the mean of seed rates.
 MLP_MEAN = rate(MLP_K, MLP_N)
-assert MLP_MEAN == sum(rate(sum(s), 600) for s in PER_CANDIDATE_SEEDS) / 4
+assert MLP_MEAN == sum(rate(sum(s), 600) for s in PER_CANDIDATE_SEEDS) / len(PER_CANDIDATE_SEEDS)
 PANEL_C = {a: rate(*pool(CELLS[a], ALL)) for a in CELLS}
 PANEL_C["Per-candidate + IFM"] = MLP_MEAN
 
@@ -149,20 +166,19 @@ def check(got, want, what):
     assert ok, f"{what}: computed {got}, expected {want}"
 
 
-# Data entry against the source's per-speed (integer) and pooled columns.
-SOURCE_ROWS = {"GaitNet": ("96", "87", "91.5"), "GaitNet, rerun": ("95", "85", "89.8"),
-               "GaitNet-Diagonal": ("95", "80", "87.2"),
-               "OCS2's own trot": ("89", "79", "84.0"),
-               "OCS2's static walk": ("90", "71", "80.5")}
+# Data entry against the per-speed (whole %) and pooled values computed from
+# results_to_fill.md on 2026-11-12.
+SOURCE_ROWS = {"GaitNet": ("86", "84", "85.1"),
+               "GaitNet-Diagonal": ("85", "81", "82.9"),
+               "OCS2's own trot": ("70", "66", "67.8"),
+               "OCS2's static walk": ("72", "59", "65.5")}
 for arm, (s10, s20, s_all) in SOURCE_ROWS.items():
     check(half_up(rate(*pool(CELLS[arm], SLOW)), "1"), s10, f"{arm} 0.10")
     check(half_up(rate(*pool(CELLS[arm], FAST)), "1"), s20, f"{arm} 0.20")
     check(half_up(rate(*pool(CELLS[arm], ALL))), s_all, f"{arm} all")
-for seed, want in zip(PER_CANDIDATE_SEEDS, ("85.5", "87.5", "89.7", "75.5")):
+for seed, want in zip(PER_CANDIDATE_SEEDS, ("73.3", "71.8", "72.7", "69.8", "68.7")):
     check(half_up(rate(sum(seed), 600)), want, "per-candidate seed")
-check(half_up(rate(sum(sum(s[:3]) for s in PER_CANDIDATE_SEEDS), 1200)), "91.3", "MLP 0.10")
-check(half_up(rate(sum(sum(s[3:]) for s in PER_CANDIDATE_SEEDS), 1200)), "77.8", "MLP 0.20")
-check(MLP_K, 2029, "per-candidate successes")
+check(MLP_K, 2138, "per-candidate successes")
 
 
 def cell_text(k: int) -> str:
@@ -176,13 +192,13 @@ def pool_text(r: Fraction) -> str:
 
 
 # Every value the panel map prints, before plotting.
-SPEC_A = {"GaitNet": ("100", "93", "96"), "GaitNet-Diagonal": ("99", "96", "89"),
-          "OCS2's own trot": ("97", "89", "80"), "OCS2's static walk": ("98", "91", "80")}
-SPEC_B = {"GaitNet": ("96", "87", "77"), "GaitNet-Diagonal": ("96", "84", "59"),
-          "OCS2's own trot": ("94", "81", "63"), "OCS2's static walk": ("90", "73", "51")}
-SPEC_C = {"GaitNet": "91.5", "GaitNet, rerun": "89.8", "GaitNet-Diagonal": "87.2",
-          "Per-candidate + IFM": "84.5", "OCS2's own trot": "84.0",
-          "OCS2's static walk": "80.5"}
+SPEC_A = {"GaitNet": ("93", "90", "76"), "GaitNet-Diagonal": ("93", "90", "72"),
+          "OCS2's own trot": ("91", "72", "46"), "OCS2's static walk": ("94", "78", "45")}
+SPEC_B = {"GaitNet": ("92", "90", "70"), "GaitNet-Diagonal": ("89", "87", "67"),
+          "OCS2's own trot": ("88", "70", "40"), "OCS2's static walk": ("80", "61", "35")}
+SPEC_C = {"GaitNet": "85.1", "GaitNet-Diagonal": "82.9",
+          "Per-candidate + IFM": "71.3", "OCS2's own trot": "67.8",
+          "OCS2's static walk": "65.5"}
 for panel, spec, name in ((PANEL_A, SPEC_A, "(a)"), (PANEL_B, SPEC_B, "(b)")):
     for arm, want in spec.items():
         check(tuple(cell_text(k) for k in panel[arm]), want, f"{name} {arm}")
@@ -195,7 +211,7 @@ check(sorted(PANEL_C), sorted(SPEC_C), "(c) rows")
 # fatal, but a macro it defines with another value is an error.
 MACROS = dict(re.findall(r"\\newcommand\{\\(corlBench\w+)\}\{([^}]*)\}",
                          CONSTANTS_TEX.read_text()))
-for macro, arm in {"Full": "GaitNet", "Rerun": "GaitNet, rerun",
+for macro, arm in {"Full": "GaitNet",
                    "Diag": "GaitNet-Diagonal", "Trot": "OCS2's own trot",
                    "MlpMean": "Per-candidate + IFM", "StaticWalk": "OCS2's static walk"}.items():
     name = "corlBench" + macro

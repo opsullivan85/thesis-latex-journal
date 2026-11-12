@@ -289,7 +289,7 @@
 % training controller in Isaac, fixed before any OCS2 trial; training took
 % about 4 h on one RTX PRO 6000 Blackwell GPU. The 80-trial sweep (Fig. 3)
 % used the same checkpoint (author, 2026-11-04).
-\newcommand{\corlOcsCheckpoint}{350}
+\newcommand{\corlOcsCheckpoint}{300}  % author, 2026-11-12: 300 throughout; every '350' in these comments was a mistake
 \newcommand{\corlNumSeedsGaitNet}{five}
 \newcommand{\corlOcsTrackM}{3}
 \newcommand{\corlOcsTimeFactor}{1.5}
@@ -367,30 +367,30 @@
 \newcommand{\corlBenchTrialsPerCell}{100}
 \newcommand{\corlBenchTrialsPerArm}{600}
 \newcommand{\corlBenchIsaacRobots}{120}
-\newcommand{\corlBenchFull}{91.5}          % 549/600
+\newcommand{\corlBenchFull}{85.1}  % 2026-11-12 (results_to_fill.md; was 91.5)
 \newcommand{\corlBenchFullCiLow}{89.0}
 \newcommand{\corlBenchFullCiHigh}{93.5}
 \newcommand{\corlBenchRerun}{89.8}         % 539/600
-\newcommand{\corlBenchTrot}{84.0}          % 504/600
+\newcommand{\corlBenchTrot}{67.8}  % 2026-11-12 (results_to_fill.md; was 84.0)
 \newcommand{\corlBenchTrotCiLow}{80.9}
 \newcommand{\corlBenchTrotCiHigh}{86.7}
 \newcommand{\corlBenchPTrot}{10^{-4}}      % CMH, 5.7e-5 (reported as p < 1e-4)
 \newcommand{\corlBenchPTrotRerun}{0.0025}  % CMH, 0.0025 (exact 0.00246)
-\newcommand{\corlBenchFullSlow}{96.3}      % 289/300
-\newcommand{\corlBenchTrotSlow}{88.7}      % 266/300
+\newcommand{\corlBenchFullSlow}{86.3}  % 2026-11-12 (results_to_fill.md; was 96.3)
+\newcommand{\corlBenchTrotSlow}{69.7}  % 2026-11-12 (results_to_fill.md; was 88.7)
 \newcommand{\corlBenchPTrotSlow}{0.0006}   % CMH over voids, 5.6e-4
-\newcommand{\corlBenchFullFast}{86.7}      % 260/300
-\newcommand{\corlBenchTrotFast}{79.3}      % 238/300
+\newcommand{\corlBenchFullFast}{83.9}  % 2026-11-12 (results_to_fill.md; was 86.7)
+\newcommand{\corlBenchTrotFast}{66.0}  % 2026-11-12 (results_to_fill.md; was 79.3)
 \newcommand{\corlBenchPTrotFast}{0.02}     % CMH over voids, 0.018
-\newcommand{\corlBenchFullDense}{86.5}     % 49 % voids, 173/200
-\newcommand{\corlBenchTrotDense}{71.5}     % 143/200
+\newcommand{\corlBenchFullDense}{72.9}  % 2026-11-12 (results_to_fill.md; was 86.5)
+\newcommand{\corlBenchTrotDense}{43.0}  % 2026-11-12 (results_to_fill.md; was 71.5)
 \newcommand{\corlBenchPTrotDense}{0.0003}  % CMH over speeds, 2.7e-4
-\newcommand{\corlBenchDiag}{87.2}          % 523/600
+\newcommand{\corlBenchDiag}{82.9}  % 2026-11-12 (results_to_fill.md; was 87.2)
 \newcommand{\corlBenchPDiag}{0.01}         % CMH vs c0, 0.013
 \newcommand{\corlBenchPDiagRerun}{0.15}    % CMH vs c0b
 \newcommand{\corlBenchPDiagTrot}{0.12}     % CMH vs trot
 \newcommand{\corlBenchPDiagCell}{0.01}     % Fisher, 49 %/0.20: 59 vs 77, 0.0097
-\newcommand{\corlBenchNoIdm}{25.2}         % 151/600
+\newcommand{\corlBenchNoIdm}{17.1}  % 2026-11-12 (results_to_fill.md; was 25.2)
 \newcommand{\corlBenchIsaacIdm}{96.0}      % 691/720
 \newcommand{\corlBenchIsaacNoIdm}{21.3}    % 153/720 (cell 49 %/0.10 = 10/120)
 % Author, 2026-11-05: EVERY learned arm is the mean of five training seeds at
@@ -404,10 +404,10 @@
 % From the per-cell means: Diagonal at 49 % voids (89 + 59)/200 = 74.0; no
 % IDM at 49 % (11 + 8)/200 = 9.5; GaitNet - trot at 49 % 86.5 - 71.5 = 15.0,
 % in the sweep 82.7 - 64.1 = 18.6.
-\newcommand{\corlBenchDiagDense}{74.0}
-\newcommand{\corlBenchNoIdmDense}{9.5}
+\newcommand{\corlBenchDiagDense}{69.6}  % 2026-11-12 (results_to_fill.md; was 74.0)
+\newcommand{\corlBenchNoIdmDense}{13.2}  % 2026-11-12 (results_to_fill.md; was 9.5)
 \newcommand{\corlSweepDiag}{73.2}
-\newcommand{\corlBenchSingle}{82.8}
+\newcommand{\corlBenchSingle}{39.6}  % 2026-11-12 (results_to_fill.md; was 82.8)
 \newcommand{\corlBenchIsaacSingle}{72.1}
 \newcommand{\corlBenchIsaacMlp}{80.3}
 \newcommand{\corlNumTrainSeeds}{five}
@@ -416,26 +416,26 @@
 \newcommand{\corlAuthorityCm}{10}
 % Claim-2 controls (author, 2026-11-05): frozen GaitNet on the OCS2 benchmark,
 % mean of five training seeds; all six cells / 49 % voids.
-\newcommand{\corlBenchTrainIfm}{28.2}
-\newcommand{\corlBenchTrainIfmDense}{12.1}
+\newcommand{\corlBenchTrainIfm}{5.5}  % 2026-11-12 (results_to_fill.md; was 28.2)
+\newcommand{\corlBenchTrainIfmDense}{4.3}  % 2026-11-12 (results_to_fill.md; was 12.1)
 % Offset values corrected by the author on 2026-11-05: 31.2 / 21.2 (the
 % earlier 11.2 / 1.2 were entry errors). Offset = per leg, mean of command
 % minus landing over the OCS2 IFM's logged steps.
-\newcommand{\corlBenchOffset}{31.2}
-\newcommand{\corlBenchOffsetDense}{21.2}
+\newcommand{\corlBenchOffset}{60.0}  % 2026-11-12 (results_to_fill.md; was 31.2)
+\newcommand{\corlBenchOffsetDense}{50.1}  % 2026-11-12 (results_to_fill.md; was 21.2)
 % Highest benchmark success among the three claim-2 controls (training IFM,
 % offset, no IFM): the offset arm. Used by every "at most" sentence.
 \newcommand{\corlBenchCtrlMax}{\corlBenchOffset}
 % OCS2 static walk (author, 2026-11-05): legged_control go1 gait.info
 % static_walk, one leg at a time, 0.3 s swings, 1.2 s period (LH, LF, RH, RF);
 % benchmark cells 0.10: 98 91 80 | 0.20: 90 73 51 = 483/600; 49 %: 131/200.
-\newcommand{\corlBenchStaticWalk}{80.5}
-\newcommand{\corlBenchStaticWalkDense}{65.5}
+\newcommand{\corlBenchStaticWalk}{65.5}  % 2026-11-12 (results_to_fill.md; was 80.5)
+\newcommand{\corlBenchStaticWalkDense}{40.0}  % 2026-11-12 (results_to_fill.md; was 65.5)
 \newcommand{\corlWalkSwing}{0.3}
 \newcommand{\corlWalkPeriod}{1.2}
-\newcommand{\corlBenchMlpMean}{84.5}       % mean of the four seeds
-\newcommand{\corlBenchMlpMin}{75.5}        % seed 4
-\newcommand{\corlBenchMlpMax}{89.7}        % seed 3; CMH vs c0 p = 0.31
+\newcommand{\corlBenchMlpMean}{71.3}  % 2026-11-12 (results_to_fill.md; was 84.5)
+\newcommand{\corlBenchMlpMin}{68.7}  % 2026-11-12 (results_to_fill.md; was 75.5)
+\newcommand{\corlBenchMlpMax}{73.3}  % 2026-11-12 (results_to_fill.md; was 89.7)
 \newcommand{\corlBenchPMlpBest}{0.31}
 \newcommand{\corlBenchMlpIterations}{1600} % checkpoints @1599
 % Ablation retrains (P2b, #10/#11), two seeds each, same benchmark protocol;
@@ -556,3 +556,48 @@
 %   \newcommand{\corlSweepSpeedMax}{0.30}
 %   \newcommand{\corlEarlyCheckpoint}{600}     % "about 600 iterations" (author, 2026-10-16)
 %   \newcommand{\corlOcsAllFull}{82}      % c0, 0-70 % voids, 3261/4000 = 81.5
+
+% --- 2026-11-12: filled from results_to_fill.md (author): five training seeds
+% at iteration 300 for every learned arm, 100 trials per cell and seed; trot and
+% static walk rerun once. Values below are exact seed means, rounded half up.
+% Isaac, sweep and gait statistics were not re-entered: the author states they
+% are from the same checkpoint (300; the earlier '350' was a mistake) and stand
+% as printed. The sweep's worlds differ from the benchmark's (author).
+% ---------------------------------------------------------------------------
+% Every macro set to \xx below is OPEN: fill it from results_to_fill.xlsx (repo
+% root, outside rss/) and delete the \xx. Reason: fig_bench.py records GaitNet
+% as one seeded run (549/600) and Per-candidate + IFM as four seeds at iteration
+% 1599 (mean 84.5 = Table 1), while the text says five seeds at iteration 350
+% for every learned method. Table 1 now prints seeds, checkpoint and the
+% per-seed range of each learned arm, so the protocol is stated per row.
+% Seeds and checkpoint per learned arm (Table 1 columns). The arms that reuse
+% GaitNet's weights (Diagonal, without IFM, + training IFM, + offset) use
+% GaitNet's values.
+\newcommand{\corlSeedsGaitNet}{5}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlIterGaitNet}{\corlOcsCheckpoint}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlSeedsSingle}{5}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlIterSingle}{\corlOcsCheckpoint}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlSeedsMlp}{5}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlIterMlp}{\corlOcsCheckpoint}  % 2026-11-12 (results_to_fill.md; was \xx)
+% Lowest and highest per-seed overall success [%] on the benchmark (600 trials
+% per seed), one decimal.
+\newcommand{\corlBenchFullMin}{78.3}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchFullMax}{89.2}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchDiagMin}{75.7}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchDiagMax}{86.3}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchSingleMin}{37.2}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchSingleMax}{42.8}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchMlpSeedMin}{68.7}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchMlpSeedMax}{73.3}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchNoIdmMin}{16.3}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchNoIdmMax}{18.2}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchTrainIfmMin}{3.8}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchTrainIfmMax}{7.2}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchOffsetMin}{57.5}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchOffsetMax}{63.0}  % 2026-11-12 (results_to_fill.md; was \xx)
+% 49 % voids, previously "---" in Table 1.
+\newcommand{\corlBenchSingleDense}{35.6}  % 2026-11-12 (results_to_fill.md; was \xx)
+\newcommand{\corlBenchMlpDense}{61.5}  % 2026-11-12 (results_to_fill.md; was \xx)
+% Gait statistics (Q3): \corlGaitTrialsGaitNet = 549 successful trials is one
+% run's count, not five seeds'. State which run they come from.
+\newcommand{\corlGaitSource}{\corlGaitTrialsGaitNet{} successful trials of one training seed}

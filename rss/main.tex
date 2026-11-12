@@ -119,12 +119,12 @@
   step, choosing the leg, swing time, and safe foothold, even while
   another leg swings. An inverse footstep model (IFM), fitted on each
   controller's logged steps, turns the foothold into a command expected
-  to land the foot there; we analyse which part of the landing error this
-  fit can remove. Trained by reinforcement learning on a convex
+  to land the foot there. Trained by reinforcement learning on a convex
   model predictive controller (MPC), GaitNet ran on OCS2's nonlinear MPC
-  and whole-body controller with only the IFM refitted. In
+  and whole-body controller with only the IFM refitted, on fewer than
+  20{,}000 steps logged on OCS2. In
   \corlBenchTrialsPerArm{} Gazebo trials per training seed, with a
-  simulated depth camera, it succeeded in
+  simulated depth camera, it succeeded on average over seeds in
   \corlBenchFull\% against \corlBenchTrot\% for OCS2's own trot and
   \corlBenchStaticWalk\% for its static walk (\corlBenchFullDense\%
   against \corlBenchTrotDense\% on the densest voids), and in
@@ -152,9 +152,13 @@
 % Required by the L4DC 2027 template. \verify: the authors must confirm
 % that this statement describes their use of generative AI accurately.
 \subsection*{Generative AI Use}
-\verify{Generative AI tools were used for literature search, for checking
-the arithmetic and the derivations, and for editing. The authors verified all
-AI-assisted content and take responsibility for the paper.}
+% 2026-11-12: wording widened to match how the tools were used on this draft
+% (sections were drafted and rewritten with an AI assistant, which also wrote
+% the figure scripts). The authors must still confirm it.
+\verify{Generative AI tools were used to draft and edit the text, search
+the literature, check arithmetic and derivations, and write plotting
+scripts. The authors verified all AI-assisted content and take
+responsibility for the paper.}
 
 \bibliography{refs}
 

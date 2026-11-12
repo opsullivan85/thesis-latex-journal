@@ -1,4 +1,6 @@
-"""Plot the OCS2 sweep (Fig. fig:sweep, Sec. 5 of the L4DC paper).
+"""CORRECTION 2026-11-12 (author): the checkpoint is iteration 300; every '350'
+below was a mistake.
+Plot the OCS2 sweep (Fig. fig:sweep, Sec. 5 of the L4DC paper).
 
 PROVENANCE NOTE (2026-11-05): the author states that every learned value
 plotted here is the mean over five training seeds at iteration 350, each seed

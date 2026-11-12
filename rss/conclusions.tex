@@ -3,11 +3,11 @@
 % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
 
 \looseness=-1 Trained on a convex MPC, GaitNet ran frozen on OCS2 with
-only its IFM refitted and succeeded in \corlBenchFull\% of benchmark
-trials, against \corlBenchTrot\% and \corlBenchStaticWalk\% for OCS2's
-own trot and static walk, and in at most \corlBenchCtrlMax\% without the
-refit. These results are from simulation, with one pair of
-controllers, square voids of one size on flat ground, noise-free depth
-images, and speeds up to \corlOcsSpeedMax\,m/s. Next, we will deploy
-GaitNet on hardware, test other controllers, and measure how few logged
-steps the refit needs \citep{xie_fada_2026}.
+only its IFM refitted and succeeded more often than OCS2's own trot and
+static walk, and far less often without the refit. These results are from simulation, with one pair of
+controllers, stock gaits as the only non-learned baselines, one void
+size on flat ground, noise-free depth, speeds up to
+\corlOcsSpeedMax\,m/s, and no test that isolates the mixer or the
+history. Next, we will deploy GaitNet on hardware, test other
+controllers, and measure how few logged steps the refit needs
+\citep{xie_fada_2026}.

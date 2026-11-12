@@ -75,7 +75,8 @@ is judged by criteria outside it.
 
 \noindent\textbf{Problem 2 (deployment on a new controller).}
 \looseness=-1 The \emph{new controller} is OCS2's NMPC and WBC.
-The planner is frozen, and only the new controller's IFM is fitted, by regression on steps that OCS2 executed
+The planner is frozen, and only the new controller's IFM is fitted, by
+regression on fewer than 20{,}000 steps that OCS2 executed
 (Sec.~\ref{subsec:method-idm}). The goal is that the planner succeeds on
 held-out worlds (Sec.~\ref{subsec:exp-setup}) at least as often as OCS2 with its own gait. Moving to OCS2 also changes the
 simulator, odometry, and terrain source (a depth camera). No planner

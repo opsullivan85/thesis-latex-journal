@@ -33,36 +33,37 @@ footstep model} (IFM), turns the chosen foothold into a command
 expected to land the foot there. Trained with proximal policy optimization (PPO)
 on the convex MPC, with no gait, foot-clearance, or posture reward,
 GaitNet then runs frozen on OCS2's nonlinear MPC (NMPC) and whole-body
-controller (WBC), with only the IFM refitted. We make three claims:
+controller (WBC), with only the IFM refitted on fewer than 20{,}000
+steps logged on OCS2. We make two claims:
 \begin{enumerate}\setlength{\itemsep}{0pt}
   \item GaitNet (Secs.~\ref{subsec:method-step}
     and~\ref{subsec:method-network}) chooses a
-    model-based controller's steps without a gait schedule. It adds the
-    candidate mixer and history to the per-candidate network of
-    \citet{Sullivan2025}.
+    model-based controller's steps without a gait schedule and, on
+    OCS2, succeeded more often than OCS2's own trot and static walk. It
+    extends the per-candidate network of \citet{Sullivan2025} with the
+    candidate mixer and history; we compare with that network but do not
+    isolate the two additions.
   \item From the convex MPC to OCS2, the frozen GaitNet moved with only
     its IFM refitted on OCS2's logged steps
     (Secs.~\ref{subsec:method-idm} and~\ref{subsec:method-deployment});
     with the training controller's IFM, a constant offset per leg, or no
     IFM, it succeeded in at most \corlBenchCtrlMax\%
-    (Sec.~\ref{subsec:exp-why}). The fit is direct inverse
-    modelling \citep{jordan_forward_1992} with hindsight relabelling
-    \citep{andrychowicz_hindsight_2017, ghosh_learning_2021}, as in
-    \citet{akizhanov_learning_2024}. To our knowledge, no prior work moves
-    a gait-free footstep planner between model-based controllers by
-    refitting only an IFM.
-  \item An analysis of what the IFM can correct
-    (Sec.~\ref{subsec:idm-theory}): it states when hindsight regression
-    inverts the controller exactly, shows that landing noise biases it
-    toward the mean logged landing, and lower-bounds, for exact terrain
-    and a point foot, the clearance the \emph{candidate margin}
-    leaves. It motivates the IFM's inputs and the margin; neither deployed
-    IFM meets its conditions.
+    (Sec.~\ref{subsec:exp-why}). The refit needs data from the new
+    controller, so this is not zero-shot transfer. The fit is direct
+    inverse modelling \citep{jordan_forward_1992} with hindsight
+    relabelling \citep{andrychowicz_hindsight_2017, ghosh_learning_2021},
+    as in \citet{akizhanov_learning_2024}. To our knowledge, no prior work moves a gait-free
+    footstep planner between model-based controllers by refitting only
+    an IFM.
 \end{enumerate}
+\looseness=-1 To motivate the IFM's inputs and the \emph{candidate
+margin}, Sec.~\ref{subsec:idm-theory} states when this regression
+inverts the controller and what clearance the margin leaves; neither
+deployed IFM meets these conditions, so the experiments carry claim~2.
 
-\looseness=-1 On OCS2 (Sec.~\ref{sec:experiments}), GaitNet succeeded
-in \corlBenchFull\% against \corlBenchTrot\% for OCS2's own trot and
-\corlBenchStaticWalk\% for its static walk, led the trot by 15.0 points
-on the densest voids, and at \corlOcsMaxVoidPct\% voids, beyond its
-\corlMaxVoidPct\% curriculum, succeeded in 50\% of sweep trials against the
-trot's 12\%.
+\looseness=-1 On OCS2 (Sec.~\ref{sec:experiments}), averaged over
+training seeds, GaitNet succeeded in \corlBenchFull\% against
+\corlBenchTrot\% for OCS2's own trot and \corlBenchStaticWalk\% for its
+static walk, led the trot by 29.9 points on the densest voids, and at
+\corlOcsMaxVoidPct\% voids, beyond its \corlMaxVoidPct\% curriculum,
+succeeded in 50\% of sweep trials against the trot's 12\%.
