@@ -10,16 +10,16 @@ statement and are kept as written.
 
 Source of every number: the author's OCS2 sweep data of 2026-10-14 (the figure
 of the 2026-10-28 draft, git 486a92a:figures/plot_ocs2_results.py), confirmed
-on 2026-11-04 as the paper's sweep: GaitNet is the benchmark checkpoint
+on 2026-11-04 as the paper's sweep: CADENCE is the benchmark checkpoint
 (iteration 350); every method ran on the same worlds, 12.5 cm tiles, 80 trials
 per point; success = reach the end of a 3 m track within 1.5x the nominal time.
-A 500-trial-per-point GaitNet sweep (100 per cell, 0.05-0.30 m/s) used in drafts
+A 500-trial-per-point CADENCE sweep (100 per cell, 0.05-0.30 m/s) used in drafts
 of 2026-11-03/04 had an evaluation mistake (author, 2026-11-04) and was removed
 from the paper; it is kept only in git history.
 
 Design rule (user, 2026-11-03): no error bars, whiskers, confidence bands or
 heatmaps. Lines with markers, the values a reader needs printed next to the
-marks. Here only GaitNet's values are printed (five lines in (a), three in
+marks. Here only CADENCE's values are printed (five lines in (a), three in
 (b) leave no room for more); App. D lists every count. Author, 2026-11-12: no
 shaded bands either, so the speeds above training in (b) are marked by a thin
 dashed vertical divider between 0.20 and 0.25 m/s with the label "beyond
@@ -27,13 +27,13 @@ training" on its right (it replaced a grey axvspan).
 
 Panels
 - (a) Success vs void fraction (0-70 %), 80 trials per point spread over
-  0.05-0.25 m/s: GaitNet, OCS2's own trot, GaitNet-Single (trained with one
-  leg in swing at a time, same training seed), GaitNet with the IFM switched
-  off (same weights), and Per-candidate + IFM (one training seed, trained
+  0.05-0.25 m/s: CADENCE, OCS2's own trot, CADENCE-Single (trained with one
+  leg in swing at a time, same training seed), CADENCE with the IFM switched
+  off (same weights), and GaitNet + IFM (one training seed, trained
   without the IFM in the loop, run with the OCS2 IFM).
 - (b) Success vs commanded speed (0.05-0.25 m/s), 80 trials per point, 10 at
-  each of the eight void fractions: GaitNet, GaitNet-Single, OCS2's own trot.
-  0.25 m/s is above GaitNet's 0.2 m/s training range (\\corlCmdVxMax).
+  each of the eight void fractions: CADENCE, CADENCE-Single, OCS2's own trot.
+  0.25 m/s is above CADENCE's 0.2 m/s training range (\\corlCmdVxMax).
 
 Data conventions: integer success counts; every printed or asserted value is
 computed with fractions.Fraction and rounded half up (decimal.ROUND_HALF_UP).
@@ -74,14 +74,14 @@ TRIALS = 80                                             # trials per point and t
 # correct one).
 N = 100
 BY_VOID = {          # success [%] per void fraction (trials spread over 0.05-0.25 m/s)
-    "GaitNet":             [100, 100, 90, 90, 91, 80, 60, 50],
+    "CADENCE":             [100, 100, 90, 90, 91, 80, 60, 50],
     "OCS2's own trot":     [100, 100, 88, 75, 70, 38, 30, 12],
-    "GaitNet-Single":      [86, 74, 82, 66, 68, 42, 30, 28],
-    "Per-candidate + IFM": [98, 92, 94, 70, 66, 70, 52, 46],
+    "CADENCE-Single":      [86, 74, 82, 66, 68, 42, 30, 28],
+    "GaitNet + IFM": [98, 92, 94, 70, 66, 70, 52, 46],
 }
 BY_SPEED = {         # success [%] per speed (10 trials at each void fraction)
-    "GaitNet":         [84, 89, 86, 81, 66],
-    "GaitNet-Single":  [74, 68, 63, 54, 40],
+    "CADENCE":         [84, 89, 86, 81, 66],
+    "CADENCE-Single":  [74, 68, 63, 54, 40],
     "OCS2's own trot": [79, 79, 74, 64, 51],
 }
 def half_up(x: Fraction, places: str = "0.1") -> Decimal:
@@ -108,25 +108,25 @@ for _m, _ks in BY_SPEED.items():
 TOTAL = {m: sum(ks) for m, ks in BY_VOID.items()}
 N_ALL = N * len(VOIDS)                                  # 8 points -> mean of percentages
 POOLED = {m: str(half_up(pct(k, N_ALL))) for m, k in TOTAL.items()}
-assert POOLED == {"GaitNet": "82.6", "OCS2's own trot": "64.1", "GaitNet-Single": "59.5",
-                  "Per-candidate + IFM": "73.5"}, POOLED
+assert POOLED == {"CADENCE": "82.6", "OCS2's own trot": "64.1", "CADENCE-Single": "59.5",
+                  "GaitNet + IFM": "73.5"}, POOLED
 # Prose claims that come from these values.
 dense = slice(4, 8)                                     # 40-70 % voids
-g_dense, t_dense = sum(BY_VOID["GaitNet"][dense]), sum(BY_VOID["OCS2's own trot"][dense])
+g_dense, t_dense = sum(BY_VOID["CADENCE"][dense]), sum(BY_VOID["OCS2's own trot"][dense])
 assert (g_dense, t_dense) == (281, 150)                 # means 70.25 (70) vs 37.5 (38)
-G, T, S = BY_SPEED["GaitNet"], BY_SPEED["OCS2's own trot"], BY_SPEED["GaitNet-Single"]
+G, T, S = BY_SPEED["CADENCE"], BY_SPEED["OCS2's own trot"], BY_SPEED["CADENCE-Single"]
 assert all(g > t for g, t in zip(G, T))                 # beat the trot at every speed
 assert all(g > s for g, s in zip(G, S))                 # Single lower at every speed
-assert all(g > s for g, s in zip(BY_VOID["GaitNet"], BY_VOID["GaitNet-Single"]))
-_gt = [g - t for g, t in zip(BY_VOID["GaitNet"], BY_VOID["OCS2's own trot"])]
+assert all(g > s for g, s in zip(BY_VOID["CADENCE"], BY_VOID["CADENCE-Single"]))
+_gt = [g - t for g, t in zip(BY_VOID["CADENCE"], BY_VOID["OCS2's own trot"])]
 assert min(_gt[3:]) == 15 and max(_gt[3:]) == 42, _gt   # "from 30 % on, by 15 to 42 points"
 assert G[1] - S[1] == 21                                # "21 points at 0.10 m/s"
 assert all(g > 80 for g in G[:4]) and G[4] == 66        # "above 80 % up to 0.20, 66 % at 0.25"
 # The printed pooled values must equal the prose macros.
 MACROS = dict(re.findall(r"\\newcommand\{\\(corl\w+)\}\{([^}]*)\}",
                          CONSTANTS_TEX.read_text()))
-for _m, _macro in {"GaitNet": "corlSweepFull", "GaitNet-Single": "corlSweepSingle",
-                   "Per-candidate + IFM": "corlSweepMlp", "OCS2's own trot": "corlSweepTrot"}.items():
+for _m, _macro in {"CADENCE": "corlSweepFull", "CADENCE-Single": "corlSweepSingle",
+                   "GaitNet + IFM": "corlSweepMlp", "OCS2's own trot": "corlSweepTrot"}.items():
     assert MACROS[_macro] == POOLED[_m], (_macro, MACROS[_macro], POOLED[_m])
 assert int(MACROS["corlOcsTrialsPerPoint"]) == TRIALS
 assert MACROS["corlOcsDenseFull"] == str(half_up(pct(g_dense, 4 * N), "1"))
@@ -162,13 +162,13 @@ DIVIDER_PAD_PT = 1.5            # gap between the divider and its label [pt]
 PAD_PT = 0.8                    # gap between a marker's edge and its value [pt]
 SHIFT_PT = 3.0                  # sideways shift of a value off a line [pt]
 GAITNET_MS, TROT_MS, VARIANT_MS = 3.6, 4.0, 3.0      # marker sizes [pt]
-STYLE = {   # method -> plot style; teal = Per-candidate + IFM as in Fig. 2a
-    "GaitNet": dict(color=GAITNET, lw=1.6, marker="o", ms=GAITNET_MS, mew=0, zorder=5),
+STYLE = {   # method -> plot style; teal = GaitNet + IFM as in Fig. 2a
+    "CADENCE": dict(color=GAITNET, lw=1.6, marker="o", ms=GAITNET_MS, mew=0, zorder=5),
     "OCS2's own trot": dict(color=TROT, ls=(0, (3.2, 1.8)), lw=1.2, marker="s", ms=TROT_MS,
                             mfc="none", mec=TROT, mew=0.9, zorder=4),
-    "GaitNet-Single": dict(color="#D97706", lw=1.0, marker="^", ms=VARIANT_MS, mew=0, zorder=3),
-    "GaitNet, no IFM": dict(color="#DB2777", lw=1.0, marker="v", ms=VARIANT_MS, mew=0, zorder=3),
-    "Per-candidate + IFM": dict(color="#0D9488", lw=1.0, marker="D", ms=VARIANT_MS, mew=0,
+    "CADENCE-Single": dict(color="#D97706", lw=1.0, marker="^", ms=VARIANT_MS, mew=0, zorder=3),
+    "CADENCE, no IFM": dict(color="#DB2777", lw=1.0, marker="v", ms=VARIANT_MS, mew=0, zorder=3),
+    "GaitNet + IFM": dict(color="#0D9488", lw=1.0, marker="D", ms=VARIANT_MS, mew=0,
                                 zorder=3),
 }
 EXTENT = {m: s["ms"] + (s.get("mew", 0) if s.get("mfc") == "none" else 0)
@@ -206,7 +206,7 @@ def style_axes(ax, xs, pad, xlabel):
 style_axes(ax_a, VOIDS, 4.5, "Nominal void fraction [%]")
 ax_a.set_title("(a) By void fraction, 0.05–0.25 m/s", **TITLE)
 lines = {"a": {}, "b": {}}
-for m in ("Per-candidate + IFM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
+for m in ("GaitNet + IFM", "CADENCE-Single", "OCS2's own trot", "CADENCE"):
     (lines["a"][m],) = ax_a.plot(VOIDS, [float(pct(k, N)) for k in BY_VOID[m]], label=m, **STYLE[m])
 
 # (b) by speed; 0.25 m/s is above the training range: a thin dashed divider
@@ -216,29 +216,29 @@ ax_b.set_xticklabels([f"{s:.2f}" for s in SPEEDS])
 ax_b.set_ylabel("")              # same axis as (a); its label is there
 divider = ax_b.axvline(X_DIVIDER, ymin=0, ymax=100 / Y_MAX, color=MUTED, lw=DIVIDER_LW,
                        ls=(0, (3.0, 2.0)), zorder=1)
-# Lower-right corner: below GaitNet-Single's 40 % at 0.25 m/s. The white box only
+# Lower-right corner: below CADENCE-Single's 40 % at 0.25 m/s. The white box only
 # hides the light 20 % gridline behind the text; it is invisible on the white axes.
 divider_label = ax_b.annotate("beyond\ntraining", (X_DIVIDER, 3), xytext=(DIVIDER_PAD_PT, 0),
                               textcoords="offset points", ha="left", va="bottom",
                               fontsize=DIVIDER_PT, color=MUTED, linespacing=1.05, zorder=2,
                               bbox=dict(boxstyle="square,pad=0.1", fc="white", ec="none"))
 ax_b.set_title("(b) By speed, all void fractions", **TITLE)
-for m in ("GaitNet-Single", "OCS2's own trot", "GaitNet"):
+for m in ("CADENCE-Single", "OCS2's own trot", "CADENCE"):
     (lines["b"][m],) = ax_b.plot(SPEEDS, [float(pct(k, N)) for k in BY_SPEED[m]], label=m,
                                  **STYLE[m])
 
 # One legend for both panels, a column between them.
-order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "Per-candidate + IFM"]
+order = ["CADENCE", "OCS2's own trot", "CADENCE-Single", "GaitNet + IFM"]
 leg = fig.legend(handles=[lines["a"][m] for m in order], labels=order, loc="center left",
                  ncol=1, frameon=False, handlelength=1.7, fontsize=6.8,
                  bbox_to_anchor=((LEFT + W_A + LEG_X) / FIG_W,
                                  (BOTTOM + 0.5 * (FIG_H - TOP - BOTTOM)) / FIG_H),
                  borderaxespad=0.0, borderpad=0.0, labelspacing=0.45, handletextpad=0.45)
 
-# ---------------------------------------------------------------- GaitNet's values
+# ---------------------------------------------------------------- CADENCE's values
 # Each value goes to the first candidate position around its marker that
 # overlaps no line, marker, legend, title or earlier value and stays inside
-# the axes; preferred above the marker (GaitNet's line is mostly the top one).
+# the axes; preferred above the marker (CADENCE's line is mostly the top one).
 fig.canvas.draw()
 renderer = fig.canvas.get_renderer()
 px_per_pt = fig.dpi / 72
@@ -328,13 +328,13 @@ def place_values(ax, xs, ks, panel_lines, extra_obstacles=()):
             tried.append(f"{name}: {why}")
             t.remove()
         else:
-            raise AssertionError(f"no free place for GaitNet {text} at {x}: {tried}")
+            raise AssertionError(f"no free place for CADENCE {text} at {x}: {tried}")
     return chosen
 
 
-print("label positions (a):", place_values(ax_a, VOIDS, BY_VOID["GaitNet"], lines["a"]))
+print("label positions (a):", place_values(ax_a, VOIDS, BY_VOID["CADENCE"], lines["a"]))
 print("label positions (b):", place_values(
-    ax_b, SPEEDS, BY_SPEED["GaitNet"], lines["b"],
+    ax_b, SPEEDS, BY_SPEED["CADENCE"], lines["b"],
     extra_obstacles=[divider_box(), divider_label.get_bbox_patch().get_window_extent(renderer)]))
 
 # ---------------------------------------------------------------- checks
@@ -353,7 +353,7 @@ _bleft = min([t.get_window_extent(renderer).x0 for t in ax_b.get_yticklabels() i
 assert _lb.x1 < _bleft - 1, "legend reaches (b)'s y labels"
 assert ax_b.title.get_window_extent(renderer).x0 > ax_a.title.get_window_extent(renderer).x1
 # The divider label (box included) lies right of the divider, inside the figure,
-# and touches no line, marker, GaitNet value, title or the divider itself.
+# and touches no line, marker, CADENCE value, title or the divider itself.
 _dl = grow(divider_label.get_bbox_patch().get_window_extent(renderer), 0.4)
 _div = divider_box()
 assert _dl.x0 > _div.x1, "divider label reaches the divider"
@@ -364,7 +364,7 @@ assert not any(hits_polyline(grow(_dl, 0.5 * ln.get_linewidth()), pl)
 assert not any(_dl.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts
                if t is not divider_label), "label on a value"
 assert not _dl.overlaps(ax_b.title.get_window_extent(renderer)), "label on the title"
-# The divider crosses no GaitNet value either.
+# The divider crosses no CADENCE value either.
 assert not any(_div.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts
                if t is not divider_label), "divider through a value"
 print("divider at %.3f m/s; label %.1f x %.1f mm" % (

@@ -1,5 +1,5 @@
 % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
-% Fig. 1: GaitNet overview. Drawn in Inkscape: edit figures/fig_overview.svg
+% Fig. 1: CADENCE overview. Drawn in Inkscape: edit figures/fig_overview.svg
 % and save a PDF copy, with text converted to paths, as
 % figures/fig_overview.pdf. Panels: (a) architecture (Sec. III-A, III-B),
 % (b) IDM training per controller (III-C), (c) PPO training in Isaac Lab
@@ -7,12 +7,12 @@
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.74\textwidth]{figures/fig_overview}
-\caption{GaitNet overview. (a)~Given the state $\mathbf x_g$ and history
+\caption{CADENCE overview. (a)~Given the state $\mathbf x_g$ and history
   $\mathbf h$, a candidate mixer scores the safe candidates
   $\mathbf q_i \in \mathcal C$ and the no-step option $\varnothing$.
   (b)~Each controller $c$ gets its own IFM $I^c$, fitted offline on its
   logged steps. (c)~PPO keeps the training controller's IFM frozen.
-  (d)~On OCS2, GaitNet stays frozen and only the IFM changes.
+  (d)~On OCS2, CADENCE stays frozen and only the IFM changes.
   \hot~trained, \frz~frozen.}
 \label{fig:overview}
 \end{figure*}

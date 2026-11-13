@@ -1,16 +1,16 @@
 """Plot the footstep-correction figure of the L4DC paper (fig:transfer, Sec. 5, Q3).
 
-Claim supported: with the same planner weights, GaitNet works on OCS2 (the new
+Claim supported: with the same planner weights, CADENCE works on OCS2 (the new
 controller) only when the IFM is refitted on OCS2; no correction, the training
 controller's IFM, and a constant per-leg offset all fall short, and overall
-only the refitted IFM lifts GaitNet above OCS2's own trot. (On the 49 % cells
+only the refitted IFM lifts CADENCE above OCS2's own trot. (On the 49 % cells
 alone the per-leg offset also beats the trot; the caption must say "overall".)
 
 One panel, 74 x 42 mm, to sit beside fig_swing.pdf (74 x 42 mm) in one row;
 margins as fig_swing.py so the two axes align. Plain bars from 0, value printed
 on every bar; no error bars, whiskers, bands, heatmaps or p-values; one
 aggregate per multi-seed method:
-  GaitNet's OCS2 benchmark success over all six cells with each footstep
+  CADENCE's OCS2 benchmark success over all six cells with each footstep
   correction: none (the desired foothold is sent uncorrected), the training
   controller's IFM, a constant per-leg offset, and the IFM refitted on OCS2.
   All bars indigo: same planner, only the correction changes.
@@ -49,8 +49,8 @@ macros of ../constants.tex (the source of truth).
 
 Provenance note: the protocol table of results_to_fill.md lists the three
 control arms with 5 seeds at iteration 300 but does not itself say that their
-seeds s1-s5 are GaitNet's s1-s5 policies; results.tex (Q3) states that the
-controls keep GaitNet's weights.
+seeds s1-s5 are CADENCE's s1-s5 policies; results.tex (Q3) states that the
+controls keep CADENCE's weights.
 
 usage: python3 fig_transfer.py   (writes fig_transfer.pdf and fig_transfer.png here)
 """
@@ -79,16 +79,16 @@ DENSE = (2, 5)                          # 49 % voids at 0.10 and 0.20 m/s
 # (2026-11-12). Cell order: 0.10 m/s at 26/38/49 % voids, then 0.20 m/s.
 # Keys are the method names of that table.
 OCS2_SEEDS = {
-    "GaitNet without the IFM": ((21, 20, 15, 19, 18, 10), (18, 19, 16, 16, 17, 12),
+    "CADENCE without the IFM": ((21, 20, 15, 19, 18, 10), (18, 19, 16, 16, 17, 12),
                                 (22, 23, 16, 18, 17, 13), (23, 21, 12, 19, 17, 11),
                                 (21, 19, 13, 17, 15, 14)),
-    "GaitNet + training IFM": ((9, 9, 5, 7, 6, 7), (7, 1, 8, 5, 2, 0),
+    "CADENCE + training IFM": ((9, 9, 5, 7, 6, 7), (7, 1, 8, 5, 2, 0),
                                (10, 6, 5, 7, 3, 3), (7, 7, 9, 3, 5, 0),
                                (9, 8, 6, 6, 4, 0)),
-    "GaitNet + offset": ((68, 67, 55, 65, 63, 45), (65, 64, 53, 64, 62, 48),
+    "CADENCE + offset": ((68, 67, 55, 65, 63, 45), (65, 64, 53, 64, 62, 48),
                          (66, 63, 58, 63, 65, 42), (67, 65, 48, 59, 58, 48),
                          (70, 70, 54, 68, 66, 50)),
-    "GaitNet": ((92, 88, 78, 90, 91, 69), (94, 91, 77, 93, 89, 73),
+    "CADENCE": ((92, 88, 78, 90, 91, 69), (94, 91, 77, 93, 89, 73),
                 (94, 94, 75, 96, 92, 71), (98, 93, 80, 96, 93, 75),
                 (87, 85, 68, 83, 84, 63)),
 }
@@ -98,10 +98,10 @@ TROT_COUNTS = (91, 72, 46, 88, 70, 40)
 # Bar order (left to right), tick label, and the macros of the all-cell and
 # 49 % pools. The 49 % pools are asserted but not drawn (Table 1 prints them).
 BARS = (   # results_to_fill.md name, tick label, all cells, 49 % voids
-    ("GaitNet without the IFM", "None",            "corlBenchNoIdm",    "corlBenchNoIdmDense"),
-    ("GaitNet + training IFM",  "Training\nIFM",   "corlBenchTrainIfm", "corlBenchTrainIfmDense"),
-    ("GaitNet + offset",        "Per-leg\noffset", "corlBenchOffset",   "corlBenchOffsetDense"),
-    ("GaitNet",                 "Refitted\nIFM",   "corlBenchFull",     "corlBenchFullDense"),
+    ("CADENCE without the IFM", "None",            "corlBenchNoIdm",    "corlBenchNoIdmDense"),
+    ("CADENCE + training IFM",  "Training\nIFM",   "corlBenchTrainIfm", "corlBenchTrainIfmDense"),
+    ("CADENCE + offset",        "Per-leg\noffset", "corlBenchOffset",   "corlBenchOffsetDense"),
+    ("CADENCE",                 "Refitted\nIFM",   "corlBenchFull",     "corlBenchFullDense"),
 )
 SPEC = {   # macro name -> printed string
     "corlBenchNoIdm": "17.1", "corlBenchTrainIfm": "5.5",
@@ -238,7 +238,7 @@ for g in GRID_AT:
     ax.axhline(g, color=GRID, lw=0.5, zorder=0)
 ax.spines[["top", "right"]].set_visible(False)
 ax.set_ylabel("Success [%]", labelpad=2)
-ax.set_title("GaitNet on OCS2, by footstep correction", loc="left", fontsize=7.5,
+ax.set_title("CADENCE on OCS2, by footstep correction", loc="left", fontsize=7.5,
              fontweight="semibold", color=INK, pad=3)
 
 

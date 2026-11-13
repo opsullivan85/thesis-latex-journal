@@ -1,13 +1,13 @@
-"""Swing-duration figure (fig:swing): measured swing durations, GaitNet vs OCS2's own trot.
+"""Swing-duration figure (fig:swing): measured swing durations, CADENCE vs OCS2's own trot.
 
 Plain, comparative counterpart of the swing-duration histogram of the
 predecessor thesis (images/data/swing_duration_histogram.png).
 
 DATA CAVEAT (same as fig_gait.py, 2026-11-12). ../timming.md comes from a
-SEPARATE, EARLIER evaluation run on the OCS2 benchmark worlds: one GaitNet
+SEPARATE, EARLIER evaluation run on the OCS2 benchmark worlds: one CADENCE
 checkpoint of one training seed with the OCS2 IFM, and one run of OCS2's own
 trot. It is NOT the set of runs behind the current Table 1 and fig_bench.py. Its
-successful trials (GaitNet 549, trot 504) are asserted by gait_stats.sanity().
+successful trials (CADENCE 549, trot 504) are asserted by gait_stats.sanity().
 Captions and prose must call this a separate evaluation run.
 PROVENANCE FLAG (review, 2026-11-12): 549/600 = 91.5 % and 504/600 = 84.0 %,
 and the per-cell counts reproduce every superseded Table 1 entry ("was 91.5",
@@ -28,7 +28,7 @@ What is plotted (definitions from gait_stats.py; read its header):
     (\\corlGaitTrotSwingMeasured) against its scheduled 0.3 s, so measured
     swings are shorter than commanded ones and the T range marker (commanded
     limits \\corlSwingDurationMin, \\corlSwingDurationMax) is a reference, not
-    a bound on the measured values. Only the GaitNet-vs-trot comparison
+    a bound on the measured values. Only the CADENCE-vs-trot comparison
     carries meaning.
   * Step-style line histograms, each bin in % of ALL of the arm's counted
     swings; swings beyond X_MAX are in the denominator but off the axis
@@ -37,7 +37,7 @@ What is plotted (definitions from gait_stats.py; read its header):
 BINS (aliasing). Lift-off and touchdown times are samples of a logger with
 about 21 ms spacing (gait_stats.py header: median 21 ms, 20-34 ms, varying
 within a trial), so measured swings cluster at whole multiples of the sample
-spacing (GaitNet: 42, 63, 85, 106, 127, 149 ... ms; trot: 213, 235, 256 ms).
+spacing (CADENCE: 42, 63, 85, 106, 127, 149 ... ms; trot: 213, 235, 256 ms).
 10 ms bins would alias against that grid (alternate bins empty or holding a
 whole cluster). Here the spacing DELTA is fitted to the data (the spacing that
 minimises the median distance of all counted swings to their nearest
@@ -154,7 +154,7 @@ MARK, MARK_TEXT = "#B6BCC6", "#6B7280"   # light T-range marker and its label
 VALUE_PT = 7.0
 HALO = dict(boxstyle="square,pad=0.1", facecolor="white", edgecolor="none")
 ARM_COLOR = {"c0": INDIGO, "trot": GRAY}
-# Lines as in fig_gait.py (b) and fig_sweep.py: GaitNet solid, the trot dashed and thinner.
+# Lines as in fig_gait.py (b) and fig_sweep.py: CADENCE solid, the trot dashed and thinner.
 LINE_STYLE = {"c0": dict(color=INDIGO, lw=1.4),
               "trot": dict(color=GRAY, lw=1.2, ls=(0, (3.2, 1.8)))}
 XTICK_PAD = 3.5                          # pt, as in fig_gait.py
@@ -173,7 +173,7 @@ ax = fig.add_axes([LEFT / FIG_W, BOTTOM / FIG_H,
 # above the 80 grid line.
 Y_TOP_TICK = 80
 Y_MAX = 86.0
-for a in ("trot", "c0"):                 # GaitNet on top
+for a in ("trot", "c0"):                 # CADENCE on top
     share = HIST[a]
     nz = np.flatnonzero(share)
     i0, i1 = nz[0], nz[-1] + 1           # draw only the bins that hold swings
@@ -209,7 +209,7 @@ ax.tick_params(axis="x", pad=XTICK_PAD)
 
 # One label per arm, right of the T_MAX line (x [s], top [%]).
 LABEL = {"trot": (0.318, 77.0), "c0": (0.318, 41.0)}   # blocks ~26 % tall; ~10 % gap
-for a, name in (("trot", "OCS2's own trot"), ("c0", "GaitNet")):
+for a, name in (("trot", "OCS2's own trot"), ("c0", "CADENCE")):
     ax.text(*LABEL[a], f"{name}\nmedian {MEDIAN[a]:.3f} s\n{COUNT[a]:,} swings",
             ha="left", va="top", fontsize=VALUE_PT, color=ARM_COLOR[a],
             linespacing=1.15, zorder=4, bbox=HALO)
@@ -300,12 +300,12 @@ for a in gs.ARMS:
 # them; this script does not edit .tex files).
 print("% ---- fig:swing (figures/fig_swing.py, from ../timming.md, counted swings)")
 print(f"\\newcommand{{\\corlGaitSwingMedian}}{{{MEDIAN['c0']:.3f}}}  "
-      f"% GaitNet measured swing, median [s] ({MEDIAN['c0']:.4f})")
+      f"% CADENCE measured swing, median [s] ({MEDIAN['c0']:.4f})")
 print(f"\\newcommand{{\\corlGaitSwingsGaitNet}}{{{COUNT['c0']:,}}}".replace(",", "{,}")
-      + "  % counted swings, GaitNet")
+      + "  % counted swings, CADENCE")
 print(f"\\newcommand{{\\corlGaitSwingsTrot}}{{{COUNT['trot']:,}}}".replace(",", "{,}")
       + "  % counted swings, trot")
 print(f"\\newcommand{{\\corlGaitSwingBinMs}}{{{DELTA_MS}}}  "
       f"% bin width = fitted log sample spacing ({DELTA_FIT:.2f} ms)")
 print(f"\\newcommand{{\\corlGaitSwingOffAxis}}{{{OFF_AXIS['c0']}}}  "
-      f"% GaitNet swings >= {X_MAX} s, off the axis (trot {OFF_AXIS['trot']})")
+      f"% CADENCE swings >= {X_MAX} s, off the axis (trot {OFF_AXIS['trot']})")

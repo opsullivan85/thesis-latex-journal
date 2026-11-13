@@ -118,10 +118,10 @@ controller's IFM also departs from (i), since it is fitted without the
 controller randomization it later runs under
 (Sec.~\ref{subsec:method-training}). The OCS2 IFM departs from (iv),
 since it is fitted on steps sent through the training controller's IFM,
-so its logged landings cover the footholds GaitNet reached through that
+so its logged landings cover the footholds CADENCE reached through that
 IFM rather than the deployed targets. Logging again with the deployed IFM
 \citep{christiano_transfer_2016} would narrow this gap. Condition (i) can
 fail even on one controller, however, since the logging policy and
-GaitNet choose commands from terrain that $\zeta$ omits.
+CADENCE choose commands from terrain that $\zeta$ omits.
 Sec.~\ref{subsec:exp-why} therefore tests the refit against controls
 instead of relying on Proposition~\ref{prop:idm-mean}.

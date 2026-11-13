@@ -30,8 +30,8 @@ along the grid axes. The history covers $H =
 \corlHistTicks$ ticks (\corlHistSeconds\,s). The candidate mixer has
 \corlMixerLayers{} layers of width \corlMixerDim{} with
 \corlMixerHeads{} heads and feed-forward blocks of width
-\corlMixerFF. GaitNet has \corlParamsGaitNetK{}k parameters, and the
-per-candidate network has \corlParamsPerCandidateK{}k.
+\corlMixerFF. CADENCE has \corlParamsGaitNetK{}k parameters, and
+GaitNet has \corlParamsPerCandidateK{}k.
 
 \noindent\textbf{IFM of the training controller.}
 \looseness=-1 Its network $\Delta_\theta$ (Eq.~\eqref{eq:idm-loss}) is
@@ -63,18 +63,18 @@ voids \corlVoidDepth\,m deep, and the \corlNumLevels{} curriculum
 levels span 0--\corlMaxVoidPct\% voids.
 
 \noindent\textbf{OCS2 IFM and footstep corrections.}
-\looseness=-1 Of GaitNet and its execution layer, only the IFM is
+\looseness=-1 Of CADENCE and its execution layer, only the IFM is
 fitted for OCS2. Steps start at the tick they are chosen, as in
 training, the candidate margin is the training margin, and all OCS2
 settings are stock. Each training seed has its own OCS2 IFM, with the
 network and fit of the training controller's IFM, fitted on \verify{fewer
-than 20{,}000} steps that this seed's frozen GaitNet took on OCS2 through
+than 20{,}000} steps that this seed's frozen CADENCE took on OCS2 through
 the training controller's IFM, \verify{on worlds disjoint from the
 evaluation's}.
-GaitNet + offset adds to each desired foothold a constant per-leg
+CADENCE + offset adds to each desired foothold a constant per-leg
 offset, the mean of command minus landing over the same logged steps.
-GaitNet without the IFM sends the desired foothold unchanged, and
-GaitNet + training IFM sends it through the training controller's IFM.
+CADENCE without the IFM sends the desired foothold unchanged, and
+CADENCE + training IFM sends it through the training controller's IFM.
 
 \noindent\textbf{Benchmark per cell.}
 \looseness=-1 The benchmark uses \corlBenchTileCm\,cm tiles and the
@@ -100,8 +100,8 @@ the unrounded values over the cells.
 % 100 per training seed and cell): a learned value is the sum over its five
 % seeds divided by 5, rounded half up to a whole percent. Every such mean is
 % a multiple of 0.2, so no tie occurs. Script: percell.py in the scratchpad of
-% session da70ccbd. fig_bench.py prints the same values for GaitNet,
-% GaitNet-Diagonal, the trot and the static walk. One-decimal means used in
+% session da70ccbd. fig_bench.py prints the same values for CADENCE,
+% CADENCE-Diagonal, the trot and the static walk. One-decimal means used in
 % the main text: offset 53.6 / 46.6 (here 54 / 47) and Single 45.4 (here 45)
 % at 0.10 m/s, 26 %.
 \begin{tabular}{@{}lrrrrrr@{}}
@@ -113,19 +113,19 @@ the unrounded values over the cells.
   & \thd{\corlBenchVoidHigh\%} & \thd{\corlBenchVoidLow\%}
   & \thd{\corlBenchVoidMid\%} & \thd{\corlBenchVoidHigh\%} \\
 \midrule
-GaitNet                 & 93 & 90 & 76 & 92 & 90 & 70 \\
+CADENCE                 & 93 & 90 & 76 & 92 & 90 & 70 \\
 \midrule
 OCS2's own trot         & 91 & 72 & 46 & 88 & 70 & 40 \\
 OCS2's static walk      & 94 & 78 & 45 & 80 & 61 & 35 \\
 \midrule
-Per-candidate + IFM     & 81 & 79 & 69 & 73 & 71 & 54 \\
+GaitNet + IFM     & 81 & 79 & 69 & 73 & 71 & 54 \\
 \midrule
-GaitNet-Diagonal        & 93 & 90 & 72 & 89 & 87 & 67 \\
-GaitNet-Single          & 45 & 45 & 40 & 38 & 38 & 31 \\
+CADENCE-Diagonal        & 93 & 90 & 72 & 89 & 87 & 67 \\
+CADENCE-Single          & 45 & 45 & 40 & 38 & 38 & 31 \\
 \midrule
-GaitNet + offset        & 67 & 66 & 54 & 64 & 63 & 47 \\
-GaitNet without the IFM & 21 & 20 & 14 & 18 & 17 & 12 \\
-GaitNet + training IFM  &  8 &  6 &  7 &  6 &  4 &  2 \\
+CADENCE + offset        & 67 & 66 & 54 & 64 & 63 & 47 \\
+CADENCE without the IFM & 21 & 20 & 14 & 18 & 17 & 12 \\
+CADENCE + training IFM  &  8 &  6 &  7 &  6 &  4 &  2 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -200,7 +200,7 @@ weights, a swing apex height of \corlRandApexMin{} to
 bias of up to $\pm\corlRandBiasCm$\,cm per axis, Gaussian landing noise
 with a standard deviation of \corlRandNoiseCm\,cm, and a lift-off delay
 of zero or one tick. Every chosen candidate is first corrected by the
-IFM and then executed by this randomized controller. GaitNet's touchdown
+IFM and then executed by this randomized controller. CADENCE's touchdown
 errors are measured against the IFM's output, so its history reports
 how far the controller missed the corrected command.
 
@@ -208,7 +208,7 @@ how far the controller missed the corrected command.
 \label{app:deployment}
 
 \noindent\textbf{Steps and footholds.}
-\looseness=-1 On OCS2, GaitNet is queried every tick, also while two legs
+\looseness=-1 On OCS2, CADENCE is queried every tick, also while two legs
 swing, and each step it starts joins the steps already planned in OCS2's
 contact schedule, at absolute times on the NMPC clock. The OCS2 IFM's
 command reaches the NMPC as a foot-placement constraint. The command is
@@ -218,7 +218,7 @@ that region, in a box of $\pm$\corlAuthorityCm\,cm around the projected
 point. OCS2's swing planner receives only the touchdown heights.
 
 \noindent\textbf{Terrain and odometry.}
-\looseness=-1 GaitNet and the controller get terrain from a simulated
+\looseness=-1 CADENCE and the controller get terrain from a simulated
 RealSense D435 depth camera through a depth-vote map. This map is a fine
 grid in which each depth frame votes hit or miss for the squares it sees.
 A square is walkable while its fading vote total is positive and it lies

@@ -13,7 +13,7 @@ feasibility rules \citep{bjelonic_whole-body_2021} or tree search
 agent set an MPC's timing \citep{patrizi_rl-augmented_2026}. However,
 the planners search contacts inside the controller's optimization, and
 the learned agent sets the timing of the one MPC it is trained with,
-whereas GaitNet sends an unchanged controller one step at a time and
+whereas CADENCE sends an unchanged controller one step at a time and
 moves between controllers.
 
 \noindent\textbf{Learned gaits and footholds.} \looseness=-1 End-to-end
@@ -24,7 +24,7 @@ heuristic footholds \citep{yang_fast_2021, margolis_learning_2021,
 yang_cajun_2023}, or footholds under a fixed gait
 \citep{gangapurwala_rloc_2022, villarreal_fast_2019}, and ContactNet's
 gait sets how many legs swing \citep{bratta_contactnet_2024}. Closest is
-\citet{Sullivan2025}, whose per-candidate network already chooses each
+GaitNet \citep{Sullivan2025}, which already chooses each
 step's leg, swing time, and foothold, or no step, and yields an acyclic
 gait. However, it scores each candidate alone and ran only on its
 training controller.

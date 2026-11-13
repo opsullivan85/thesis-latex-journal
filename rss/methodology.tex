@@ -13,7 +13,7 @@
   \centering
   \includegraphics[width=\textwidth]{figures/fig_action}
   \caption{The action space at one tick (posed MuJoCo scene,
-    illustrative). Each tick, GaitNet takes no step or picks one leg and
+    illustrative). Each tick, CADENCE takes no step or picks one leg and
     one of its candidates, plus a swing time. (a)~The
     \corlTrainCandidatesPerLeg{} candidates of each leg, by the rule of
     Sec.~\ref{subsec:method-step}; front-right in dark indigo, dots the
@@ -25,7 +25,7 @@
 \subsection{A Small Action Space}
 \label{subsec:method-step}
 
-\looseness=-1 At each tick, GaitNet takes one of at most
+\looseness=-1 At each tick, CADENCE takes one of at most
 \corlTotalCandidates{} discrete choices, the no-step option or one of
 \corlTrainCandidatesPerLeg{} candidate footholds for each of the
 \corlNumLegs{} legs (Fig.~\ref{fig:action}), and predicts a swing time
@@ -35,8 +35,8 @@ tracks the motion, and the timing, order, overlap, and pairing of steps
 follow only from which choice wins each tick. Apart from the contact
 rule, the per-step cost $w_s$ of Eq.~\eqref{eq:reward}, and one
 candidate per leg pinned near a regular stride's foothold, which sets
-where but not when a leg steps, nothing gait-related enters GaitNet, so
-its timing and order emerge, as in \citet{Sullivan2025}. The candidates come from a terrain mask: vertical
+where but not when a leg steps, nothing gait-related enters CADENCE, so
+its timing and order emerge, as in GaitNet \citep{Sullivan2025}. The candidates come from a terrain mask: vertical
 rays on a $h = \corlScanResCm$\,cm grid around each hip mark a cell safe
 when ground lies within reach below it, the unsafe region is grown by
 $k = 2$ cells into a \emph{candidate margin} $m = kh =
@@ -47,7 +47,7 @@ pinned (App.~\ref{app:sampler}).
 \subsection{Network}
 \label{subsec:method-network}
 
-\looseness=-1 GaitNet embeds the robot state $\mathbf x_g$, a
+\looseness=-1 CADENCE embeds the robot state $\mathbf x_g$, a
 \corlHistSeconds\,s history $\mathbf h$ of base velocities, foot
 positions, scheduled contacts, and each leg's last \emph{touchdown
 error}, and each candidate's code $\mathbf q_i$ (its leg and offset from
@@ -70,8 +70,8 @@ gives each mixed token $\tilde{\mathbf t}_i$ a score and a swing time,
 \end{equation}
 and the policy is a softmax of the scores, sampled in training and
 maximized at deployment. With $W_h$ and the mixer's output layers
-initialized at zero, GaitNet starts as the per-candidate network of
-\citet{Sullivan2025} (App.~\ref{app:settings}).
+initialized at zero, CADENCE starts as GaitNet
+\citep{Sullivan2025} (App.~\ref{app:settings}).
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}
@@ -95,7 +95,7 @@ akizhanov_learning_2024}:
   \label{eq:idm-loss}
 \end{equation}
 where $\Delta_\theta$ is a small multilayer perceptron initialized at
-zero. For OCS2, each training seed's frozen GaitNet logs
+zero. For OCS2, each training seed's frozen CADENCE logs
 \verify{fewer than 20{,}000} steps through the training controller's IFM,
 \verify{on worlds separate from the evaluation}, and its own OCS2 IFM is
 fitted on them.
@@ -108,7 +108,7 @@ transfer claim (Sec.~\ref{subsec:exp-why}).
 \subsection{Training and Deployment}
 \label{subsec:method-training}
 
-\looseness=-1 We train GaitNet with PPO \citep{Schulman_proximal_2017}
+\looseness=-1 We train CADENCE with PPO \citep{Schulman_proximal_2017}
 in Isaac Lab \citep{mittal_orbit_2023}, on terrain whose void fraction
 a curriculum raises to \corlMaxVoidPct\%
 (Fig.~\ref{fig:training-terrain-combined}), with the reward
@@ -138,7 +138,7 @@ randomized at every reset (App.~\ref{app:training}).
 \end{figure}
 
 \phantomsection\label{subsec:method-deployment}\looseness=-1 On OCS2,
-GaitNet replaces the gait scheduler of the \texttt{legged\_control}
+CADENCE replaces the gait scheduler of the \texttt{legged\_control}
 stack \citep{leggedcontrol, grandia_perceptive_2022} in Gazebo, with
 all OCS2 settings stock. Its candidates are built as in training, the
 corrected command enters the NMPC as a foot-placement constraint, and

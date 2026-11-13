@@ -20,7 +20,7 @@
 %  * Gait statistics (timming.md, figures/gait_stats.py, and the acyclicity
 %    measures at \corlGaitEventRepeatPct ff. in constants.tex), Fig.
 %    swing-transfer (a) and the frames of App. F: an earlier evaluation run of
-%    one GaitNet policy and the trot, on other worlds than Table 1 (author),
+%    one CADENCE policy and the trot, on other worlds than Table 1 (author),
 %    successful trials only. Its training seed and iteration are not printed
 %    (App. F, app:earlier-run).
 % Plain figures, no p-values, no intervals (user, 2026-11-03).
@@ -47,7 +47,7 @@ areas of Isaac's \corlBenchIsaacVoidLow, \corlBenchIsaacVoidMid, and
 trial succeeds if the robot does not fall and walks at least half the
 nominal distance. Every learned method is trained with
 \corlNumTrainSeeds{} training seeds and evaluated at iteration
-\corlOcsCheckpoint, \verify{where GaitNet's mean success on the training
+\corlOcsCheckpoint, \verify{where CADENCE's mean success on the training
 controller in Isaac was highest}; this iteration was fixed before any
 trial of Table~\ref{tab:results} and may not be the best one for the
 other methods. We report
@@ -74,18 +74,18 @@ pairs with \corlTrotSwing\,s swings on a \corlTrotPeriod\,s period, the
 walk one leg at a time with \corlWalkSwing\,s swings on a
 \corlWalkPeriod\,s period, both with heuristic footholds projected onto
 planar regions \citep{grandia_perceptive_2022}. They ran once each.
-\emph{Per-candidate + IFM} is the gait-free network of
-\citet{Sullivan2025}, trained with GaitNet's recipe but without the
-IFM in the loop, as there, and run with the OCS2 IFM. \emph{GaitNet-Diagonal} keeps GaitNet's weights but starts a
+\emph{GaitNet + IFM} is GaitNet
+\citep{Sullivan2025}, trained with CADENCE's recipe but without the
+IFM in the loop, as there, and run with the OCS2 IFM. \emph{CADENCE-Diagonal} keeps CADENCE's weights but starts a
 second swing only on the swinging leg's diagonal partner, and
-\emph{GaitNet-Single} is retrained to swing one leg at a time. Three
-controls keep GaitNet's weights and change only the footstep
-correction: a constant per-leg offset (\emph{GaitNet + offset}), none
+\emph{CADENCE-Single} is retrained to swing one leg at a time. Three
+controls keep CADENCE's weights and change only the footstep
+correction: a constant per-leg offset (\emph{CADENCE + offset}), none
 (\emph{without the IFM}), or the training controller's IFM.
 
 \noindent\textbf{Gait data.}
 \looseness=-1 The gait statistics come from the successful trials of an
-earlier evaluation run of one GaitNet policy
+earlier evaluation run of one CADENCE policy
 (\corlGaitTrialsGaitNet{} of \corlBenchTrialsPerArm) and of the trot
 (\corlGaitTrialsTrot) on other worlds, not from the runs of
 Table~\ref{tab:results} (App.~\ref{app:earlier-run}). A fixed period
@@ -111,45 +111,45 @@ lifting within \corlGaitEventWindowMs\,ms) or a leg.
 \thd{Method} & \thd{All cells} & \thd{Lowest--highest seed}
   & \thd{\corlBenchVoidHigh\% voids} \\
 \midrule
-GaitNet & \corlBenchFull & \corlBenchFullMin--\corlBenchFullMax
+CADENCE & \corlBenchFull & \corlBenchFullMin--\corlBenchFullMax
   & \corlBenchFullDense \\
 \midrule
 OCS2's own trot & \corlBenchTrot & --- & \corlBenchTrotDense \\
 OCS2's static walk & \corlBenchStaticWalk & --- & \corlBenchStaticWalkDense \\
 \midrule
-Per-candidate + IFM & \corlBenchMlpMean
+GaitNet + IFM & \corlBenchMlpMean
   & \corlBenchMlpSeedMin--\corlBenchMlpSeedMax & \corlBenchMlpDense \\
 \midrule
-GaitNet-Diagonal & \corlBenchDiag & \corlBenchDiagMin--\corlBenchDiagMax
+CADENCE-Diagonal & \corlBenchDiag & \corlBenchDiagMin--\corlBenchDiagMax
   & \corlBenchDiagDense \\
-GaitNet-Single & \corlBenchSingle & \corlBenchSingleMin--\corlBenchSingleMax
+CADENCE-Single & \corlBenchSingle & \corlBenchSingleMin--\corlBenchSingleMax
   & \corlBenchSingleDense \\
 \midrule
-GaitNet + offset & \corlBenchOffset & \corlBenchOffsetMin--\corlBenchOffsetMax
+CADENCE + offset & \corlBenchOffset & \corlBenchOffsetMin--\corlBenchOffsetMax
   & \corlBenchOffsetDense \\
-GaitNet without the IFM & \corlBenchNoIdm
+CADENCE without the IFM & \corlBenchNoIdm
   & \corlBenchNoIdmMin--\corlBenchNoIdmMax & \corlBenchNoIdmDense \\
-GaitNet + training IFM & \corlBenchTrainIfm
+CADENCE + training IFM & \corlBenchTrainIfm
   & \corlBenchTrainIfmMin--\corlBenchTrainIfmMax & \corlBenchTrainIfmDense \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent\textbf{GaitNet beat OCS2's cyclic gaits, most where
+\noindent\textbf{CADENCE beat OCS2's cyclic gaits, most where
 voids are densest (Fig.~\ref{fig:bench}, Table~\ref{tab:results}).}
-\looseness=-1 GaitNet succeeded in \corlBenchFull\% of benchmark
+\looseness=-1 CADENCE succeeded in \corlBenchFull\% of benchmark
 trials, against \corlBenchTrot\% for OCS2's own trot and
 \corlBenchStaticWalk\% for its static walk, leads of 17.3 and 19.6
 percentage points, and even its lowest seed led the trot by 10.5. The
 lead over the trot grew with the void fraction, from 2 to 18 to 30
 points at \corlBenchSpeedSlow\,m/s and from 4 to 20 to 30 at
-\corlBenchSpeedFast\,m/s, although the walk beat GaitNet in the easiest
+\corlBenchSpeedFast\,m/s, although the walk beat CADENCE in the easiest
 cell (94 against 93\%). In the hardest cell, \corlBenchVoidHigh\% voids
-at \corlBenchSpeedFast\,m/s, GaitNet succeeded in 70\% against 40\% for
-the trot and 35\% for the walk (Fig.~\ref{fig:bench}b). Per-candidate + IFM succeeded in
-\corlBenchMlpMean\%, 13.8 points below GaitNet, a gap that mixes the
+at \corlBenchSpeedFast\,m/s, CADENCE succeeded in 70\% against 40\% for
+the trot and 35\% for the walk (Fig.~\ref{fig:bench}b). GaitNet + IFM succeeded in
+\corlBenchMlpMean\%, 13.8 points below CADENCE, a gap that mixes the
 mixer, the history, size, and the IFM in training. Since the stock gaits
-also take footholds from another source, the lead belongs to GaitNet and
+also take footholds from another source, the lead belongs to CADENCE and
 its execution layer together.
 
 \begin{figure*}[t]
@@ -167,20 +167,20 @@ its execution layer together.
 
 \looseness=-1 The sweep, on other worlds and with a criterion that also
 fails a robot that stalls, extends this result beyond training
-(Fig.~\ref{fig:sweep-main}). \verify{GaitNet succeeded in
+(Fig.~\ref{fig:sweep-main}). \verify{CADENCE succeeded in
 \corlSweepFull\% against the trot's \corlSweepTrot\%. The two were
-equal up to 10\% voids, and from 30\% voids on GaitNet led by 15 to 42
+equal up to 10\% voids, and from 30\% voids on CADENCE led by 15 to 42
 points. Beyond the \corlMaxVoidPct\% curriculum, at 50, 60, and
 \corlOcsMaxVoidPct\% voids, it succeeded in 80, 60, and 50\% against
 the trot's 38, 30, and 12\%. It also led at every speed, and at
 \corlOcsSpeedMax\,m/s, above the training speeds, it succeeded in 66
-against 51\%.} GaitNet therefore kept its lead on unseen worlds, denser
+against 51\%.} CADENCE therefore kept its lead on unseen worlds, denser
 voids, and a higher speed than it was trained on.
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig_gait}
-  \caption{Gait of GaitNet and OCS2's own trot (earlier evaluation run,
+  \caption{Gait of CADENCE and OCS2's own trot (earlier evaluation run,
     successful trials). (a)~Swings in one trial each (world seed
     \corlGaitExampleSeed, \corlBenchVoidHigh\% voids,
     \corlBenchSpeedFast\,m/s); filled: FL--RR, open: FR--RL. (b)~Time
@@ -191,13 +191,13 @@ voids, and a higher speed than it was trained on.
 \noindent\textbf{The emergent gait is acyclic but pairs diagonal legs
 (Figs.~\ref{fig:gait} and~\ref{fig:swing-transfer}a).}
 \looseness=-1 With no gait schedule, gait reward, or phase variable,
-GaitNet's gait had neither a fixed period nor a fixed order. In the
+CADENCE's gait had neither a fixed period nor a fixed order. In the
 example trial of Fig.~\ref{fig:gait}a, the trot alternated its two
-diagonal pairs on its fixed period, whereas GaitNet spaced its steps
+diagonal pairs on its fixed period, whereas CADENCE spaced its steps
 unevenly and sometimes split a pair into single-leg steps. Over all
 successful trials, a leg's time between lift-offs varied far more than
 in the trot (CV \corlGaitStrideCv{} against \corlGaitStrideCvTrot;
-Fig.~\ref{fig:gait}b), and GaitNet raised its step rate with speed, from
+Fig.~\ref{fig:gait}b), and CADENCE raised its step rate with speed, from
 \corlGaitStepsSlow{} steps per second at \corlBenchSpeedSlow\,m/s to
 \corlGaitStepsFast{} at \corlBenchSpeedFast\,m/s, while the trot kept
 \corlGaitStepsTrot{} at both. \verify{A step event repeated the legs of the
@@ -211,16 +211,16 @@ median of \corlGaitSwingMedian{} against \corlGaitSwingMedianTrot\,s
 (Fig.~\ref{fig:swing-transfer}a). Yet \corlGaitDiagPairPct\% of its
 \corlGaitOverlapPairs{} overlapping swing pairs were diagonal
 (Fig.~\ref{fig:gait}c), with partners lifting off a median
-\corlGaitLiftLagMs\,ms apart, about one tick. GaitNet therefore kept
+\corlGaitLiftLagMs\,ms apart, about one tick. CADENCE therefore kept
 the trot's pairing but neither its period nor its order, in this one
 run of one policy.
 
 \looseness=-1 Restricting the action space showed which freedom
-mattered. Retrained to swing one leg at a time, GaitNet-Single
+mattered. Retrained to swing one leg at a time, CADENCE-Single
 succeeded in only \corlBenchSingle\%, so overlapping swings mattered for
 this policy, although OCS2's static walk, also one leg at a time,
 reached \corlBenchStaticWalk\%. Restricted at test time to diagonal
-pairs, GaitNet-Diagonal lost only 2.2 points on the benchmark, within
+pairs, CADENCE-Diagonal lost only 2.2 points on the benchmark, within
 the seed spread, but 9.4 in the sweep (\verify{\corlSweepDiag{} against
 \corlSweepFull\%}).
 
@@ -231,25 +231,25 @@ the seed spread, but 9.4 in the sweep (\verify{\corlSweepDiag{} against
   \subfigure[Footstep corrections on OCS2][t]{%
     \includegraphics[width=0.48\textwidth]{figures/fig_transfer}}
   \caption{(a)~Measured swings, earlier run; the detector shortens every
-    swing, so only the comparison holds. (b)~GaitNet on OCS2 with four
+    swing, so only the comparison holds. (b)~CADENCE on OCS2 with four
     footstep corrections, mean of \corlSeedsGaitNet{} seeds; dashed:
     OCS2's own trot.}
   \label{fig:swing-transfer}
 \end{figure}
 
-\noindent\phantomsection\label{subsec:exp-why}\textbf{Moving GaitNet to
+\noindent\phantomsection\label{subsec:exp-why}\textbf{Moving CADENCE to
 OCS2 took a refitted footstep model (Fig.~\ref{fig:swing-transfer}b).}
-\looseness=-1 With GaitNet's weights frozen, it succeeded in
+\looseness=-1 With CADENCE's weights frozen, it succeeded in
 \corlBenchNoIdm\% without the IFM and in only \corlBenchTrainIfm\% with
 the training controller's IFM, consistent with that IFM cancelling a
 hip-fixed overshoot that OCS2's world-fixed target lacks
 (Sec.~\ref{subsec:method-idm}). A constant per-leg offset recovered much
 of the loss (\corlBenchOffset\%), and the refitted IFM added 25.1
 points more; we did not test models between the two. Overall, only the
-refit lifted GaitNet above the trot, although at \corlBenchVoidHigh\%
+refit lifted CADENCE above the trot, although at \corlBenchVoidHigh\%
 voids the offset also beat it (54 and 47 against 46 and 40\%).
 \verify{On flat ground, the refit cut OCS2's RMS landing error from
 \corlOcsLandRmsNoIdm\,cm, three times the \corlMarginCm\,cm margin, to
 \corlOcsLandRmsIdm\,cm (Fig.~\ref{fig:teaser}c).}
-% Isaac sentence (GaitNet 96.0 % on the training controller) dropped on
+% Isaac sentence (CADENCE 96.0 % on the training controller) dropped on
 % 2026-11-13 for the page limit; its per-seed counts were never entered.

@@ -13,7 +13,7 @@
 % experiment-setup.md, results.md, runs.md), state of 2026-10-13. Each block
 % names the file and section it comes from. The policy is SC-idm@1590
 % (inverse footstep model in the loop); the OCS2 evaluation instead uses
-% iteration 350 of one of five seeded runs (author, 2026-11-03/04). The paper calls the method GaitNet;
+% iteration 350 of one of five seeded runs (author, 2026-11-03/04). The paper calls the method CADENCE (GaitNet is the prior network of Sullivan2025);
 % gaitnet-docs calls the same network GaitNet-T.
 %
 % Convention: every macro below holds a bare value (a number, or a short
@@ -271,10 +271,10 @@
 % speed for the trot" were wrong). All methods run the same world seeds.
 % The success counts behind the plotted rates follow exactly from k/80
 % (audit of 2026-10-27; every rate maps to one k under round-half-even):
-%   by void   GaitNet 80 80 72 72 73 64 48 40   trot 80 80 70 60 56 30 24 10
+%   by void   CADENCE 80 80 72 72 73 64 48 40   trot 80 80 70 60 56 30 24 10
 %             Single 69 59 66 53 54 34 24 22    no IDM 77 64 51 45 35 30 29 21
 %             per-candidate 78 74 75 56 53 56 42 37
-%   by speed  GaitNet 67 71 69 65 53   trot 63 63 59 51 41   Single 59 54 50 43 32
+%   by speed  CADENCE 67 71 69 65 53   trot 63 63 59 51 41   Single 59 54 50 43 32
 % CIs are 95 % Wilson. Each void-sweep point spreads its trials over all five
 % speeds (author, 2026-10-27); which void fractions the speed sweep used is
 % still to confirm (\verify in results.tex).
@@ -296,7 +296,7 @@
 \newcommand{\corlOcsLandRmsNoIdm}{6}
 \newcommand{\corlOcsLandRmsIdm}{2}
 % Author, 2026-10-14: steps per metre walked on OCS2 in the sweep's
-% successful trials, GaitNet-Single vs GaitNet; OCS2 IDM fitted on fewer than 20k logged steps (seeds 61-110);
+% successful trials, CADENCE-Single vs CADENCE; OCS2 IDM fitted on fewer than 20k logged steps (seeds 61-110);
 % anchoring and the foothold region are not used with the OCS2 IDM.
 \newcommand{\corlOcsStepsPerMSingle}{45.6}
 \newcommand{\corlOcsStepsPerMFull}{32.4}
@@ -322,7 +322,7 @@
 % Two-sided tests on the counts above (2026-10-27). They ignore that the
 % methods share worlds: Fisher exact at single points, Cochran-Mantel-Haenszel
 % stratified by void fraction (or speed) for pooled comparisons.
-\newcommand{\corlOcsPTrotThirty}{0.02}     % GaitNet vs trot, 30 % voids (0.021)
+\newcommand{\corlOcsPTrotThirty}{0.02}     % CADENCE vs trot, 30 % voids (0.021)
 \newcommand{\corlOcsPTrotDense}{10^{-6}}   % CMH, 40-70 % voids (1e-18)
 \newcommand{\corlOcsPTrotSpeed}{10^{-4}}   % CMH over the five speeds (8.6e-5)
 \newcommand{\corlOcsPTrotSpeedTwenty}{0.02} % Fisher at 0.20 m/s (0.021)
@@ -339,7 +339,7 @@
 % no fall and >= 0.5 v x duration walked. Full record on the cluster:
 % /scratch/sselvaraj/gaitnet-runs/idm/inv/paper_exp/SUMMARY.md.
 % Cells (0.10: 26 38 49 | 0.20: 26 38 49), successes out of 100:
-%   GaitNet c0 100 93 96 | 96 87 77 = 549   rerun c0b 96 97 92 | 96 84 74 = 539
+%   CADENCE c0 100 93 96 | 96 87 77 = 549   rerun c0b 96 97 92 | 96 84 74 = 539
 %   diagonal-only #6 99 96 89 | 96 84 59 = 523   trot #7 97 89 80 | 94 81 63 = 504
 %   no IDM (Gazebo-vs-Isaac table) 48 34 11 | 33 17 8 = 151
 %   per-candidate #4 @1599: s1 513, s2 525, s3 538, s4 453
@@ -400,9 +400,9 @@
 % are superseded; 84.5 and the Table 2 values are 5-seed means (author).
 % No seed spread and no confidence intervals in the paper (author).
 % New values (author, 2026-11-05): Diagonal sweep 73.2; Single benchmark
-% 82.8, Isaac 72.1; Per-candidate + IDM in Isaac 80.3.
+% 82.8, Isaac 72.1; GaitNet + IDM in Isaac 80.3.
 % From the per-cell means: Diagonal at 49 % voids (89 + 59)/200 = 74.0; no
-% IDM at 49 % (11 + 8)/200 = 9.5; GaitNet - trot at 49 % 86.5 - 71.5 = 15.0,
+% IDM at 49 % (11 + 8)/200 = 9.5; CADENCE - trot at 49 % 86.5 - 71.5 = 15.0,
 % in the sweep 82.7 - 64.1 = 18.6.
 \newcommand{\corlBenchDiagDense}{69.6}  % 2026-11-12 (results_to_fill.md; was 74.0)
 \newcommand{\corlBenchNoIdmDense}{13.2}  % 2026-11-12 (results_to_fill.md; was 9.5)
@@ -414,7 +414,7 @@
 % legged_perceptive foothold authority (author, 2026-11-05: launch default used):
 % /gaitnet/foothold_authority_radius = 0.10 m (PerceptiveLeggedInterface.cpp:148).
 \newcommand{\corlAuthorityCm}{10}
-% Claim-2 controls (author, 2026-11-05): frozen GaitNet on the OCS2 benchmark,
+% Claim-2 controls (author, 2026-11-05): frozen CADENCE on the OCS2 benchmark,
 % mean of five training seeds; all six cells / 49 % voids.
 \newcommand{\corlBenchTrainIfm}{5.5}  % 2026-11-12 (results_to_fill.md; was 28.2)
 \newcommand{\corlBenchTrainIfmDense}{4.3}  % 2026-11-12 (results_to_fill.md; was 12.1)
@@ -455,7 +455,7 @@
 % 2026-11-03 the paper has no tables and plots only seed means (author's
 % rule); the per-seed cells survive here and in the figure scripts.
 % Cells: 0.10 m/s 26/38/49 % | 0.20 m/s 26/38/49 %, successes of 100.
-%   Per-candidate + IDM s1: 98 91 82 | 92 80 70   (pooled 85.5)
+%   GaitNet + IDM s1: 98 91 82 | 92 80 70   (pooled 85.5)
 %                       s2: 98 95 87 | 93 84 68   (87.5)
 %                       s3: 99 93 88 | 93 88 77   (89.7)
 %                       s4: 98 87 79 | 83 63 43   (75.5)
@@ -473,23 +473,23 @@
 
 % ---- Sweep (Fig. 3; author's answers of 2026-11-04) ------------------------
 % The author's OCS2 sweep of 2026-10-14 (figure of the 2026-10-28 draft, git
-% 486a92a:figures/plot_ocs2_results.py). Author, 2026-11-04: GaitNet is the
-% benchmark checkpoint (iteration 350); GaitNet-Single was TRAINED with one leg
-% in swing at a time (same training seed); "GaitNet, no IDM" is GaitNet's
-% weights with the IDM switched off; Per-candidate + IDM (one training seed)
+% 486a92a:figures/plot_ocs2_results.py). Author, 2026-11-04: CADENCE is the
+% benchmark checkpoint (iteration 350); CADENCE-Single was TRAINED with one leg
+% in swing at a time (same training seed); "CADENCE, no IDM" is CADENCE's
+% weights with the IDM switched off; GaitNet + IDM (one training seed)
 % was trained WITHOUT the IDM in the loop and runs with the OCS2 IDM; all on the
 % same worlds, 12.5 cm tiles, success = 3 m within 1.5x the nominal time.
 % Void sweep: 80 trials per void fraction spread over 0.05-0.25 m/s. Speed
 % sweep: 80 per speed, 10 at each void fraction. Counts recovered from that
 % figure's percentages (unique under round-half-even), equal to its macros.
 % Per void fraction 0, 10, ..., 70 % (of 80):
-%   GaitNet        80 80 72 72 73 64 48 40  = 529
-%   GaitNet-Single 69 59 66 53 54 34 24 22  = 381
+%   CADENCE        80 80 72 72 73 64 48 40  = 529
+%   CADENCE-Single 69 59 66 53 54 34 24 22  = 381
 %   Per-cand.+IDM  78 74 75 56 53 56 42 37  = 471 (one training seed)
-%   GaitNet no IDM 77 64 51 45 35 30 29 21  = 352
+%   CADENCE no IDM 77 64 51 45 35 30 29 21  = 352
 %   OCS2 trot      80 80 70 60 56 30 24 10  = 410
-% Per speed 0.05-0.25 m/s (of 80): GaitNet 67 71 69 65 53, GaitNet-Single
-% 59 54 50 43 32, trot 63 63 59 51 41. 95 % Wilson intervals (prose): GaitNet
+% Per speed 0.05-0.25 m/s (of 80): CADENCE 67 71 69 65 53, CADENCE-Single
+% 59 54 50 43 32, trot 63 63 59 51 41. 95 % Wilson intervals (prose): CADENCE
 % 82.7 [79.5, 85.4], Single 59.5 [55.7, 63.3], trot 64.1 [60.3, 67.7].
 \newcommand{\corlSweepTrialsPerMethod}{640}         % per method, void sweep
 % Author, 2026-11-05: sweep values are success [%] averaged over five training
@@ -500,8 +500,8 @@
 \newcommand{\corlSweepMlp}{73.5}           % mean of 98 92 94 70 66 70 52 46
 \newcommand{\corlSweepNoIdm}{55.0}         % 352/640
 \newcommand{\corlSweepTrot}{64.1}          % 410/640
-% GaitNet-Single's step length: \corlOcsStepsPerMSingle (45.6) against
-% \corlOcsStepsPerMFull (32.4) steps per metre for GaitNet, in
+% CADENCE-Single's step length: \corlOcsStepsPerMSingle (45.6) against
+% \corlOcsStepsPerMFull (32.4) steps per metre for CADENCE, in
 % successful trials. One leg at a time, swings >= \corlSwingDurationMin s and
 % starts only on \corlControlTickMs ms ticks cap it at about 8 steps/s; at
 % 0.25 m/s it would need 0.25 x 45.6 = 11.4 (binds from about 0.20 m/s:
@@ -509,42 +509,42 @@
 
 % ---- Gait on the G125 benchmark (added 2026-11-04) ----------------------
 % Source: thesis-latex-journal/rss/timming.md (author, 2026-11-04): one row
-% per measured swing of the benchmark's SUCCESSFUL trials (author), GaitNet
+% per measured swing of the benchmark's SUCCESSFUL trials (author), CADENCE
 % (c0) and OCS2's own trot; computed by figures/gait_stats.py (run it in
 % thesis-latex-journal/rss/figures, where the data lives; the data file is
 % not part of the paper repo). Swings come from the simulator's ground-truth
 % foot heights (author); statistics are taken from when the rear feet reach
 % the void field (author) to the end of the 20 s trial. Measured swings are
 % shorter than commanded ones (the trot measures 0.235 s against its
-% scheduled 0.3 s), so only GaitNet-vs-trot comparisons are meaningful.
+% scheduled 0.3 s), so only CADENCE-vs-trot comparisons are meaningful.
 \newcommand{\corlGaitTrialsGaitNet}{549}   % successful trials, all six cells
 \newcommand{\corlGaitTrialsTrot}{504}
 \newcommand{\corlGaitExampleSeed}{134} % world seed of Fig. 2b; chosen by fig_gait.py's L1 rule, asserted there
-\newcommand{\corlGaitDiagTimePct}{99}      % 99.05 % of GaitNet's two-feet-up time on a diagonal pair (trot 100 %)
+\newcommand{\corlGaitDiagTimePct}{99}      % 99.05 % of CADENCE's two-feet-up time on a diagonal pair (trot 100 %)
 \newcommand{\corlGaitOverlapPairs}{24{,}793}  % overlapping swing pairs, successful trials (gait_stats.py)
 \newcommand{\corlGaitDiagPairPct}{98}      % 24370 of 24793 overlapping swing pairs = 98.3 % (rear 227, side 158, front 38)
 \newcommand{\corlGaitStepsSlow}{5.5}       % steps/s on the field at 0.10 m/s (5.48; cells 5.35 5.47 5.63)
 \newcommand{\corlGaitStepsFast}{7.2}       % at 0.20 m/s (7.16; cells 7.04 7.17 7.29)
 \newcommand{\corlGaitStepsTrot}{6.7}       % trot, 6.66-6.67 in every cell
-\newcommand{\corlGaitAllDownSlow}{51}      % % of field time with all four feet down, GaitNet 0.10 m/s (51.1)
-\newcommand{\corlGaitAllDownFast}{39}      % GaitNet 0.20 m/s (38.7)
+\newcommand{\corlGaitAllDownSlow}{51}      % % of field time with all four feet down, CADENCE 0.10 m/s (51.1)
+\newcommand{\corlGaitAllDownFast}{39}      % CADENCE 0.20 m/s (38.7)
 \newcommand{\corlGaitAllDownTrot}{21}      % trot (21.0; its schedule never has all four down: detector effect)
-\newcommand{\corlGaitStrideCv}{0.61}       % coefficient of variation of the same-leg lift-off interval, GaitNet
+\newcommand{\corlGaitStrideCv}{0.61}       % coefficient of variation of the same-leg lift-off interval, CADENCE
 \newcommand{\corlGaitStrideCvTrot}{0.02}   % trot
 \newcommand{\corlGaitTrotPeriodMeasured}{0.598} % trot same-leg lift-off interval, median [s]
 \newcommand{\corlGaitTrotSwingMeasured}{0.235}  % trot measured swing, median [s]
-\newcommand{\corlGaitLiftLagMs}{42}        % median lift-off lag between GaitNet's diagonal partners [ms] (q10-q90 21-66; trot: same sample in 97 %)
+\newcommand{\corlGaitLiftLagMs}{42}        % median lift-off lag between CADENCE's diagonal partners [ms] (q10-q90 21-66; trot: same sample in 97 %)
 \newcommand{\corlGaitNonDiagHard}{2.3}     % non-diagonal overlapping pairs per successful trial, 49 % voids, 0.20 m/s (2.27; 68 of 77 trials)
 \newcommand{\corlGaitNonDiagEasy}{0.1}     % 26 % voids, 0.10 m/s (0.11)
 \newcommand{\corlGaitNonDiagMildTrials}{53} % 0.20 m/s, 26 %: trials with >= 1 non-diagonal pair ...
-\newcommand{\corlGaitNonDiagMildOf}{96}     % ... of 96 successful trials (GaitNet-Diagonal lost 0 points in this cell)
+\newcommand{\corlGaitNonDiagMildOf}{96}     % ... of 96 successful trials (CADENCE-Diagonal lost 0 points in this cell)
 
 % ---- Sweep (Fig. 3), 2026-11-04 -------------------------------------------
 % The paper's sweep is the 80-trial-per-point data (author, 2026-11-04): the
 % benchmark checkpoint (iteration 350), all methods on the same worlds, 12.5 cm
 % tiles, success = 3 m within 1.5x the nominal time; speed sweep: 10 trials at
 % each of the eight void fractions. The \corlSweep* macros above (renamed from
-% \corlEarly*) are its pooled rates. Removed: the macros of a 500-trial GaitNet
+% \corlEarly*) are its pooled rates. Removed: the macros of a 500-trial CADENCE
 % sweep that had an evaluation mistake (author):
 %   \newcommand{\corlSweepTrialsPerCell}{100}
 %   \newcommand{\corlSweepTrialsPerVoid}{500}
@@ -552,7 +552,7 @@
 %   \newcommand{\corlSweepFullSlowest}{88}   % 703/800 at 0.05 m/s
 %   \newcommand{\corlSweepFullTwentyFive}{72} % 573/800 at 0.25 m/s
 %   \newcommand{\corlSweepFullThirty}{62}    % 493/800 at 0.30 m/s
-%   \newcommand{\corlSweepFullAllVoids}{81.5} % the same, one decimal: GaitNet over Fig. 3a (checked by fig_sweep.py)
+%   \newcommand{\corlSweepFullAllVoids}{81.5} % the same, one decimal: CADENCE over Fig. 3a (checked by fig_sweep.py)
 %   \newcommand{\corlSweepSpeedMax}{0.30}
 %   \newcommand{\corlEarlyCheckpoint}{600}     % "about 600 iterations" (author, 2026-10-16)
 %   \newcommand{\corlOcsAllFull}{82}      % c0, 0-70 % voids, 3261/4000 = 81.5
@@ -565,14 +565,14 @@
 % as printed. The sweep's worlds differ from the benchmark's (author).
 % ---------------------------------------------------------------------------
 % Every macro set to \xx below is OPEN: fill it from results_to_fill.xlsx (repo
-% root, outside rss/) and delete the \xx. Reason: fig_bench.py records GaitNet
-% as one seeded run (549/600) and Per-candidate + IFM as four seeds at iteration
+% root, outside rss/) and delete the \xx. Reason: fig_bench.py records CADENCE
+% as one seeded run (549/600) and GaitNet + IFM as four seeds at iteration
 % 1599 (mean 84.5 = Table 1), while the text says five seeds at iteration 350
 % for every learned method. Table 1 now prints seeds, checkpoint and the
 % per-seed range of each learned arm, so the protocol is stated per row.
 % Seeds and checkpoint per learned arm (Table 1 columns). The arms that reuse
-% GaitNet's weights (Diagonal, without IFM, + training IFM, + offset) use
-% GaitNet's values.
+% CADENCE's weights (Diagonal, without IFM, + training IFM, + offset) use
+% CADENCE's values.
 \newcommand{\corlSeedsGaitNet}{5}  % 2026-11-12 (results_to_fill.md; was \xx)
 \newcommand{\corlIterGaitNet}{\corlOcsCheckpoint}  % 2026-11-12 (results_to_fill.md; was \xx)
 \newcommand{\corlSeedsSingle}{5}  % 2026-11-12 (results_to_fill.md; was \xx)
@@ -605,21 +605,21 @@
 % ---- Acyclicity of the gait, earlier evaluation run (added 2026-11-13) -----
 % Author's new focus (rewrite_decisions.md, UPDATE 2026-11-13 00:35). Source:
 % rss/timming.md, the counted (void-field) swings of the SUCCESSFUL trials, as
-% in figures/gait_stats.py (549 GaitNet / 504 trot trials). Within each trial,
+% in figures/gait_stats.py (549 CADENCE / 504 trot trials). Within each trial,
 % lift-offs are sorted by lift-off time, ties (same ~21 ms sample) by leg name;
 % lift-off-only stable sorting gives the same values. Computed on 2026-11-13 by
 % the session script writerB/acyclicity_stats.py (scratchpad, not in the repo;
 % fold it into figures/gait_stats.py). gait_stats.py's own report agrees on the
 % leg-twice share ("same leg 6.1 %") and on the swing counts and medians.
 %   leg twice   two consecutive lift-offs of the same leg, share of consecutive
-%               lift-off pairs: GaitNet 3338/54621 = 6.111 %, trot 0/52927.
+%               lift-off pairs: CADENCE 3338/54621 = 6.111 %, trot 0/52927.
 %   four-cover  overlapping windows of four consecutive lift-offs that contain
-%               all four legs: GaitNet 21565/53523 = 40.291 %, trot
+%               all four legs: CADENCE 21565/53523 = 40.291 %, trot
 %               51561/51919 = 99.310 %.
 %   event       the lift-offs within 66 ms of the event's first lift-off (66 ms
-%               = 90th percentile of GaitNet's diagonal lift-off lag; chaining
+%               = 90th percentile of CADENCE's diagonal lift-off lag; chaining
 %               gaps of <= 66 ms gives the same value); repeat = the next event
-%               lifts the same set of legs: GaitNet 5102/32186 = 15.852 %, trot
+%               lifts the same set of legs: CADENCE 5102/32186 = 15.852 %, trot
 %               0/26214.
 % NOTE: rewrite_decisions.md listed 15.7 / 6.2 / 40 / 82 (trot four-cover);
 % none of 15.7, 6.2 or 82 could be reproduced from timming.md under any sorting,
@@ -634,7 +634,7 @@
 \newcommand{\corlGaitFourAllPctTrot}{99}     % 99.310 %
 % Measured swings (fig_swing.py, gait_stats.py): medians over the counted
 % swings; detector-limited (the trot's scheduled 0.3 s swings measure 0.235 s).
-\newcommand{\corlGaitSwingMedian}{0.128}     % s, GaitNet
+\newcommand{\corlGaitSwingMedian}{0.128}     % s, CADENCE
 \newcommand{\corlGaitSwingMedianTrot}{\corlGaitTrotSwingMeasured} % s, trot (0.235), same value as above
-\newcommand{\corlGaitSwingsGaitNet}{55{,}170} % counted swings, GaitNet
+\newcommand{\corlGaitSwingsGaitNet}{55{,}170} % counted swings, CADENCE
 \newcommand{\corlGaitSwingsTrot}{53{,}431}    % counted swings, trot

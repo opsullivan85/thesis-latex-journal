@@ -1,10 +1,10 @@
-"""Gait figure (fig:gait): GaitNet keeps the trot's diagonal pairing, not its timing.
+"""Gait figure (fig:gait): CADENCE keeps the trot's diagonal pairing, not its timing.
 
 DATA CAVEAT (2026-11-12). ../timming.md comes from a SEPARATE, EARLIER
-evaluation run on the OCS2 benchmark worlds: one GaitNet checkpoint of one
+evaluation run on the OCS2 benchmark worlds: one CADENCE checkpoint of one
 training seed with the OCS2 IFM, and one run of OCS2's own trot. It is NOT the
 set of runs behind Table 1 and fig_bench.py (five training seeds at iteration
-300, entered 2026-11-12). Its successful trials per cell (GaitNet 100 93 96 |
+300, entered 2026-11-12). Its successful trials per cell (CADENCE 100 93 96 |
 96 87 77 = 549, trot 97 89 80 | 94 81 63 = 504) are not Table 1's (trot there:
 91 72 46 | 88 70 40). gait_stats.SUCCESS and gait_stats.sanity() still assert
 those earlier counts: they describe this data file, not the paper's
@@ -13,7 +13,7 @@ benchmark. Captions and prose must call this a separate evaluation run.
 Source: ../timming.md (CSV of measured swings, one row per swing, added by the
 author on 2026-11-04). All definitions come from gait_stats.py; read its
 header for the column meanings and caveats:
-  * ONLY SUCCESSFUL TRIALS are in the file (549 GaitNet, 504 trot), so every
+  * ONLY SUCCESSFUL TRIALS are in the file (549 CADENCE, 504 trot), so every
     statistic is conditioned on success.
   * Swing times are MEASURED (foot-height detector, presumably 1.5 cm above
     the rolling minimum), not the commanded swing time. The trot's measured
@@ -31,9 +31,9 @@ single panel before):
       leg, rows ordered FL, RR, FR, RL so that diagonal partners sit next to
       each other. A bar is a measured swing (foot up); white space is stance.
       Filled bars are the FL+RR pair and open bars the FR+RL pair (no light
-      shade: light indigo means GaitNet-Diagonal elsewhere in the paper).
+      shade: light indigo means CADENCE-Diagonal elsewhere in the paper).
       The seed is not hand-picked: among the seeds that succeeded in that
-      cell for BOTH arms, it is the one whose GaitNet feet-up shares
+      cell for BOTH arms, it is the one whose CADENCE feet-up shares
       (0 / 1 / 2 feet up) are closest (L1) to the cell's pooled shares.
   (b) Time between consecutive lift-offs of the same leg on the void field,
       pooled over all six cells and all four legs: gait_stats.summarize()'s
@@ -43,13 +43,13 @@ single panel before):
       in % of ALL of the arm's intervals; intervals above X_MAX_B are in the
       denominator but off the axis (printed below for the caption). The
       trot's two-bin block is its 0.6 s period straddling a bin edge. The
-      panel carries exactly two labels, "GaitNet, CV 0.61" and "OCS2's own
+      panel carries exactly two labels, "CADENCE, CV 0.61" and "OCS2's own
       trot, CV 0.02" (coefficient of variation = sample std / mean); the
-      medians were dropped from the panel on 2026-11-12 (GaitNet's has no
+      medians were dropped from the panel on 2026-11-12 (CADENCE's has no
       macro) and are printed below only. The CVs and the trot's median must
       reproduce \\corlGaitStrideCv, \\corlGaitStrideCvTrot and
       \\corlGaitTrotPeriodMeasured (asserted).
-  (c) GaitNet's overlapping swing pairs (two legs in measured swing at once,
+  (c) CADENCE's overlapping swing pairs (two legs in measured swing at once,
       gait_stats.py's 'overlap pair') by leg-pair type, as shares of all its
       pairs. Must reproduce \\corlGaitOverlapPairs (24,793) and
       \\corlGaitDiagPairPct (98) (asserted). The trot's pairs (all diagonal)
@@ -58,7 +58,7 @@ single panel before):
 Removed panels (author, 2026-11-04): a step-rate panel and a feet-in-swing
 (0 / 1 / 2 feet up) panel. Their numbers are still in gait_stats.py's report
 (steps_per_s, feet_up) and the \\corlGaitSteps* / \\corlGaitAllDown* macros.
-The diagonal share of the two-feet-up time (GaitNet 99.1 %, trot 100 %,
+The diagonal share of the two-feet-up time (CADENCE 99.1 %, trot 100 %,
 \\corlGaitDiagTimePct) is printed below.
 
 Design rules (user, 2026-11-03): no error bars, whiskers, bands or heatmaps;
@@ -148,7 +148,7 @@ assert f"{TIMING['trot'][1]:.2f}" == _macros["corlGaitStrideCvTrot"], TIMING["tr
 assert f"{TIMING['trot'][0]:.3f}" == _macros["corlGaitTrotPeriodMeasured"], TIMING["trot"]
 assert TIMING["trot"][2] == 0.0       # every trot interval is on the axis
 
-# (c) GaitNet's overlapping swing pairs by leg-pair type.
+# (c) CADENCE's overlapping swing pairs by leg-pair type.
 PAIR_ORDER = ("diagonal", "rear", "side", "front")
 PAIRS = {p: POOLED["c0"]["pair_counts"][p] for p in PAIR_ORDER}
 N_PAIRS = sum(PAIRS.values())
@@ -182,7 +182,7 @@ VALUE_PT = 7.0
 PAD_PT = 1.5
 HALO = dict(boxstyle="square,pad=0.1", facecolor="white", edgecolor="none")
 ARM_COLOR = {"c0": (INDIGO, LIGHT_INDIGO), "trot": (GRAY, LIGHT_GRAY)}   # (FL+RR, FR+RL)
-# (b) lines as in fig_sweep.py: GaitNet solid, the trot dashed and thinner.
+# (b) lines as in fig_sweep.py: CADENCE solid, the trot dashed and thinner.
 LINE_STYLE = {"c0": dict(color=INDIGO, lw=1.4),
               "trot": dict(color=GRAY, lw=1.2, ls=(0, (3.2, 1.8)))}
 
@@ -214,7 +214,7 @@ ROW_H = 0.72
 GROUP_GAP = 0.5                       # extra space between the two arms [rows]
 y_ticks, y_labels, arm_mid = [], [], {}
 y = 0.0
-for a in ("trot", "c0"):              # bottom to top: trot, then GaitNet
+for a in ("trot", "c0"):              # bottom to top: trot, then CADENCE
     tr = df[(df.arm == a) & (df.speed_mps == EX_SPEED) & (df.void_pct == EX_VOID)
             & (df.world_seed == EX_SEED)]
     fe = tr.field_entry_s.iloc[0]
@@ -249,7 +249,7 @@ ax_a.tick_params(axis="x", pad=XTICK_PAD)
 for x in np.arange(0.5, WINDOW_S, 0.5):
     ax_a.axvline(x, color=GRID, lw=0.5, zorder=0)
 ax_a.spines[["top", "right", "left"]].set_visible(False)
-for a, name in (("c0", "GaitNet"), ("trot", "OCS2's\nown trot")):
+for a, name in (("c0", "CADENCE"), ("trot", "OCS2's\nown trot")):
     ax_a.annotate(name, xy=(0, arm_mid[a]), xycoords=("axes fraction", "data"),
                   xytext=(-17, 0), textcoords="offset points", ha="right", va="center",
                   fontsize=7.5, fontweight="semibold", color=ARM_COLOR[a][0], linespacing=1.0)
@@ -258,7 +258,7 @@ title(ax_a, f"(a) Swings, {EX_VOID} % voids, {EX_SPEED:.2f} m/s", x=-(LEFT - 1.0
 
 # ---------------------------------------------------------------- (b) lift-off intervals
 Y_MAX_B = 70.0
-for a in ("trot", "c0"):              # GaitNet on top
+for a in ("trot", "c0"):              # CADENCE on top
     edges, share = HIST[a]
     nz = np.flatnonzero(share)
     i0, i1 = nz[0], nz[-1] + 1        # draw only the bins that hold intervals
@@ -276,12 +276,12 @@ ax_b.set_xlabel("Time between lift-offs [s]", labelpad=2)
 ax_b.set_ylabel("Intervals per 0.1 s [%]", labelpad=2)
 ax_b.tick_params(axis="x", pad=XTICK_PAD)
 # One single-line label per arm, name and CV only (2026-11-12): the medians
-# were dropped from the panel since GaitNet's has no macro; both medians are
+# were dropped from the panel since CADENCE's has no macro; both medians are
 # still asserted/printed below. The trot's label (26.8 mm) is too wide to
 # start right of its block, so it sits above the block, under the axes top;
-# GaitNet's sits right of the trot's block and above GaitNet's line.
+# CADENCE's sits right of the trot's block and above CADENCE's line.
 LABEL_B = {"trot": (0.06, 69.0), "c0": (0.80, 41.0)}       # (x [s], top [%])
-for a, name in (("trot", "OCS2's own trot"), ("c0", "GaitNet")):
+for a, name in (("trot", "OCS2's own trot"), ("c0", "CADENCE")):
     cv = TIMING[a][1]
     ax_b.text(*LABEL_B[a], f"{name}, CV {cv:.2f}", ha="left", va="top",
               fontsize=VALUE_PT, color=ARM_COLOR[a][0], zorder=4, bbox=HALO)
@@ -310,7 +310,7 @@ ax_c.set_xlabel(f"Share of {N_PAIRS:,} pairs [%]", labelpad=2)
 # Centred under the 0-100 axis; set_x keeps matplotlib's automatic y (below
 # the tick labels), unlike set_label_coords.
 ax_c.xaxis.label.set_x(50 / X_MAX_C)
-title(ax_c, "(c) GaitNet's swing pairs", x=-(X_C - X_B - W_B - 2.0) / W_C)
+title(ax_c, "(c) CADENCE's swing pairs", x=-(X_C - X_B - W_B - 2.0) / W_C)
 
 
 # ---------------------------------------------------------------- layout checks
@@ -369,5 +369,5 @@ for a in gs.ARMS:
     print(f"(b) {gs.ARM_NAME[a]}: {n} intervals, median {med:.3f} s, CV {cv:.3f}, "
           f"{off:.2f} % above {X_MAX_B} s (off the axis, max {INTERVALS[a].max():.3f} s)")
     print("    bins [%]:", " ".join(f"{x:.1f}" for x in HIST[a][1]))
-print(f"(c) GaitNet pairs {N_PAIRS}: " + ", ".join(f"{p} {PAIRS[p]} ({PAIR_PCT[p]} %)" for p in PAIR_ORDER))
+print(f"(c) CADENCE pairs {N_PAIRS}: " + ", ".join(f"{p} {PAIRS[p]} ({PAIR_PCT[p]} %)" for p in PAIR_ORDER))
 print(f"    trot pairs {sum(TROT_PAIRS.values())}: {TROT_PAIRS}")

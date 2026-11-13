@@ -20,7 +20,7 @@ Success: no fall and at least half of v * duration walked.
 
 Panels:
   (a) 0.10 m/s and (b) 0.20 m/s: grouped bars by void fraction, one bar per
-      arm (GaitNet, GaitNet-Diagonal, OCS2's own trot), the cell's success
+      arm (CADENCE, CADENCE-Diagonal, OCS2's own trot), the cell's success
       count printed on top of every bar.
   (c) REMOVED 2026-11-05 at the author's request: it repeated Table 1's
       benchmark column. Its values are still computed and checked below
@@ -37,12 +37,12 @@ panels were dropped for a swing diagram, then restored at the author's
 request ("then add back the image"); the swing diagram is in App. E.
 
 Arms (names as in the paper):
-  GaitNet          = c0, iteration 350 of one of five seeded runs, OCS2 IFM.
-  GaitNet, rerun   = c0b, the SAME checkpoint evaluated a second time. It is
+  CADENCE          = c0, iteration 350 of one of five seeded runs, OCS2 IFM.
+  CADENCE, rerun   = c0b, the SAME checkpoint evaluated a second time. It is
                      run-to-run variation of the benchmark, not a training seed.
-  GaitNet-Diagonal = #6, diagonal-only second swing.
+  CADENCE-Diagonal = #6, diagonal-only second swing.
   OCS2's own trot  = #7.
-  Per-candidate + IFM = #4, four training seeds at iteration 1599. The figure
+  GaitNet + IFM = #4, four training seeds at iteration 1599. The figure
                      shows ONLY the mean over the four seeds (user rule of
                      2026-11-03: no per-seed markers, bars, rows or ranges in
                      figures). The per-seed counts are kept below only to
@@ -51,8 +51,8 @@ Arms (names as in the paper):
 Data conventions:
   * Counts are integers. Every rate is Fraction(100 * k, n) rounded half up
     (decimal.ROUND_HALF_UP): integers for cells, one decimal for pools.
-  * Per-candidate + IFM appears only in (c): no claim uses its per-cell means,
-    and a bare mean next to GaitNet's cells would rank the two networks cell
+  * GaitNet + IFM appears only in (c): no claim uses its per-cell means,
+    and a bare mean next to CADENCE's cells would rank the two networks cell
     by cell, which the paper does not do.
 
 Open \\verify items that touch this figure:
@@ -95,14 +95,14 @@ N_CELL = 100                            # \corlBenchTrialsPerCell
 # 0.20 m/s. A learned arm's cell value is the exact mean over its seeds (a
 # Fraction), printed rounded half up to a whole percent; pooled = mean of seeds.
 SEEDS = {
-    "GaitNet": ((92, 88, 78, 90, 91, 69), (94, 91, 77, 93, 89, 73),
+    "CADENCE": ((92, 88, 78, 90, 91, 69), (94, 91, 77, 93, 89, 73),
                 (94, 94, 75, 96, 92, 71), (98, 93, 80, 96, 93, 75),
                 (87, 85, 68, 83, 84, 63)),
-    "GaitNet-Diagonal": ((90, 88, 76, 90, 88, 68), (92, 90, 73, 90, 90, 65),
+    "CADENCE-Diagonal": ((90, 88, 76, 90, 88, 68), (92, 90, 73, 90, 90, 65),
                          (96, 95, 73, 92, 89, 70), (95, 91, 78, 94, 88, 72),
                          (91, 86, 61, 78, 78, 60)),
 }
-# Per-candidate + IFM: one tuple per training seed (1-5), same order. Used only
+# GaitNet + IFM: one tuple per training seed (1-5), same order. Used only
 # for the mean over seeds; it is not drawn.
 PER_CANDIDATE_SEEDS = (
     (81, 80, 70, 79, 77, 53),
@@ -119,8 +119,8 @@ def seed_mean(seeds):
 
 
 CELLS = {
-    "GaitNet":            seed_mean(SEEDS["GaitNet"]),
-    "GaitNet-Diagonal":   seed_mean(SEEDS["GaitNet-Diagonal"]),
+    "CADENCE":            seed_mean(SEEDS["CADENCE"]),
+    "CADENCE-Diagonal":   seed_mean(SEEDS["CADENCE-Diagonal"]),
     "OCS2's own trot":    (91, 72, 46, 88, 70, 40),   # one run (author, 2026-11-12)
     "OCS2's static walk": (94, 78, 45, 80, 61, 35),   # one run (author, 2026-11-12)
 }
@@ -144,7 +144,7 @@ def pool(counts, idx) -> tuple[int, int]:
 
 
 SLOW, FAST, ALL = (0, 1, 2), (3, 4, 5), tuple(range(6))
-BAR_ARMS = ("GaitNet", "GaitNet-Diagonal", "OCS2's own trot", "OCS2's static walk")   # (a), (b)
+BAR_ARMS = ("CADENCE", "CADENCE-Diagonal", "OCS2's own trot", "OCS2's static walk")   # (a), (b)
 
 # (a), (b): per arm, the three cell counts (= rates in %, n = 100).
 PANEL_A = {a: CELLS[a][:3] for a in BAR_ARMS}
@@ -156,7 +156,7 @@ MLP_N = N_CELL * 6 * len(PER_CANDIDATE_SEEDS)
 MLP_MEAN = rate(MLP_K, MLP_N)
 assert MLP_MEAN == sum(rate(sum(s), 600) for s in PER_CANDIDATE_SEEDS) / len(PER_CANDIDATE_SEEDS)
 PANEL_C = {a: rate(*pool(CELLS[a], ALL)) for a in CELLS}
-PANEL_C["Per-candidate + IFM"] = MLP_MEAN
+PANEL_C["GaitNet + IFM"] = MLP_MEAN
 
 
 # ---------------------------------------------------------------- checks
@@ -168,8 +168,8 @@ def check(got, want, what):
 
 # Data entry against the per-speed (whole %) and pooled values computed from
 # results_to_fill.md on 2026-11-12.
-SOURCE_ROWS = {"GaitNet": ("86", "84", "85.1"),
-               "GaitNet-Diagonal": ("85", "81", "82.9"),
+SOURCE_ROWS = {"CADENCE": ("86", "84", "85.1"),
+               "CADENCE-Diagonal": ("85", "81", "82.9"),
                "OCS2's own trot": ("70", "66", "67.8"),
                "OCS2's static walk": ("72", "59", "65.5")}
 for arm, (s10, s20, s_all) in SOURCE_ROWS.items():
@@ -192,12 +192,12 @@ def pool_text(r: Fraction) -> str:
 
 
 # Every value the panel map prints, before plotting.
-SPEC_A = {"GaitNet": ("93", "90", "76"), "GaitNet-Diagonal": ("93", "90", "72"),
+SPEC_A = {"CADENCE": ("93", "90", "76"), "CADENCE-Diagonal": ("93", "90", "72"),
           "OCS2's own trot": ("91", "72", "46"), "OCS2's static walk": ("94", "78", "45")}
-SPEC_B = {"GaitNet": ("92", "90", "70"), "GaitNet-Diagonal": ("89", "87", "67"),
+SPEC_B = {"CADENCE": ("92", "90", "70"), "CADENCE-Diagonal": ("89", "87", "67"),
           "OCS2's own trot": ("88", "70", "40"), "OCS2's static walk": ("80", "61", "35")}
-SPEC_C = {"GaitNet": "85.1", "GaitNet-Diagonal": "82.9",
-          "Per-candidate + IFM": "71.3", "OCS2's own trot": "67.8",
+SPEC_C = {"CADENCE": "85.1", "CADENCE-Diagonal": "82.9",
+          "GaitNet + IFM": "71.3", "OCS2's own trot": "67.8",
           "OCS2's static walk": "65.5"}
 for panel, spec, name in ((PANEL_A, SPEC_A, "(a)"), (PANEL_B, SPEC_B, "(b)")):
     for arm, want in spec.items():
@@ -211,9 +211,9 @@ check(sorted(PANEL_C), sorted(SPEC_C), "(c) rows")
 # fatal, but a macro it defines with another value is an error.
 MACROS = dict(re.findall(r"\\newcommand\{\\(corlBench\w+)\}\{([^}]*)\}",
                          CONSTANTS_TEX.read_text()))
-for macro, arm in {"Full": "GaitNet",
-                   "Diag": "GaitNet-Diagonal", "Trot": "OCS2's own trot",
-                   "MlpMean": "Per-candidate + IFM", "StaticWalk": "OCS2's static walk"}.items():
+for macro, arm in {"Full": "CADENCE",
+                   "Diag": "CADENCE-Diagonal", "Trot": "OCS2's own trot",
+                   "MlpMean": "GaitNet + IFM", "StaticWalk": "OCS2's static walk"}.items():
     name = "corlBench" + macro
     if name in MACROS:
         check(pool_text(PANEL_C[arm]), MACROS[name], "\\" + name)
@@ -247,14 +247,14 @@ PAD_PT = 1.5                            # gap between a bar end and its value [p
 # crosses one (the label of the 63 % bar in (b) reaches the 75 % line). Its
 # pad (0.1 x 7 pt = 0.7 pt) is less than PAD_PT, so it never touches a bar.
 HALO = dict(boxstyle="square,pad=0.1", facecolor="white", edgecolor="none")
-# GaitNet and the trot are both dark (#4F46E5 and #4B5563 have about the same
-# luminance), so GaitNet-Diagonal is light: every group reads dark-light-dark
+# CADENCE and the trot are both dark (#4F46E5 and #4B5563 have about the same
+# luminance), so CADENCE-Diagonal is light: every group reads dark-light-dark
 # in the same order, in colour and in grey.
 BAR_STYLE = {
-    "GaitNet":             dict(facecolor=INDIGO, edgecolor=INDIGO),
-    "GaitNet, rerun":      dict(facecolor="white", edgecolor=INDIGO),
-    "GaitNet-Diagonal":    dict(facecolor=LIGHT_INDIGO, edgecolor=LIGHT_INDIGO),
-    "Per-candidate + IFM": dict(facecolor=TEAL, edgecolor=TEAL),
+    "CADENCE":             dict(facecolor=INDIGO, edgecolor=INDIGO),
+    "CADENCE, rerun":      dict(facecolor="white", edgecolor=INDIGO),
+    "CADENCE-Diagonal":    dict(facecolor=LIGHT_INDIGO, edgecolor=LIGHT_INDIGO),
+    "GaitNet + IFM": dict(facecolor=TEAL, edgecolor=TEAL),
     "OCS2's own trot":     dict(facecolor=GRAY, edgecolor=GRAY),
     "OCS2's static walk":  dict(facecolor="#B8BEC8", edgecolor="#B8BEC8"),
 }
@@ -269,7 +269,7 @@ _panel_w = (FIG_W - LEFT - RIGHT - GAP) / 2
 WSPACE = GAP / _panel_w
 
 SLOT, BAR_W = 0.20, 0.17               # bar pitch and width within a group [groups]
-OFFSET = {"GaitNet": -1.5 * SLOT, "GaitNet-Diagonal": -0.5 * SLOT,
+OFFSET = {"CADENCE": -1.5 * SLOT, "CADENCE-Diagonal": -0.5 * SLOT,
           "OCS2's own trot": 0.5 * SLOT, "OCS2's static walk": 1.5 * SLOT}
 Y_TOP = 114                             # headroom for the labels on 100 % bars
 GRID_AT = (25, 50, 75)                  # no line at 100: labels of 93-100 % bars cross it
