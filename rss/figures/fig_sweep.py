@@ -400,8 +400,7 @@ assert not any(_div.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts)
 # Legend: one entry per drawn line and one for the divider, in the common style
 # (compared on the data keys; cadence_names shows "CADENCE" for "GaitNet").
 assert [t.get_text() for t in leg.get_texts()] == [
-    m.replace("GaitNet", "CADENCE").replace("Per-candidate + IFM", "GaitNet + IFM")
-    for m in order] + [DIVIDER_NAME], "legend entries"   # display names: cadence_names.py
+    m.replace("GaitNet", "CADENCE") for m in order] + [DIVIDER_NAME], "legend entries"
 assert all(t.get_fontsize() >= 7 for t in leg.get_texts()), "legend text below 7 pt"
 assert "limit" not in DIVIDER_NAME.lower(), "the divider is at 0.225 m/s, not at the limit"
 # The divider's vertical handle (drawn past its handle box) stays clear of the

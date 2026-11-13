@@ -10,19 +10,18 @@
 % other terrain; voids, not "missing sections") and, since 2026-11-13, no
 % longer repeats what the legend says. The author's original caption is in
 % commit c8c7f43.
-% 2026-11-13 16:30 framing (author: "gaitnet is not published, so integrate the
-% gaitnet to the methodology, dont cite as separate work"): GaitNet is presented
-% as CADENCE's core (the per-candidate scoring network with the no-step option
-% and swing-time head), not as earlier work; the thesis (Sullivan2025) is no
-% longer cited anywhere, and Fig. 4 carries no credit line. This replaces the
-% 12:57 framing (GaitNet cited as the authors' earlier planner).
+% 2026-11-13 16:40 framing (author: "integrate the gaitnet to the methodology,
+% dont cite as separate work" and "dont mention as gaitnet"): the per-candidate
+% scoring network with the no-step option and swing-time head is presented as
+% CADENCE's core, without the name GaitNet; the thesis (Sullivan2025) is cited
+% nowhere and Fig. 4 has no credit line. The baseline is "Per-candidate + IFM".
 \section{Method}
 \label{sec:method}
 
 \looseness=-1 CADENCE has three parts (Fig.~\ref{fig:overview}). Its
-core, \emph{GaitNet}, scores the footstep options of a tick one at a
-time, each from the robot's state and that option alone, next to a
-no-step option, and predicts a swing time. One option is taken per
+core is a \emph{per-candidate network}, which scores the footstep options
+of a tick one at a time, each from the robot's state and that option
+alone, next to a no-step option, and predicts a swing time. One option is taken per
 tick, with up to two legs in swing. CADENCE adds a candidate
 mixer and a history, which compare the options with each other and with
 the recent motion (Sec.~\ref{subsec:method-network}), and an IFM, with
@@ -96,7 +95,7 @@ gives each mixed token $\tilde{\mathbf t}_i$ a score and a swing time,
 where $\operatorname{sig}$ is the logistic function, and the policy is
 a softmax of the scores, sampled in training and maximized at
 deployment. With $W_h$ and the mixer's output layers
-initialized at zero, CADENCE starts as GaitNet, a \emph{per-candidate network},
+initialized at zero, CADENCE starts as the per-candidate network,
 which scores each candidate alone from the state and its code
 (App.~\ref{app:settings}).
 
