@@ -42,8 +42,8 @@
 % and Sec. 5.2 states neutrally how GaitNet + IFM differs from CADENCE. That
 % list of differences stays: without it the 13.8-point gap would read as an
 % ablation of the architecture, which the runs do not support.
-% 2026-11-13 16:40 (author: "dont mention as gaitnet"): the baseline row is
-% "Per-candidate + IFM" again (it was "GaitNet + IFM" from 13:40 to 16:40).
+% 2026-11-13 13:40: the baseline row is named "GaitNet + IFM", as in the first
+% author's pushed version (commit f983b3b); it was "Per-candidate + IFM".
 % The macros (\corlBenchMlp*, \corlSweepMlp) and the figure-script keys keep
 % their names.
 
@@ -111,13 +111,13 @@ walk one leg at a time with \corlWalkSwing\,s swings on a
 \corlWalkPeriod\,s period, both with heuristic footholds projected onto
 planar regions \citep{grandia_perceptive_2022}. They ran once each.
 \emph{CADENCE} runs with its refitted OCS2 IFM and lets any two legs
-swing at once. \emph{Per-candidate + IFM} is the per-candidate network alone
+swing at once. \emph{GaitNet + IFM} is GaitNet alone
 (Sec.~\ref{subsec:method-network}), CADENCE without the mixer and the
 history, trained with CADENCE's recipe but with no IFM in the training
 loop. \emph{CADENCE-Diagonal} keeps CADENCE's weights but, at
 test time, starts a second swing only on the swinging leg's diagonal
 partner, and \emph{CADENCE-Single} is retrained to swing one leg at a
-time. Per-candidate + IFM and CADENCE-Single both run with the OCS2 IFM
+time. GaitNet + IFM and CADENCE-Single both run with the OCS2 IFM
 of the CADENCE policy with the same training seed, which was fitted on
 that policy's steps and not on their own.
 Three controls keep CADENCE's weights and change only the footstep
@@ -169,7 +169,7 @@ CADENCE & \corlBenchFull & \corlBenchFullMin--\corlBenchFullMax
 OCS2's own trot & \corlBenchTrot & --- & \corlBenchTrotDense \\
 OCS2's static walk & \corlBenchStaticWalk & --- & \corlBenchStaticWalkDense \\
 \midrule
-Per-candidate + IFM & \corlBenchMlpMean
+GaitNet + IFM & \corlBenchMlpMean
   & \corlBenchMlpSeedMin--\corlBenchMlpSeedMax & \corlBenchMlpDense \\
 \midrule
 CADENCE-Diagonal & \corlBenchDiag & \corlBenchDiagMin--\corlBenchDiagMax
@@ -198,7 +198,7 @@ points at \corlBenchSpeedSlow\,m/s and from 4 to 20 to 30 at
 \corlBenchSpeedFast\,m/s, although the walk beat CADENCE in the easiest
 cell (94 against 93\%). In the hardest cell, \corlBenchVoidHigh\% voids
 at \corlBenchSpeedFast\,m/s, CADENCE succeeded in 70\% against 40\% for
-the trot and 35\% for the walk (Fig.~\ref{fig:bench}b). Per-candidate + IFM succeeded in
+the trot and 35\% for the walk (Fig.~\ref{fig:bench}b). GaitNet + IFM succeeded in
 \corlBenchMlpMean\%, 13.8 points below CADENCE, from which it differs in
 the mixer, the history, network size, the IFM in training, and an OCS2
 IFM fitted on CADENCE's steps. Since the stock gaits
