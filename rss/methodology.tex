@@ -169,7 +169,7 @@ times the margin to about the margin (Sec.~\ref{subsec:exp-why}).
 \citep{mittal_orbit_2023}, with many robots in parallel.
 The robot follows a commanded forward velocity over terrain in which a
 fraction of the tiles, the \emph{void fraction}, are deep voids, and a
-curriculum raises it. The reward per tick is
+curriculum raises it (Figure \ref{fig:training-terrain-combined}. The reward per tick is
 \begin{equation}
   r = \Delta t\,\Big[\,w_a\,\mathbf 1_{\text{alive}}
   + e^{-\|\mathbf v^{usr}_{xy} - \mathbf v_{b,xy}\|^2/\sigma_v^2}
@@ -186,6 +186,14 @@ robot's controller gets new tracking quality, swing height, landing bias and noi
 (App.~\ref{app:training}), a randomization absent from the IFM's data.
 PPO's critic reads the state and candidates only, without attention
 (App.~\ref{app:training}).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{figures/gaitnet_thesis_images/figures/environment-combined.png}
+    \caption{(Left) Individual training instance of a Unitree Go 1 navigating the terrain. Red region shows area converted into heightmap for front left leg. Black regions show voids in the terrain. Green arrow shows desired velocity vector. (Right) full terrain used in simulation. Full terrain is a grid of 12×12 sub-terrains with increasing difficulty. Sub-terrains are 4×4\,m grids with missing sections.}
+    \label{fig:training-terrain-combined}
+\end{figure}
+
 
 \subsection{Deployment on OCS2}
 \label{subsec:method-deployment}
