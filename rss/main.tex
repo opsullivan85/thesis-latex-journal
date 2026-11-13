@@ -151,14 +151,14 @@
   lifts the legs in a fixed order on a fixed period, wherever the safe
   footholds are. We present CADENCE, a learned step planner with a small
   action space. Every \corlControlTickMs\,ms, it picks one of at most
-  \corlTotalCandidates{} discrete choices, no step, or one leg's step to
-  a safe foothold, and predicts a swing time, while the controller still
-  tracks the motion. We train CADENCE by reinforcement learning on a
-  convex model predictive controller (MPC), with no gait schedule or
-  gait reward, only a cost per step and at most
-  \numberstringnum{\corlMaxConcurrentSwingLegs} legs in swing. The
-  policy we analysed developed an acyclic gait, with neither a fixed
-  period nor a fixed stepping order, that still paired diagonal legs. An
+  \corlTotalCandidates{} discrete choices: no step, or one leg's step to
+  a safe foothold. It also predicts a swing time, and the controller
+  still tracks the motion. We train CADENCE by reinforcement learning on
+  a convex model predictive controller (MPC), with no gait schedule. Its
+  reward has no gait term, only a cost per step, and at most
+  \numberstringnum{\corlMaxConcurrentSwingLegs} legs may swing at once.
+  The policy we analysed developed an acyclic gait, with no fixed period
+  or stepping order, yet it still paired diagonal legs. An
   inverse footstep model (IFM), fitted on a controller's logged steps,
   turns each foothold into a command. With only the IFM refitted, on
   fewer than 20{,}000 steps, CADENCE ran frozen on OCS2's
