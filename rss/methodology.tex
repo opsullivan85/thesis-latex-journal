@@ -121,7 +121,7 @@ controller the IFM sends a command $\mathbf u = I^c(\zeta,\mathbf
 u^\star)$ meant to satisfy $F_c(\mathbf s,\ell,T,\mathbf u) \approx
 \mathbf u^\star$. Every logged step $(\zeta,\mathbf u,\mathbf o)$ shows,
 in hindsight, a command that landed the foot at $\mathbf o$, so we fit
-the inverse directly, with the landing as input
+the inverse directly (Fig.~\ref{fig:overview}b), with the landing as input
 \citep{jordan_forward_1992, andrychowicz_hindsight_2017,
 akizhanov_learning_2024}:
 \begin{equation}
@@ -162,7 +162,7 @@ a curriculum raises to \corlMaxVoidPct\%
 which tracks the commanded (usr) base ($b$) velocities and charges
 each step and failure but has no gait, clearance, or posture term
 (weights $w_a, w_s, w_f$ and widths $\sigma_v, \sigma_\omega$ in
-App.~\ref{app:settings}). The training controller's IFM is frozen in the loop, and the controller is
+App.~\ref{app:settings}). The training controller's IFM is frozen in the loop (Fig.~\ref{fig:overview}c), and the controller is
 randomized at every reset (App.~\ref{app:training}).
 
 \begin{figure}[t]
@@ -176,8 +176,8 @@ randomized at every reset (App.~\ref{app:training}).
   \label{fig:training-terrain-combined}
 \end{figure}
 
-\phantomsection\label{subsec:method-deployment}\looseness=-1 On OCS2,
-CADENCE replaces the gait scheduler of the \texttt{legged\_control}
+\phantomsection\label{subsec:method-deployment}\looseness=-1 On OCS2
+(Fig.~\ref{fig:overview}d), CADENCE replaces the gait scheduler of the \texttt{legged\_control}
 stack \citep{leggedcontrol, grandia_perceptive_2022} in Gazebo, with
 all OCS2 settings stock. Its candidates are built as in training, the
 corrected command enters the NMPC as a foot-placement constraint, and
