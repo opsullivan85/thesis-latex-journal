@@ -16,6 +16,7 @@
 \documentclass{l4dc2027}
 % Camera-ready: \documentclass[final]{l4dc2027}
 \usepackage{times}
+\usepackage{soul} % Overleaf edit of M. Agheli (for \hl{} review marks)
 
 % Loaded by the class: amsmath, amssymb, natbib (author-year), graphicx,
 % url, hyperref, xcolor, algorithm2e.
@@ -150,7 +151,7 @@
   lifts the legs in a fixed order on a fixed period, wherever the safe
   footholds are. We present CADENCE, a learned step planner with a small
   action space. Every \corlControlTickMs\,ms, it picks one of at most
-  \corlTotalCandidates{} discrete choices, no step or one leg's step to
+  \corlTotalCandidates{} discrete choices, no step, or one leg's step to
   a safe foothold, and predicts a swing time, while the controller still
   tracks the motion. We train CADENCE by reinforcement learning on a
   convex model predictive controller (MPC), with no gait schedule or
