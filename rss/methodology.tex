@@ -10,33 +10,24 @@
 % other terrain; voids, not "missing sections") and, since 2026-11-13, no
 % longer repeats what the legend says. The author's original caption is in
 % commit c8c7f43.
-% 2026-11-13 framing (corresponding author's Overleaf comment, 12:57): this
-% section opens with the authors' earlier planner, GaitNet (Sullivan, 2025),
-% and what CADENCE adds to it; no earlier section mentions GaitNet. The
-% paragraph credits GaitNet only with what both the thesis sources and
-% gaitnet-docs support (a network that scores one footstep option at a time,
-% a no-step option, a swing-time output, greedy choice per tick, PPO on the
-% convex MPC, acyclic gaits with up to two legs in swing). It does NOT credit
-% the thesis with the 16-candidate grid or the count of 65: the thesis draft
-% in "owen thessis/" selects footholds by projected gradient ascent. \verify:
-% the first author confirmed the paragraph against the deposited thesis, which
-% reports simulation results on the convex MPC only (author, 2026-11-13).
-% Fig. 4's picture joins two screenshots from that thesis, so its caption
-% credits it.
+% 2026-11-13 16:30 framing (author: "gaitnet is not published, so integrate the
+% gaitnet to the methodology, dont cite as separate work"): GaitNet is presented
+% as CADENCE's core (the per-candidate scoring network with the no-step option
+% and swing-time head), not as earlier work; the thesis (Sullivan2025) is no
+% longer cited anywhere, and Fig. 4 carries no credit line. This replaces the
+% 12:57 framing (GaitNet cited as the authors' earlier planner).
 \section{Method}
 \label{sec:method}
 
-\looseness=-1 CADENCE builds on GaitNet \citep{Sullivan2025},
-our earlier planner for the same convex MPC. At every tick, GaitNet
-scores footstep options one at a time, each from the robot's state and
-that option alone, next to a no-step option, and predicts a swing time.
-Taking the best-scoring option greedily, with up to two legs in swing,
-it generated acyclic gaits on that controller. CADENCE keeps this
-per-tick choice and per-candidate scoring as its starting point and adds
-a candidate mixer and a history, which compare the options with each
-other and with the recent motion (Sec.~\ref{subsec:method-network}), and
-an IFM, with which it moves to a second controller
-(Secs.~\ref{subsec:method-idm} and~\ref{subsec:method-training}).
+\looseness=-1 CADENCE has three parts (Fig.~\ref{fig:overview}). Its
+core, \emph{GaitNet}, scores the footstep options of a tick one at a
+time, each from the robot's state and that option alone, next to a
+no-step option, and predicts a swing time. One option is taken per
+tick, with up to two legs in swing. CADENCE adds a candidate
+mixer and a history, which compare the options with each other and with
+the recent motion (Sec.~\ref{subsec:method-network}), and an IFM, with
+which it moves to a second controller (Secs.~\ref{subsec:method-idm}
+and~\ref{subsec:method-training}).
 
 % Fig. 3 regenerated 2026-11-13 in the paper's render style (author: "regenerate
 % the fig3 with match theme of the paper"): figures/fig_action.py, posed MuJoCo,
@@ -105,7 +96,7 @@ gives each mixed token $\tilde{\mathbf t}_i$ a score and a swing time,
 where $\operatorname{sig}$ is the logistic function, and the policy is
 a softmax of the scores, sampled in training and maximized at
 deployment. With $W_h$ and the mixer's output layers
-initialized at zero, CADENCE starts as GaitNet's \emph{per-candidate network},
+initialized at zero, CADENCE starts as GaitNet, a \emph{per-candidate network},
 which scores each candidate alone from the state and its code
 (App.~\ref{app:settings}).
 
@@ -171,8 +162,7 @@ randomized at every reset (App.~\ref{app:training}).
   \caption{(Left) One Unitree Go1 on the training terrain. (Right) The
     full training terrain, a grid of $12\times12$ sub-terrains of
     $4\times4$\,m with voids and increasing difficulty. The scan area is
-    the ray grid of Sec.~\ref{subsec:method-step}. Renders from
-    \citet{Sullivan2025}.}
+    the ray grid of Sec.~\ref{subsec:method-step}..}
   \label{fig:training-terrain-combined}
 \end{figure}
 
