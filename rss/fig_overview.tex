@@ -1,18 +1,20 @@
 % 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
-% Fig. 1: GaitNet overview. Drawn in Inkscape: edit figures/fig_overview.svg
+% Fig. 2: CADENCE overview. Drawn in Inkscape: edit figures/fig_overview.svg
 % and save a PDF copy, with text converted to paths, as
-% figures/fig_overview.pdf. Panels: (a) architecture (Sec. III-A, III-B),
-% (b) IDM training per controller (III-C), (c) PPO training in Isaac Lab
-% (III-D), (d) deployment on OCS2 (III-E).
+% figures/fig_overview.pdf. Panels: (a) architecture (Secs. 4.1, 4.2),
+% (b) IFM fitting per controller (Sec. 4.3), (c) PPO training in Isaac Lab
+% and (d) deployment on OCS2 (both Sec. 4.4). The figure's legend row
+% carries the arrow styles and the trained/frozen icons.
+% 2026-11-13: width 0.74 -> 0.86\textwidth (labels printed at 4-6 pt). If
+% the main text needs lines, reduce this width first, never below 0.74.
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.74\textwidth]{figures/fig_overview}
-\caption{GaitNet overview. (a)~Given the state $\mathbf x_g$ and history
+\includegraphics[width=0.86\textwidth]{figures/fig_overview}
+\caption{CADENCE overview. (a)~Given the state $\mathbf x_g$ and history
   $\mathbf h$, a candidate mixer scores the safe candidates
   $\mathbf q_i \in \mathcal C$ and the no-step option $\varnothing$.
   (b)~Each controller $c$ gets its own IFM $I^c$, fitted offline on its
   logged steps. (c)~PPO keeps the training controller's IFM frozen.
-  (d)~On OCS2, GaitNet stays frozen and only the IFM changes.
-  \hot~trained, \frz~frozen.}
+  (d)~On OCS2, CADENCE stays frozen and only the IFM changes.}
 \label{fig:overview}
 \end{figure*}

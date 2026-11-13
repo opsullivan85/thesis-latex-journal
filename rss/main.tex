@@ -1,6 +1,12 @@
-% L4DC 2027 version of the GaitNet paper (branch l4dc). The RSS version on
-% main keeps the IEEEtran layout; numbers and fixes shared by both live in
-% constants.tex and the section files.
+% CADENCE paper, L4DC 2027 submission. Every printed number is a macro in
+% constants.tex; the text is in the section files input below.
+% Naming: "GaitNet" was this method's working name in drafts and survives
+% in macro names (\corl...GaitNet...) and as a data key in the figure
+% scripts, where it means CADENCE. In the printed text, "GaitNet" names
+% only the authors' earlier planner (Sullivan, 2025), which Sec. 4 presents
+% and cites as CADENCE's starting point; no section before Sec. 4 mentions
+% it (corresponding author's Overleaf comment, 2026-11-13 12:57, which
+% replaced the self-contained framing of that morning).
 %
 % Template: l4dc2027.cls v1.0 (2026/10/05), from the L4DC 2027 author page
 % (l4dc2027.control.ee.ethz.ch/author-information). Limit: 10 PMLR pages of
@@ -22,7 +28,7 @@
 \definecolor{linkgreen}{HTML}{1E7B4F}
 \hypersetup{colorlinks=true,linkcolor=linkgreen,citecolor=linkgreen,
   urlcolor=linkgreen}
-% Fig. 1 is drawn in Inkscape (figures/fig_overview.svg, exported to PDF).
+% Fig. 2 is drawn in Inkscape (figures/fig_overview.svg, exported to PDF).
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,calc,positioning}
 \usepackage{fontawesome5}
@@ -81,24 +87,31 @@
 \newcommand{\verify}[1]{\ifrevmarkup\textcolor{magenta}{#1}\else#1\fi}
 \newcommand{\xx}{\pending{\text{xx}}}
 
-\title[GaitNet]{GaitNet: Learning When and Where to Step for Model-Based
-  Quadruped Controllers}
+\title[CADENCE]{CADENCE: Learning Acyclic Gaits for Model-Based
+  Quadruped Locomotion}
 
 % L4DC is single-blind: real names and affiliations are required.
 % Authors (author, 2026-11-13): Owen Sullivan and Sourav Selvaraj contributed
-% equally; Mahdi Agheli's email from his WPI faculty page
+% equally; Mahdi Agheli is the corresponding author (author, 2026-11-13); his email is from his WPI faculty page
 % (wpi.edu/people/faculty/mmaghelih).
+% 2026-11-13 13:50 (author): Owen Sullivan's contact is opsullivan85@gmail.com,
+% Worcester Polytechnic Institute (it was osullivan@locusrobotics.com, Locus
+% Robotics).
 \author{%
- \Name{Owen Sullivan\nametag{\thanks{Equal contribution.}}} \Email{osullivan@locusrobotics.com}\\
- \addr Locus Robotics
+ \Name{Owen Sullivan\nametag{\thanks{Equal contribution.}}} \Email{opsullivan85@gmail.com}\\
+ \addr Worcester Polytechnic Institute
  \AND
  \Name{Sourav Selvaraj\nametag{\footnotemark[1]}} \Email{sselvaraj@wpi.edu}\\
  \addr Worcester Polytechnic Institute
  \AND
- \Name{Mahdi Agheli} \Email{mmaghelih@wpi.edu}\\
+ \Name{Mahdi Agheli\nametag{\thanks{Corresponding author.}}} \Email{mmaghelih@wpi.edu}\\
  \addr Worcester Polytechnic Institute%
 }
 
+
+% 2026-11-13: no line break inside the name; no page-group warning.
+\hyphenation{CADENCE}
+\pdfsuppresswarningpagegroup=1
 
 \begin{document}
 
@@ -109,13 +122,14 @@
 \begin{center}
 \teasercaptype
 \includegraphics[width=\textwidth]{figures/fig_teaser}
-\caption{GaitNet decides when and where a model-based controller steps
-  (posed MuJoCo scene, illustrative step). (a)~Every
-  \corlControlTickMs\,ms, it picks one of at most
-  \corlTotalCandidates{} choices, no step or a leg's safe foothold, and
-  a swing time. (b)~The controller swings the
-  leg there. (c)~On OCS2, RMS landing error on flat ground without the
-  inverse footstep model (IFM) and with the refitted one.}
+\caption{CADENCE decides when and where a model-based controller steps,
+  shown here on a posed MuJoCo scene with an illustrative step.
+  (a)~Every \corlControlTickMs\,ms, it either waits or starts one step by
+  picking a leg and one of that leg's safe footholds, at most
+  \corlTotalCandidates{} choices in all, and it sets the swing time.
+  (b)~The controller then swings the leg to the chosen foothold.
+  (c)~On OCS2, refitting the inverse footstep model (IFM) brings the RMS
+  landing error on flat ground down to about the candidate margin.}
 \label{fig:teaser}
 \end{center}
 \vspace{-0.8em}
@@ -127,28 +141,35 @@
   % qualifiers (earlier run, one policy, successful trials) do not fit the
   % word budget; the introduction and Sec. 5 carry them. Typed: 20,000
   % (no macro).
+  % 2026-11-13, Overleaf comments (O. Sullivan, M. Agheli): the two longest
+  % sentences are split ("We train ... The policy we analysed ..." and the
+  % results sentence); the densest-void 43.0 % is named as the trot's; the
+  % single-leg and the simpler-correction results each state what they are
+  % compared with (CADENCE's own rate; the trot's rate).
   Model-based quadruped controllers usually step on a cyclic gait, which
   lifts the legs in a fixed order on a fixed period, wherever the safe
-  footholds are. We present GaitNet, a learned step planner with a small
+  footholds are. We present CADENCE, a learned step planner with a small
   action space. Every \corlControlTickMs\,ms, it picks one of at most
   \corlTotalCandidates{} discrete choices, no step or one leg's step to
-  a safe foothold, and predicts a swing time. It sets no joint targets
-  and no gait parameters, so the controller still tracks the motion.
-  Trained by reinforcement learning on a convex model predictive
-  controller (MPC), with no gait schedule or gait reward, only a cost
-  per step and at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs in swing, the GaitNet policy we analysed developed
-  an acyclic gait, with neither a fixed period nor a fixed stepping order,
-  that still paired diagonal legs. An inverse footstep model (IFM), fitted on
-  a controller's logged steps, turns each foothold into a command. With
-  only the IFM refitted, on \verify{fewer than 20{,}000} steps, GaitNet ran frozen
-  on OCS2's nonlinear MPC. In \corlBenchTrialsPerArm{} simulated trials
-  per training seed on ground with voids, it succeeded in
-  \corlBenchFull\% (mean of \corlNumSeedsGaitNet{} seeds), against
-  \corlBenchTrot\% for OCS2's cyclic trot and \corlBenchStaticWalk\% for
-  its static walk, and \corlBenchFullDense\% against \corlBenchTrotDense\%
-  on the densest voids. Retrained to swing one leg at a time, it
-  succeeded in \corlBenchSingle\%. With simpler footstep corrections, it
-  reached at most \corlBenchCtrlMax\%.%
+  a safe foothold, and predicts a swing time, while the controller still
+  tracks the motion. We train CADENCE by reinforcement learning on a
+  convex model predictive controller (MPC), with no gait schedule or
+  gait reward, only a cost per step and at most
+  \numberstringnum{\corlMaxConcurrentSwingLegs} legs in swing. The
+  policy we analysed developed an acyclic gait, with neither a fixed
+  period nor a fixed stepping order, that still paired diagonal legs. An
+  inverse footstep model (IFM), fitted on a controller's logged steps,
+  turns each foothold into a command. With only the IFM refitted, on
+  fewer than 20{,}000 steps, CADENCE ran frozen on OCS2's
+  nonlinear MPC. In simulated trials on ground with voids, it succeeded
+  in \corlBenchFull\% (mean of \corlNumSeedsGaitNet{} training seeds),
+  against \corlBenchTrot\% for OCS2's cyclic trot and
+  \corlBenchStaticWalk\% for its static walk. On the densest voids, it
+  succeeded in \corlBenchFullDense\%, against \corlBenchTrotDense\% for
+  the trot. Retrained to swing one leg at a time, it succeeded in
+  \corlBenchSingle\% instead of \corlBenchFull\%. With simpler footstep
+  corrections, it reached at most \corlBenchCtrlMax\%, below the trot's
+  \corlBenchTrot\%.%
 \end{abstract}
 
 \begin{keywords}%
@@ -169,11 +190,15 @@
 \subsection*{Generative AI Use}
 % 2026-11-12: wording widened to match how the tools were used on this draft
 % (sections were drafted and rewritten with an AI assistant, which also wrote
-% the figure scripts). The authors must still confirm it.
-\verify{Generative AI tools were used to draft and edit the text, search
-the literature, check arithmetic and derivations, and write plotting
-scripts. The authors verified all AI-assisted content and take
-responsibility for the paper.}
+% the figure scripts). 2026-11-13 13:40 (author: "use Owen's"): the statement
+% below is the wording of the first author's Overleaf sync (commit ee553da),
+% which no longer names drafting and editing of the text. OPEN for the three
+% authors: the text of this draft was drafted and edited with an AI
+% assistant, so the earlier wording ("to draft and edit the text, search the
+% literature, ...") is the accurate one; L4DC asks for this disclosure.
+\verify{Generative AI tools were used to search the literature, check
+arithmetic and derivations, and write plotting scripts. The authors
+verified all AI-assisted content and take responsibility for the paper.}
 
 \bibliography{refs}
 

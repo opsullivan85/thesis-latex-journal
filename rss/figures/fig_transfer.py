@@ -15,16 +15,25 @@ aggregate per multi-seed method:
   controller's IFM, a constant per-leg offset, and the IFM refitted on OCS2.
   All bars indigo: same planner, only the correction changes.
   One thin dashed grey reference line at OCS2's own trot over the same six
-  cells (\\corlBenchTrot), labelled "OCS2's own trot" just above the line,
-  ending left of the last bar. Trot style as fig_swing.py / fig_gait.py
+  cells (\\corlBenchTrot). Trot style as fig_swing.py / fig_gait.py
   (#4B5563, dashes 3.2/1.8), thinner because it is a reference.
+
+  Legend (author, 2026-11-13: "add legend all the figure"): one row inside
+  the axes, under the title, above every bar (the tallest is 85.1 %) and
+  above the end of the y axis (100 %; the y range runs to Y_TOP = 114 for
+  that, so that the handles cannot be read as marks at 100 %), in
+  the paper's common legend style: indigo bar = GaitNet, dashed grey line =
+  OCS2's own trot. The direct label that sat on the reference line was
+  removed (it said the same as the legend entry). Legend text is 7.1 pt on
+  the 74 mm canvas, i.e. 7.0 pt when printed at 0.48\\textwidth (72.96 mm).
 
   Value labels: at this height a value printed above the per-leg-offset bar
   (60.0) would span about 62-71 % and the trot line (67.8) would run through
   it. Hence every bar tall enough to hold its value (>= INSIDE_MIN) carries it
   inside its top, in white (contrast 6.3:1 on #4F46E5); the 5.5 bar keeps it
-  above. The layout check asserts that an inside label lies within its bar and
-  that the reference line crosses no text.
+  above. The layout check asserts that an inside label lies within its bar,
+  that the reference line crosses no text, and that the legend covers no bar,
+  value, line or spine.
 
   All text >= 7 pt at final size (rewrite decisions: "Never put fonts below
   7 pt at final size"); fig_bench.py's 6.3 pt value size is not reused here.
@@ -64,7 +73,10 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import cadence_names  # noqa: F401  (paper name: CADENCE)
 from matplotlib import font_manager
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from matplotlib.text import Text
 from matplotlib.transforms import Bbox
 
@@ -184,9 +196,17 @@ VALUE_PT = 7.0                          # value labels, as fig_swing.py's labels
 PAD_PT = 1.5                            # value label to bar top
 HALO = dict(boxstyle="square,pad=0.1", facecolor="white", edgecolor="none")
 REF_STYLE = dict(color=GRAY, lw=0.8, ls=(0, (3.2, 1.8)))   # thin trot dashes
-REF_LABEL_PT = 7.0
-REF_LABEL_GAP_PT = 1.5                  # label (text box) above the line
-REF_LABEL_END_MM = 1.5                  # label ends this far left of the last bar
+# Common legend style of the paper's figures (2026-11-13): Fira Sans, ink, no
+# frame, short handles. 7.1 pt here prints as 7.0 pt: the 74 mm canvas is
+# included at 0.48\textwidth = 72.96 mm.
+LEGEND_PT = 7.1
+LEGEND_KW = dict(frameon=False, fontsize=LEGEND_PT, labelcolor=INK, handlelength=1.6,
+                 handletextpad=0.5, columnspacing=1.2, labelspacing=0.3,
+                 borderpad=0.0, borderaxespad=0.0)
+LEGEND_X_MM = 2.0                       # legend starts this far right of the y axis
+LEGEND_TOP_MM = 0.4                     # legend top below the axes top
+LEGEND_CLEAR_MM = 1.5                   # least distance from the legend to a bar or line
+LEGEND_ABOVE_AXIS_MM = 0.7              # least height of the legend above the y axis's end
 INSIDE_MIN = 15.0                       # % : a bar this tall holds its value inside
 
 # ---------------------------------------------------------------- layout [mm]
@@ -194,7 +214,13 @@ MM = 1 / 25.4
 FIG_W, FIG_H = 74.0, 42.0               # half \textwidth, beside fig_swing (74 x 42)
 TOP, BOTTOM, LEFT, RIGHT = 5.0, 9.0, 10.5, 3.0   # as fig_swing.py: axes align in the row
 BAR_MM = 6.5                            # wide enough for "85.1" inside at 7 pt
-Y_TOP = 106                             # bars reach 85 %; room under the title
+# The y axis ends at 100 %; the band above it holds the legend row. With 114
+# the legend's lower edge is at 103 %, above the axis end. With 106 (until
+# 2026-11-13) the row was centred on the 100 % level, next to the "100" tick,
+# and its handles read as marks at 100 %. No value changes: the bars are drawn
+# 7 % shorter.
+Y_AXIS_END = 100
+Y_TOP = 114
 GRID_AT = (25, 50, 75)
 
 fig = plt.figure(figsize=(FIG_W * MM, FIG_H * MM))
@@ -218,22 +244,17 @@ for i, (_, _, macro, _) in enumerate(BARS):
                     bbox=HALO)
 
 # OCS2's own trot over the same six cells: behind the bars (zorder 1), above
-# the grid (zorder 0). Its label sits on the line and ends just left of the
-# last (tallest) bar, so it clears every bar and value.
+# the grid (zorder 0). The legend names it (no label on the line).
 trot = float(MACROS["corlBenchTrot"])
-ax.axhline(trot, zorder=1, **REF_STYLE)
-x_end = len(BARS) - 1 - bar_w / 2 - REF_LABEL_END_MM / units
-ref_label = ax.annotate(TROT, (x_end, trot), xytext=(0, REF_LABEL_GAP_PT),
-                        textcoords="offset points", ha="right", va="bottom",
-                        fontsize=REF_LABEL_PT, color=GRAY, zorder=3, bbox=HALO)
+ref_line = ax.axhline(trot, zorder=1, **REF_STYLE)
 
 ax.set_xlim(-0.5, len(BARS) - 0.5)
 ax.set_xticks(range(len(BARS)))
 ax.set_xticklabels([tick for _, tick, _, _ in BARS], linespacing=1.0)
 ax.tick_params(axis="x", length=0, pad=3)
 ax.set_ylim(0, Y_TOP)
-ax.set_yticks(range(0, 101, 25))
-ax.spines["left"].set_bounds(0, 100)
+ax.set_yticks(range(0, Y_AXIS_END + 1, 25))
+ax.spines["left"].set_bounds(0, Y_AXIS_END)
 for g in GRID_AT:
     ax.axhline(g, color=GRID, lw=0.5, zorder=0)
 ax.spines[["top", "right"]].set_visible(False)
@@ -241,12 +262,21 @@ ax.set_ylabel("Success [%]", labelpad=2)
 ax.set_title("GaitNet on OCS2, by footstep correction", loc="left", fontsize=7.5,
              fontweight="semibold", color=INK, pad=3)
 
+# Legend: one row in the empty band under the axes top, wholly above the end
+# of the y axis (100 %) and so above the tallest bar (85.1 %). Handles repeat
+# the drawn marks: an indigo bar and the dashed reference line.
+_ax_w, _ax_h = FIG_W - LEFT - RIGHT, FIG_H - TOP - BOTTOM      # mm
+legend = ax.legend(handles=[Patch(facecolor=INDIGO, linewidth=0), Line2D([], [], **REF_STYLE)],
+                   labels=["GaitNet", TROT], ncol=2, loc="upper left",
+                   bbox_to_anchor=(LEGEND_X_MM / _ax_w, 1 - LEGEND_TOP_MM / _ax_h), **LEGEND_KW)
+
 
 # ---------------------------------------------------------------- layout checks
 def layout_problems(fig):
     """Text outside the canvas or too small, text on text, labels on bars or
-    spines (an inside value label must lie within its own bar), and the
-    reference line through any text (as fig_bench.py plus the last two)."""
+    spines (an inside value label must lie within its own bar), the
+    reference line through any text, and the legend on or too close to any
+    mark (as fig_bench.py plus the last three)."""
     fig.canvas.draw()
     r = fig.canvas.get_renderer()
     texts = [t for t in fig.findobj(Text) if t.get_visible() and t.get_text().strip()]
@@ -292,10 +322,33 @@ def layout_problems(fig):
     for t, b in boxes:
         if b.x1 > ab.x0 and b.x0 < ab.x1 and b.y0 < y + half and b.y1 > y - half:
             out.append(f"reference line through text: {t.get_text()!r}")
-    # The line label must sit on the line (not drift away from it).
-    lb = extent(ref_label)
-    if not (y + half < lb.y0 < y + half + 2 * fig.dpi / 72):
-        out.append("reference-line label not just above the line")
+    # The legend: inside the axes, two entries, above the end of the y axis
+    # (not level with the "100" tick), and at least LEGEND_CLEAR_MM
+    # from every bar, value label, the reference line and the visible spines;
+    # no grid line may run behind it either.
+    lg = legend.get_window_extent(r)
+    y_end = ax.transData.transform((0, Y_AXIS_END))[1]
+    if lg.y0 < y_end + LEGEND_ABOVE_AXIS_MM / 25.4 * fig.dpi:
+        out.append(f"legend not above the end of the y axis ({Y_AXIS_END} %)")
+    if len(legend.get_texts()) != 2:
+        out.append("legend must have two entries")
+    if not (lg.x0 >= ab.x0 and lg.x1 <= ab.x1 and lg.y0 >= ab.y0 and lg.y1 <= ab.y1):
+        out.append("legend outside the axes")
+    clear = LEGEND_CLEAR_MM / 25.4 * fig.dpi
+    grown = Bbox.from_extents(lg.x0 - clear, lg.y0 - clear, lg.x1 + clear, lg.y1 + clear)
+    for p in ax.patches:
+        if grown.overlaps(p.get_window_extent(r)):
+            out.append("legend too close to a bar")
+    for t, b in values:
+        if grown.overlaps(b):
+            out.append(f"legend too close to value {t.get_text()!r}")
+    for s in ax.spines.values():
+        if s.get_visible() and grown.overlaps(s.get_window_extent(r)):
+            out.append("legend too close to a spine")
+    for level in (trot,) + GRID_AT:
+        y_l = ax.transData.transform((0, level))[1]
+        if grown.y0 < y_l < grown.y1:
+            out.append(f"legend on the line at {level} %")
     return sorted(set(out))
 
 

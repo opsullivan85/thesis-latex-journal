@@ -2,32 +2,66 @@
 \label{sec:related}
 % 2026-11-13: shortened for the 10-page limit; action-space and cyclic vs
 % acyclic contrasts kept.
+% 2026-11-13 framing (corresponding author's Overleaf comment, 12:57): the
+% authors' earlier planner, GaitNet, is presented and cited only in Sec. 4,
+% so this section does not mention it; the close prior work named here for
+% the action space is ContactNet.
+% Patrizi et al. (arXiv:2603.10878) re-checked against the full text on
+% 2026-11-13: the RL agent injects per-foot flight phases into the MPC's
+% contact schedule (Secs. III, IV-D); it sets no horizontal landing location
+% (Sec. VIII lists that as future work); "policies in this study are trained
+% for specific MPC instances and robots" (Sec. VIII); the abstract reports
+% "the emergence of acyclic gaits", with a trot typical in steady forward
+% motion (Sec. VII-D). Flat terrain and stepped pyramids, no voids.
+% ContactNet's description was checked against arXiv:2209.15566v3 (Secs.
+% III-A, III-C, III-D, IV-A, Fig. 3): a multi-output regression network,
+% trained offline on a cost function, ranks a discrete set of footholds at
+% fixed offsets from the hips and so selects which leg moves and where; the
+% swing times are preset by the chosen gait (walk: one leg at a time; trot:
+% two diagonal feet together); it is re-evaluated after each touchdown
+% (3.125 Hz); Solo12 in simulation with one centroidal trajectory optimizer.
+% "Close" (not "closest": no literature check ranks the action spaces) is
+% scoped to the action space (a leg plus a discrete foothold near its hip);
+% the first paragraph covers learned gait-free timing (Patrizi et al.).
+% 2026-11-13 review pass, sources read for the first two paragraphs:
+% Patrizi et al. (arXiv:2603.10878): RL agent outside the MPC injects
+% per-foot flight phases; acyclic gaits emerge, mostly a trot in steady
+% forward motion; policies "trained for specific MPC instances"; landing
+% locations are future work. Amatucci et al. (arXiv:2205.14277, Sec. II):
+% the MCTS simulation policy solves "the same" optimization as the MPC.
+% Taouil et al. (arXiv:2408.07508, Sec. II-C, IV-B): nodes are rated by MPC
+% rollouts or a value function fitted to that cost. Bjelonic et al.
+% (arXiv:2010.06322, abstract only): gait sequences from kinematic leg
+% utilities. Da et al. (arXiv:2009.10019, Sec. 3): an RL policy picks one of
+% nine contact configurations at 2.5 Hz for a model-based controller, with
+% a linear foot-placement heuristic.
 
 \noindent\textbf{Gaits in model-based control.} \looseness=-1
 Model-based controllers usually take their contact timing from a cyclic
 gait \citep{dicarlo_dynamic_2018, grandia_perceptive_2022}, while
 planners optimize timing or footholds \citep{winkler_gait_2018,
 jenelten_tamols_2022}. Gait-free planners choose contacts online by
-feasibility rules \citep{bjelonic_whole-body_2021} or tree search
+kinematic rules \citep{bjelonic_whole-body_2021} or tree search
 \citep{amatucci_monte_2022, taouil_non-gaited_2024}, or let a learned
-agent set an MPC's timing \citep{patrizi_rl-augmented_2026}. However,
-the planners search contacts inside the controller's optimization, and
-the learned agent sets the timing of the one MPC it is trained with,
-whereas GaitNet sends an unchanged controller one step at a time and
-moves between controllers.
+agent set an MPC's contact timing, from which acyclic gaits also emerge
+\citep{patrizi_rl-augmented_2026}. However, the tree searches rate
+contact sequences by the controller's own optimal cost, and the learned
+agent chooses no footholds and is trained for the MPC it runs with,
+whereas CADENCE sends an unchanged controller one step at a time,
+foothold included, and moves between controllers.
 
 \noindent\textbf{Learned gaits and footholds.} \looseness=-1 End-to-end
 policies decide contacts implicitly, in a large action space of joint
-targets \citep{lee_learning_2020, zhang_learning_2023}. Hybrids learn
-the parameters of a cyclic gait or per-foot contact states with
+or foot targets \citep{lee_learning_2020, zhang_learning_2023}. Hybrids
+learn the parameters of a cyclic gait or per-foot contact states with
 heuristic footholds \citep{yang_fast_2021, margolis_learning_2021,
-yang_cajun_2023}, or footholds under a fixed gait
-\citep{gangapurwala_rloc_2022, villarreal_fast_2019}, and ContactNet's
-gait sets how many legs swing \citep{bratta_contactnet_2024}. Closest is
-\citet{Sullivan2025}, whose per-candidate network already chooses each
-step's leg, swing time, and foothold, or no step, and yields an acyclic
-gait. However, it scores each candidate alone and ran only on its
-training controller.
+da_learning_2020, yang_cajun_2023}, or footholds under a fixed gait
+\citep{gangapurwala_rloc_2022, villarreal_fast_2019}. Close to CADENCE
+in its action space is ContactNet \citep{bratta_contactnet_2024}, a
+supervised network that ranks discrete footholds near each hip and so
+chooses which legs step and where, in an acyclic order. However, its
+walk or trot setting presets the swing times and how many legs swing,
+and it replans only after each touchdown.
 
 \noindent\textbf{Transfer between controllers.} \looseness=-1 Policies
 move to a new system through an inverse dynamics model fitted on its

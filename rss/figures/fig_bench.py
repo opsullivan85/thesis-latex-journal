@@ -78,6 +78,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import cadence_names  # noqa: F401  (paper name: CADENCE)
 from matplotlib import font_manager
 from matplotlib.patches import Patch
 from matplotlib.text import Text
@@ -320,11 +321,23 @@ title(ax_b, "(b) 0.20 m/s")
 
 # Legend in its own strip above (a) and (b): every bar in (a) and (b) reaches
 # at least 59 %, so no area inside the panels is free.
+# 2026-11-13 (author: "add legend all the figure"): the paper's common legend
+# style, shared by every figure script: Fira Sans 7 pt, ink text, no frame,
+# short handles. Before: black text, handlelength 1.0, handleheight 0.9,
+# handletextpad 0.4, columnspacing 1.6. One entry per bar colour, in the bar
+# order of a group and with Table 1's method names; nothing else is drawn that
+# needs a key (the numbers on the bars are the bars' values).
+LEGEND_STYLE = dict(frameon=False, fontsize=7, labelcolor=INK, handlelength=1.6,
+                    handletextpad=0.5, columnspacing=1.2, labelspacing=0.3)
 _x_mid = (ax_a.get_position().x0 + ax_b.get_position().x1) / 2
-fig.legend(handles=[Patch(label=a, linewidth=0, **BAR_STYLE[a]) for a in BAR_ARMS],
-           loc="upper center", bbox_to_anchor=(_x_mid, 1.0), ncol=4, frameon=False,
-           fontsize=7, handlelength=1.0, handleheight=0.9, handletextpad=0.4,
-           columnspacing=1.6, borderaxespad=0.0, borderpad=0.15)
+legend = fig.legend(handles=[Patch(label=a, linewidth=0, **BAR_STYLE[a]) for a in BAR_ARMS],
+                    loc="upper center", bbox_to_anchor=(_x_mid, 1.0), ncol=4,
+                    borderaxespad=0.0, borderpad=0.15, **LEGEND_STYLE)
+# Every arm drawn in (a) and (b) has exactly one legend entry, in bar order
+# (compared on the data keys; cadence_names shows "CADENCE" for "GaitNet").
+assert tuple(PANEL_A) == tuple(PANEL_B) == BAR_ARMS
+assert [t.get_text() for t in legend.get_texts()] == [
+    a.replace("GaitNet", "CADENCE") for a in BAR_ARMS], "legend entries"
 
 
 # ---------------------------------------------------------------- layout checks

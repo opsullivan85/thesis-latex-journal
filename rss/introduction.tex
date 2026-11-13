@@ -3,6 +3,29 @@
 % 2026-11-13 refocus (author: "focus on the small action space and emergent
 % fully acyclic gait"). Acyclicity numbers: earlier evaluation run, successful
 % trials only (App. F); macros \corlGait* in constants.tex.
+% 2026-11-13 framing (corresponding author's Overleaf comment, 12:57): the
+% authors' earlier planner, GaitNet (Sullivan, 2025), is presented and cited
+% in the Method section only (start of Sec. 4); the abstract and Secs. 1-3
+% do not mention it. This replaced the self-contained framing of the same
+% morning. Rules kept: no "first", "novel", "new" or "to our knowledge" for
+% the action space or the acyclic gait (no literature check was done for
+% them, and Sec. 4 credits GaitNet with the per-tick choice); the only "to
+% our knowledge" claim is the move between two model-based controllers.
+% Contribution 1 is worded as the planner and what its network adds (mixer,
+% history), since Sec. 4 says the per-tick choice itself comes from GaitNet.
+% 2026-11-13, same comments: the "two problems" paragraph now states both as
+% problems and no longer compares our training controller with OCS2. The
+% numbers it held are in Sec. 4.3 (overshoot of the convex MPC), Sec. 5.2
+% and Fig. 1c (OCS2's RMS landing error) and App. A.
+% 2026-11-13 review pass: the prior-work sentence no longer says that the
+% gait-free planners search "inside the controller's optimization". Sources
+% read: Bjelonic et al. (arXiv:2010.06322, abstract: kinematic leg
+% utilities); Amatucci et al. (arXiv:2205.14277) and Taouil et al.
+% (arXiv:2408.07508), tree search beside the MPC; Patrizi et al.
+% (arXiv:2603.10878): an RL agent outside the MPC injects per-foot flight
+% phases, is "trained for specific MPC instances", and leaves landing
+% locations to future work. Lee et al. (2020) output foot-trajectory
+% parameters and foot-position residuals, hence "joint or foot targets".
 
 \input{fig_overview}
 
@@ -15,40 +38,38 @@ walk lifts one leg at a time, in a fixed order and on a fixed period,
 wherever the safe footholds are. On sparse footholds, a cycle can
 therefore call for a step when no safe foothold is in reach.
 
-\looseness=-1 Choosing the gait online raises two problems. First,
-contact decisions are discrete, so choosing them inside a model
+\looseness=-1 Choosing the gait online instead raises two problems.
+First, contact decisions are discrete, so choosing them inside a model
 predictive controller (MPC) makes its optimization mixed-integer
 \citep{Wensing2022Nov}, whereas learning them end to end replaces the
-model-based controller with a policy over joint targets
+model-based controller with a policy over joint or foot targets
 \citep{lee_learning_2020}. Second, a planner outside the controller only
-commands where a foot should land, and the closed-loop map from command
-to landing differs between controllers. The convex MPC we train on
-overshoots the command by up to \corlOvershootFastMax\,cm, about twice
-the \corlMarginCm\,cm margin our footholds keep from voids, whereas OCS2
-lands an uncorrected command \verify{\corlOcsLandRmsNoIdm\,cm} RMS away on flat
-ground. A planner trained on one controller can hence miss a safe
-foothold on another.
+commands where a foot should land, and the controller lands the foot at
+an offset from that command. This offset differs between controllers and
+can exceed the margin that keeps a chosen foothold clear of voids, so a
+planner trained with one controller can miss safe footholds with
+another.
 
-\looseness=-1 Gait-free planners search contact timing inside the
-controller's optimization \citep{bjelonic_whole-body_2021,
-amatucci_monte_2022, taouil_non-gaited_2024, patrizi_rl-augmented_2026},
-and learned hybrids tune parameters of a cyclic gait or learn footholds
-under a fixed timing \citep{yang_fast_2021, margolis_learning_2021,
-gangapurwala_rloc_2022, bratta_contactnet_2024}. The per-candidate
-network of \citet{Sullivan2025} generates an acyclic gait but ran only
-on its training controller, and \citet{akizhanov_learning_2024} correct
-a nonlinear MPC's contact targets by hindsight regression within a fixed
-gait. To our knowledge, no gait-free footstep planner has been moved
-between two model-based controllers.
+\looseness=-1 Gait-free planners choose contact timing by kinematic
+rules or tree search \citep{bjelonic_whole-body_2021,
+amatucci_monte_2022, taouil_non-gaited_2024}, or learn it for a given
+MPC without choosing footholds \citep{patrizi_rl-augmented_2026}, and
+learned hybrids choose the parameters of a cyclic gait, per-foot contact
+states, or footholds under a preset timing \citep{yang_fast_2021,
+margolis_learning_2021, gangapurwala_rloc_2022,
+bratta_contactnet_2024}. At the footstep level,
+\citet{akizhanov_learning_2024} correct a nonlinear MPC's contact
+targets by hindsight regression, but within a fixed gait. To our
+knowledge, no gait-free footstep planner has been moved between two
+model-based controllers.
 
-\looseness=-1 We propose GaitNet (Fig.~\ref{fig:overview}), which keeps
-the name of the network of \citet{Sullivan2025} and extends it into a learned
+\looseness=-1 We propose CADENCE (Fig.~\ref{fig:overview}), a learned
 planner with a small action space on top of an unchanged model-based
-controller. Every \corlControlTickMs\,ms, a \emph{tick}, it takes the
-\emph{no-step option} or starts one step: one of at most
-\corlTotalCandidates{} discrete choices, a leg and one of
-\corlTrainCandidatesPerLeg{} safe cells near its hip, the
-\emph{candidates} (Fig.~\ref{fig:action}), plus a swing time. Since a
+controller. Every \corlControlTickMs\,ms, a \emph{tick}, it makes one
+of at most \corlTotalCandidates{} discrete choices: the \emph{no-step
+option}, or one step, a leg and one of \corlTrainCandidatesPerLeg{}
+safe cells near its hip, the \emph{candidates}
+(Fig.~\ref{fig:action}), plus a swing time. Since a
 step starts at the tick it is chosen, the gait is never specified. Its
 timing, order, overlap, and pairing emerge from these choices, with no
 gait schedule, phase variable, or gait reward. A small transformer, the
@@ -56,22 +77,21 @@ gait schedule, phase variable, or gait reward. A small transformer, the
 footstep model} (IFM), fitted by hindsight regression on logged steps,
 turns each chosen foothold into a command expected to land the foot
 there. Trained with proximal policy optimization (PPO) on the convex
-MPC, GaitNet runs frozen on OCS2's nonlinear MPC (NMPC) and whole-body
-controller (WBC), with only the IFM refitted on \verify{fewer than 20{,}000} OCS2
+MPC, CADENCE runs frozen on OCS2's nonlinear MPC (NMPC) and whole-body
+controller (WBC), with only the IFM refitted on fewer than 20{,}000 OCS2
 steps. Our contributions are:
 \begin{enumerate}\setlength{\itemsep}{0pt}
-  \item A small per-tick action space for stepping without a gait
-    schedule on an unchanged model-based controller
-    (Secs.~\ref{subsec:method-step}--\ref{subsec:method-network}). It
-    extends the per-candidate network of \citet{Sullivan2025} with the
-    mixer and a history, which we do not isolate.
-  \item Evidence that the emergent acyclic gait, first generated by
-    \citet{Sullivan2025} on its training controller, beats a model-based
-    controller's own cyclic gaits: on OCS2, GaitNet's gait had neither a
-    fixed period nor a fixed order, yet mostly paired diagonal legs, and
-    succeeded more often than OCS2's trot and static walk
-    (Sec.~\ref{subsec:exp-transfer}; acyclicity measured on one earlier
-    run).
+  \item A learned step planner with a small per-tick action space, on an
+    unchanged model-based controller, whose network compares the choices
+    with a candidate mixer and a history
+    (Secs.~\ref{subsec:method-step}--\ref{subsec:method-network}). We do
+    not isolate the mixer or the history.
+  \item An emergent acyclic gait, measured and compared with a
+    model-based controller's own cyclic gaits: on OCS2, CADENCE's gait
+    had neither a fixed period nor a fixed order, yet mostly paired
+    diagonal legs, and CADENCE succeeded more often than OCS2's trot and
+    static walk (Sec.~\ref{subsec:exp-transfer}; acyclicity measured on
+    one earlier run of one policy).
   \item Transfer between model-based controllers by refitting only the
     IFM (Secs.~\ref{subsec:method-idm}
     and~\ref{subsec:method-deployment}), where simpler corrections fell
@@ -80,7 +100,7 @@ steps. Our contributions are:
 \end{enumerate}
 
 \looseness=-1 Averaged over \corlNumSeedsGaitNet{} training seeds,
-GaitNet succeeded in \corlBenchFull\% of OCS2 benchmark trials, against
+CADENCE succeeded in \corlBenchFull\% of OCS2 benchmark trials, against
 \corlBenchTrot\% and \corlBenchStaticWalk\% for OCS2's trot and static
 walk, and its lead over the trot grew to 30 percentage points in both
 \corlBenchVoidHigh\% cells (Sec.~\ref{sec:experiments}).

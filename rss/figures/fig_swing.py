@@ -53,6 +53,19 @@ Design rules (user, 2026-11-03): no error bars, whiskers, bands or heatmaps;
 plain lines with the values printed; at most about four short labels.
 Style (rcParams, colours, line styles, layout check) copied from fig_gait.py.
 
+LEGEND (author, 2026-11-13: "add legend all the figure"). One row in the top
+margin, above the axes, in the paper's common legend style: solid indigo line
+= GaitNet, dashed grey line = OCS2's own trot, light dimension mark = T range
+(the commanded limits). The direct labels that said the same were removed:
+the arm names above the two value labels and the "T range" text above the
+arrow. The two value labels (median, number of counted swings) stay, in the
+arm's colour. Legend text is 7.1 pt on the 74 mm canvas, i.e. 7.0 pt when
+printed at 0.48\\textwidth (72.96 mm).
+"T range" is the legend's only mathtext label (italic T). matplotlib's PDF
+backend draws mathtext a fraction of a point above the text baseline (0.78 pt
+here), so in the PDF the entry sat above the other two; the rise is read from
+the mathtext parser and undone for the PDF only (see "PDF baseline" below).
+
 Size: 74 mm x 42 mm, half of the PMLR \\textwidth (152 mm).
 
 usage: python fig_swing.py   (writes fig_swing.pdf and fig_swing.png here)
@@ -64,11 +77,16 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import cadence_names  # noqa: F401  (paper name: CADENCE)
 import numpy as np
 import pandas as pd
 from matplotlib import font_manager
+from matplotlib.legend_handler import HandlerBase
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 from matplotlib.text import Text
-from matplotlib.transforms import Bbox
+from matplotlib.textpath import text_to_path
+from matplotlib.transforms import Bbox, ScaledTranslation
 
 import gait_stats as gs
 
@@ -150,7 +168,7 @@ plt.rcParams.update({
 })
 INK, GRID = "#1F2937", "#E5E7EB"
 INDIGO, GRAY = "#4F46E5", "#4B5563"
-MARK, MARK_TEXT = "#B6BCC6", "#6B7280"   # light T-range marker and its label
+MARK = "#B6BCC6"                         # light T-range marker (its name is in the legend)
 VALUE_PT = 7.0
 HALO = dict(boxstyle="square,pad=0.1", facecolor="white", edgecolor="none")
 ARM_COLOR = {"c0": INDIGO, "trot": GRAY}
@@ -158,6 +176,18 @@ ARM_COLOR = {"c0": INDIGO, "trot": GRAY}
 LINE_STYLE = {"c0": dict(color=INDIGO, lw=1.4),
               "trot": dict(color=GRAY, lw=1.2, ls=(0, (3.2, 1.8)))}
 XTICK_PAD = 3.5                          # pt, as in fig_gait.py
+# Common legend style of the paper's figures (2026-11-13): Fira Sans, ink, no
+# frame, short handles. 7.1 pt here prints as 7.0 pt: the 74 mm canvas is
+# included at 0.48\textwidth = 72.96 mm.
+LEGEND_PT = 7.1
+LEGEND_KW = dict(frameon=False, fontsize=LEGEND_PT, labelcolor=INK, handlelength=1.6,
+                 handletextpad=0.5, columnspacing=1.2, labelspacing=0.3,
+                 borderpad=0.0, borderaxespad=0.0)
+LEGEND_GAP_MM = 1.4                      # legend bottom above the axes top
+# The T-range dimension mark (two verticals and a double-headed arrow), used
+# for the drawn mark and for its legend handle.
+T_ARROW = "<|-|>,head_length=0.35,head_width=0.13"
+T_ARROW_SCALE = 7.5                      # pt; annotate()'s default (font.size)
 
 # ---------------------------------------------------------------- layout [mm]
 MM = 1 / 25.4
@@ -189,11 +219,9 @@ assert max(HIST["trot"].max(), HIST["c0"].max()) < Y_TOP_TICK - 5, "peak too clo
 for x in (T_MIN, T_MAX):
     ax.plot([x, x], [0, Y_BRACKET + 1.5], color=MARK, lw=0.7, zorder=1, solid_capstyle="butt")
 ax.annotate("", xy=(T_MIN, Y_BRACKET), xytext=(T_MAX, Y_BRACKET), annotation_clip=False,
-            arrowprops=dict(arrowstyle="<|-|>,head_length=0.35,head_width=0.13", color=MARK,
+            arrowprops=dict(arrowstyle=T_ARROW, mutation_scale=T_ARROW_SCALE, color=MARK,
                             lw=0.7, shrinkA=0, shrinkB=0))
-ax.annotate("$T$ range", ((T_MIN + T_MAX) / 2, Y_BRACKET), xytext=(0, 1.5),
-            textcoords="offset points", ha="center", va="bottom",
-            fontsize=VALUE_PT, color=MARK_TEXT, annotation_clip=False)
+# The mark is named in the legend ("T range"), not on the plot.
 
 ax.set_xlim(0, X_MAX)
 ax.set_xticks(np.arange(0, X_MAX + 1e-9, 0.1))
@@ -207,12 +235,45 @@ ax.set_xlabel("Measured swing [s]", labelpad=2)
 ax.set_ylabel("Share of swings [%]", labelpad=2)
 ax.tick_params(axis="x", pad=XTICK_PAD)
 
-# One label per arm, right of the T_MAX line (x [s], top [%]).
-LABEL = {"trot": (0.318, 77.0), "c0": (0.318, 41.0)}   # blocks ~26 % tall; ~10 % gap
-for a, name in (("trot", "OCS2's own trot"), ("c0", "GaitNet")):
-    ax.text(*LABEL[a], f"{name}\nmedian {MEDIAN[a]:.3f} s\n{COUNT[a]:,} swings",
+# One value label per arm, in the arm's colour, right of the T_MAX line
+# (x [s], top [%]). The legend names the arms, so the labels carry values only.
+LABEL = {"trot": (0.318, 78.5), "c0": (0.318, 38.5)}   # ~17 % tall: between two grid lines
+for a in ("trot", "c0"):
+    ax.text(*LABEL[a], f"median {MEDIAN[a]:.3f} s\n{COUNT[a]:,} swings",
             ha="left", va="top", fontsize=VALUE_PT, color=ARM_COLOR[a],
             linespacing=1.15, zorder=4, bbox=HALO)
+assert len([t for t in ax.texts if t.get_text().strip()]) == 2   # two value labels, no names
+
+
+# ---------------------------------------------------------------- legend
+class TRange:
+    """Legend proxy of the T-range dimension mark."""
+
+
+class HandlerTRange(HandlerBase):
+    """Draws the mark small: two light verticals and the double-headed arrow."""
+
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize,
+                       trans):
+        x0, x1 = -xdescent, width - xdescent
+        y0, y1 = -ydescent, height - ydescent
+        arts = [Line2D([x, x], [y0, y1], color=MARK, lw=0.7, solid_capstyle="butt")
+                for x in (x0, x1)]
+        arts.append(FancyArrowPatch((x0, (y0 + y1) / 2), (x1, (y0 + y1) / 2), arrowstyle=T_ARROW,
+                                    mutation_scale=T_ARROW_SCALE, color=MARK, lw=0.7,
+                                    shrinkA=0, shrinkB=0))
+        for a in arts:
+            a.set_transform(trans)
+        return arts
+
+
+# One row in the top margin, starting at the y axis. Handles repeat the drawn
+# marks: the two step lines and the T-range mark.
+legend = fig.legend(handles=[Line2D([], [], **LINE_STYLE["c0"]), Line2D([], [], **LINE_STYLE["trot"]),
+                             TRange()],
+                    labels=["GaitNet", "OCS2's own trot", "$T$ range"], ncol=3, loc="lower left",
+                    bbox_to_anchor=(LEFT / FIG_W, (FIG_H - TOP + LEGEND_GAP_MM) / FIG_H),
+                    handler_map={TRange: HandlerTRange()}, **LEGEND_KW)
 
 
 # ---------------------------------------------------------------- layout checks
@@ -262,6 +323,17 @@ def layout_problems(fig, ax):
                 if hit.any():
                     out.append(f"label on data: {t.get_text()!r}")
                     break
+    # The legend: three entries, inside the canvas, wholly above the axes (so
+    # it covers no line, value label or the T-range mark) and no wider than them.
+    lg = legend.get_window_extent(r)
+    if len(legend.get_texts()) != 3:
+        out.append("legend must have three entries")
+    if not (lg.x0 >= canvas.x0 and lg.y0 >= canvas.y0 and lg.x1 <= canvas.x1 and lg.y1 <= canvas.y1):
+        out.append("legend outside the canvas")
+    if lg.y0 < clip.y1 + 0.5 / 25.4 * fig.dpi:
+        out.append("legend reaches into the axes")
+    if lg.x0 < clip.x0 - 1 or lg.x1 > clip.x1 + 1:
+        out.append("legend wider than the axes")
     return sorted(set(out))
 
 
@@ -271,6 +343,39 @@ for p in problems:
 assert not problems, "layout problems, see above"
 
 fig.savefig(HERE / "fig_swing.png", dpi=300)
+
+
+# ---------------------------------------------------------------- PDF baseline of "T range"
+def pdf_mathtext_rise_pt(text: Text) -> float:
+    """Height [pt] by which matplotlib's PDF backend draws a mathtext Text above its baseline.
+
+    The backend parses the string at 72 dpi; the parser rounds the box height h
+    [pt] up to a whole point and puts the glyphs ceil(h) - h above the baseline
+    (_mathtext.Output.to_vector; RendererPdf.draw_mathtext, "TODO: fix
+    positioning"). Agg rounds to pixels instead, so the PNG and the layout
+    check are not affected."""
+    glyphs = text_to_path.mathtext_parser.parse(text.get_text(), 72,
+                                                text.get_fontproperties()).glyphs
+    rises = {round(float(oy), 6) for _font, _size, _num, _ox, oy in glyphs}
+    assert len(rises) == 1, rises        # one baseline: no sub- or superscripts
+    return rises.pop()
+
+
+# Lower the label by that rise, for the PDF only (the PNG is already saved).
+# Verified with matplotlib 3.10.7 on a 600 dpi render of the PDF: the cap tops
+# of C, O and T are on one pixel row.
+VERIFIED_MPL = "3.10.7"
+t_range = legend.get_texts()[2]
+assert t_range.get_text() == "$T$ range", t_range.get_text()
+PDF_RISE_PT = pdf_mathtext_rise_pt(t_range)
+assert 0.0 <= PDF_RISE_PT < 1.0, PDF_RISE_PT
+t_range.set_transform(t_range.get_transform()
+                      + ScaledTranslation(0, -PDF_RISE_PT / 72, fig.dpi_scale_trans))
+print(f"PDF: 'T range' lowered by {PDF_RISE_PT:.2f} pt (mathtext baseline of the PDF backend)")
+if matplotlib.__version__ != VERIFIED_MPL:
+    print(f"note: baseline correction verified with matplotlib {VERIFIED_MPL}, this is "
+          f"{matplotlib.__version__}; compare 'T range' with the other legend entries in the PDF")
+
 raw = HERE / "fig_swing.raw.pdf"
 fig.savefig(raw)
 try:

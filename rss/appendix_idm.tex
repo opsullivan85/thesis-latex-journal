@@ -1,9 +1,9 @@
 % ---------------------------------------------------------------------------
 % Appendix D: analysis of the IFM, cited by Sec. 4.3 (subsec:idm-theory) and
-% by App. A (clearance of the candidate margin). 2026-11-13 pass: only what
+% by App. A (clearance (cut 2026-11-13) of the candidate margin). 2026-11-13 pass: only what
 % those two pointers need. Assumption (iii) is now injectivity instead of a
 % convex set of commands per landing; Prop. 2 (attenuation bias) is a remark
-% without proof; the rotated-square part of the clearance lemma, the beta
+% without proof; the rotated-square part of the clearance (cut 2026-11-13) lemma, the beta
 % decomposition and the Gaussian margin remark are removed (soderstrom_errors_2007
 % is no longer cited here). Previous version:
 % git history (fd1856c and later) and scratchpad/appendix_idm_before_2026-11-13_pass.tex.
@@ -25,30 +25,35 @@ error of the command $\mathbf u = I^c(\zeta,\mathbf u^\star)$ split as
   \label{eq:mean-forward}
 \end{equation}
 where the residual $\boldsymbol\eta$ has mean zero given $(\zeta,\mathbf
-u)$. An IFM with the inputs $\zeta$ therefore acts only on the mean error
-$\boldsymbol\beta$, the part of the landing error that its inputs predict,
-and none removes $\boldsymbol\eta$. This appendix states when the
-regression of Eq.~\eqref{eq:idm-loss} cancels $\boldsymbol\beta$, the bias
-that remains otherwise, and the clearance that the candidate margin leaves
-for $\boldsymbol\beta + \boldsymbol\eta$.
+u)$, and so given the IFM's inputs $(\zeta,\mathbf u^\star)$ when
+$I^c(\zeta,\cdot)$ is one-to-one. Such an IFM therefore acts only on the
+mean error $\boldsymbol\beta$, the part of the landing error that its
+inputs predict, and none removes $\boldsymbol\eta$. This appendix states
+when the regression of Eq.~\eqref{eq:idm-loss} cancels $\boldsymbol\beta$
+and which bias remains otherwise.
 
 \noindent\textbf{Notation.}
 \looseness=-1 We drop the superscript $c$ from $I^c$. Let $P_c$ be the
 distribution of the logged tuples $(\zeta,\mathbf u,\mathbf o)$, one per
-step the controller executed, with $\mathbb E_{P_c}\|\mathbf u\|^2 <
-\infty$, and let $I_\star(\zeta,\mathbf o) := \mathbb E_{P_c}[\mathbf u
-\mid \zeta,\mathbf o]$ be the function that the regression estimates. Let
-$\mathcal S$ be the support of the logged pairs $(\zeta,\mathbf u)$. Norms
-are Euclidean unless marked.
+step the controller executed, with $\mathbb E_{P_c}(\|\mathbf u\|^2 +
+\|\mathbf o\|^2) < \infty$, and let $I_\star(\zeta,\mathbf o) := \mathbb
+E_{P_c}[\mathbf u \mid \zeta,\mathbf o]$ be the function that the
+regression estimates. Let $\mathcal S$ be the support of the logged pairs
+$(\zeta,\mathbf u)$. \emph{Deployment} means any use of a fitted IFM, in
+training or on OCS2, and a \emph{deployment pair} is a pair
+$(\zeta,\mathbf u^\star)$ at which it is queried. In
+Assumption~\ref{as:idm-exact}, $\bar F_c$ is the conditional mean under
+$P_c$; in Eq.~\eqref{eq:mean-forward} it is taken under the law of the
+deployed steps, and (i) makes the two agree. Norms are Euclidean.
 
-\subsection{When the Regression Inverts the Controller}
-
+% 2026-11-13 reduction: the lone run-in head "When the regression inverts the
+% controller." that stood here is cut (it held no text of its own).
 \begin{assumption}[Exact relabelling]
 \label{as:idm-exact}
-(i)~\emph{Same landing law:} the law of $\mathbf o$ given $(\zeta,\mathbf
-u)$ is the same when logging and at deployment.
-(ii)~\emph{No residual:} $\mathbf o = \bar F_c(\zeta,\mathbf u)$ for every
-$(\zeta,\mathbf u) \in \mathcal S$.
+(i)~\emph{Same landing law:} one kernel gives the law of $\mathbf o$ at
+every $(\zeta,\mathbf u) \in \mathcal S$, when logging and at deployment.
+(ii)~\emph{No residual:} at every $(\zeta,\mathbf u) \in \mathcal S$ this
+law is the point mass at $\bar F_c(\zeta,\mathbf u)$.
 (iii)~\emph{One command per landing:} for every $\zeta$, the map $\mathbf
 u \mapsto \bar F_c(\zeta,\mathbf u)$ is one-to-one on the commands with
 $(\zeta,\mathbf u) \in \mathcal S$.
@@ -84,8 +89,9 @@ $I = I_\star$ almost everywhere.
 support, the smallest such set. By (ii), a logged step lands at $\bar
 F_c(\zeta,\mathbf u)$ with $(\zeta,\mathbf u) \in \mathcal S$, and by (iii)
 only one such command reaches a given $(\zeta,\mathbf o)$. The logged
-command is therefore almost surely a function of $(\zeta,\mathbf o)$, so
-it equals its conditional mean, and $(\zeta, I_\star(\zeta,\mathbf o)) \in
+command is therefore almost surely a measurable function of
+$(\zeta,\mathbf o)$, since a continuous one-to-one map on the closed set
+$\mathcal S$ has a Borel inverse, so it equals its conditional mean, and $(\zeta, I_\star(\zeta,\mathbf o)) \in
 \mathcal S$ with $\bar F_c(\zeta, I_\star(\zeta,\mathbf o)) = \mathbf o$
 for $P_c$-almost every $(\zeta,\mathbf o)$. The set where both hold is
 closed, since $\mathcal S$ is closed and $\bar F_c$ and $I_\star$ are
@@ -99,29 +105,34 @@ $\bar F_c(\zeta, I(\zeta,\mathbf u^\star)) = \mathbf u^\star$ at
 deployment.
 \end{idmproof}
 
-\noindent\textbf{Why each condition matters.}
-\looseness=-1 Without (ii), the regression averages the command over the
-hidden states that share $(\zeta,\mathbf o)$, so it is biased even with
-unlimited data \citep{eysenbach_imitating_2022}, pulling landings toward
-the mean logged landing, the attenuation bias of a regression on a noisy
-input \citep{fuller_measurement_1987}.
-Without (iii), commands from two branches of the inverse that land at the
-same point can average to one that lands at neither
-\citep{jordan_forward_1992}. Without (iv), the held-out error says
-nothing about targets outside the logged landings.
+\noindent\textbf{Why conditions (ii)--(iv) matter.}
+\looseness=-1 Without (ii), the regression averages the command over
+hidden states that share $(\zeta,\mathbf o)$, so it is generally biased
+even with unlimited data \citep{eysenbach_imitating_2022}. For example,
+keep (i) and (v): if, given $\zeta$, $\bar F_c$ is affine in $\mathbf u$
+with slope $A$ and the logged commands and the residual are jointly
+Gaussian with covariances $\Sigma_u$ and $\Sigma_\eta \succ 0$, the mean
+landing is $\bar{\mathbf o} + \Lambda(\mathbf u^\star - \bar{\mathbf o})$,
+where $\bar{\mathbf o}$ is the mean logged landing for that $\zeta$ and
+$\Lambda = A\Sigma_u A^\top (A\Sigma_u A^\top + \Sigma_\eta)^{-1}$ has
+eigenvalues in $[0,1)$: the attenuation bias of a regression on a
+noisy input \citep{fuller_measurement_1987}.
+Without (iii), two commands with one landing can average to
+one that lands elsewhere \citep{jordan_forward_1992}, and without (iv), the held-out error is
+silent on targets outside the logged landings.
 
 \noindent\textbf{The deployed IFMs.}
 \looseness=-1 Neither deployed IFM meets the assumption. Both leave a
 residual, since $\zeta$ omits the terrain and the controller's state, so
-(ii) fails, and neither fit is exact, so (v) fails. The training
+(ii) fails, and neither fit is exact, so (v) fails. On OCS2, (iii) can
+also fail, since a command outside a planar region is projected onto
+it (App.~\ref{app:deployment}). The training
 controller's IFM also departs from (i), since it is fitted without the
-controller randomization it later runs under
-(Sec.~\ref{subsec:method-training}). The OCS2 IFM departs from (iv),
-since it is fitted on steps sent through the training controller's IFM,
-so its logged landings cover the footholds GaitNet reached through that
-IFM rather than the deployed targets. Logging again with the deployed IFM
-\citep{christiano_transfer_2016} would narrow this gap. Condition (i) can
-fail even on one controller, however, since the logging policy and
-GaitNet choose commands from terrain that $\zeta$ omits.
+controller randomization it runs under
+(Sec.~\ref{subsec:method-training}), and the OCS2 IFM from (iv), since
+its logged landings cover the footholds CADENCE reached through the
+training controller's IFM, not the deployed targets. Even on one
+controller, (i) can fail, since the logging policy and
+CADENCE choose commands from terrain that $\zeta$ omits.
 Sec.~\ref{subsec:exp-why} therefore tests the refit against controls
-instead of relying on Proposition~\ref{prop:idm-mean}.
+rather than rely on Proposition~\ref{prop:idm-mean}.

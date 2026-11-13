@@ -1,15 +1,16 @@
 % App. F (new, 2026-11-12): the earlier evaluation run behind the gait
-% statistics (fig:gait, fig:swing-transfer a) and the frames (fig:frames). Not
-% the runs of Table 1.
-% 2026-11-13 (author's new focus): the fig:frames float moved here from the
-% Results (no main-text reference to it remains), and the definitions behind
+% statistics (fig:gait, fig:swing-transfer a). Not the runs of Table 1.
+% 2026-11-13 reduction (author: "reduce the appendix"): the frames figure
+% (fig:frames, figures/fig_frames, cited nowhere in the main text) and its
+% "Frames" paragraph are cut, and with them every mention of the frames and of
+% the separate ramp trial; the prose is tightened. No label fig:frames remains.
+% 2026-11-13 (author's new focus): the definitions behind
 % the acyclicity measures added ("Period and stepping order"; macros
 % \corlGaitEventRepeatPct ff. in constants.tex, reproduced from timming.md by
 % the session script writerB/acyclicity_stats.py, counts below from its output).
 % 2026-11-13 appendix pass (author: "only the math needed ... add the
 % important things"): kept the disclosure of the run, the swing detector, the
-% overlap counts, the definitions of the measures used in Sec. 5 and the
-% frames. Cut:
+% overlap counts and the definitions of the measures used in Sec. 5. Cut:
 % this run's six per-cell success rates (GaitNet 100/93/96 and 96/87/77, trot
 % 97/89/80 and 94/81/63 of 100, at 0.10 and 0.20 m/s), the step rates
 % (\corlGaitStepsSlow / \corlGaitStepsFast steps/s against the trot's
@@ -17,8 +18,7 @@
 % (\corlGaitNonDiagEasy to \corlGaitNonDiagHard per trial), the "no share of
 % time with all feet down" remark, the step cap of GaitNet-Single (it used the
 % sweep's unconfirmed steps per metre, \corlOcsStepsPerM*, and is cited
-% nowhere), and the video file names in the prose (now in the comment above
-% the frames paragraph).
+% nowhere), and the video file names in the prose.
 % Sources: rss/timming.md (CSV, one row per measured swing; author,
 % 2026-11-04) analysed by figures/gait_stats.py (report re-run on 2026-11-12:
 % pairs 24370 diagonal / 227 rear / 158 side / 38 front = 24793; diagonal
@@ -35,120 +35,84 @@
 % The swing detector's threshold (1.5 cm above a rolling minimum) is only
 % presumed in gait_stats.py, so no value is printed.
 
-\section{Earlier Evaluation Run: Gait Statistics and Frames}
+\section{Earlier Evaluation Run: Gait Statistics}
 \label{app:earlier-run}
 
 \noindent\textbf{The run.}
-\looseness=-1 The gait statistics of Figs.~\ref{fig:gait}
-and~\ref{fig:swing-transfer}a and the frames of Fig.~\ref{fig:frames}b
-come from an earlier evaluation run on OCS2, not from the runs of
-Table~\ref{tab:results}. It ran one GaitNet policy, deployed as in
-Sec.~\ref{subsec:method-deployment} with an OCS2 IFM and depth-camera
-terrain, and OCS2's own trot. Its worlds differ from those of
-Table~\ref{tab:results}, but it used the benchmark's six cells,
+\looseness=-1 The gait statistics (Figs.~\ref{fig:gait}
+and~\ref{fig:swing-transfer}a) come from an earlier evaluation run on
+OCS2, not from the runs of Table~\ref{tab:results}. It ran one CADENCE
+policy, deployed as in Sec.~\ref{subsec:method-deployment} with an OCS2
+IFM and depth-camera terrain, and OCS2's own trot, on other worlds than
+Table~\ref{tab:results} but with the benchmark's six cells,
 \corlBenchTrialsPerCell{} trials of \corlBenchTrialSeconds\,s per cell,
-and the benchmark's success criterion. GaitNet succeeded in
-\corlGaitTrialsGaitNet{} of \corlBenchTrialsPerArm{} trials (91.5\%) and
-the trot in \corlGaitTrialsTrot{} (84.0\%). Both succeeded more often
-than in Table~\ref{tab:results}, the trot by far more (84.0 against
-\corlBenchTrot\%), so GaitNet's lead over the trot was 7.5 points in
-this run against 17.3 in Table~\ref{tab:results}. No success rate in the
-main text comes from this run, which we use only for the gait statistics
-and the frames of Fig.~\ref{fig:frames}b. Fig.~\ref{fig:frames}a shows a
-separate OCS2 trial of the same policy on a ramp track outside the
-benchmark.
+and success criterion. CADENCE succeeded in \corlGaitTrialsGaitNet{} of
+\corlBenchTrialsPerArm{} trials (91.5\%) and the trot in
+\corlGaitTrialsTrot{} (84.0\%). Both succeeded more often than in
+Table~\ref{tab:results}, the trot by far more (\corlBenchTrot\% there),
+so CADENCE's lead was 7.5 points in this run against 17.3 in
+Table~\ref{tab:results}. No success rate in the main text comes from
+this run.
 
 \noindent\textbf{Swing detection.}
-\looseness=-1 The run's log holds one row per swing, taken from the
-simulator's ground-truth foot heights: \verify{a foot counts as in swing
-while its height is above a threshold}. The heights are sampled about
-every 21\,ms of simulated time (median spacing, 20 to 34\,ms within a
-trial), so each lift-off and touchdown is known to about one sample.
-The statistics use only the successful trials, \corlGaitTrialsGaitNet{}
-of GaitNet and \corlGaitTrialsTrot{} of the trot, and only the swings
-that land on the \emph{void field}, between the time the rear feet reach
-the voids and the end of the trial: \corlGaitSwingsGaitNet{} swings of
-GaitNet and \corlGaitSwingsTrot{} of the trot. Since the trot failed
-more often in the hardest cells, fewer of its trials there enter the
-statistics, so the two methods are measured on different mixes of
-trials. The detector also shortens swings. The trot, scheduled with
-\corlTrotSwing\,s swings on a \corlTrotPeriod\,s period, measures a
-median swing of \corlGaitTrotSwingMeasured\,s, although its median time
-between a leg's lift-offs, \corlGaitTrotPeriodMeasured\,s, matches the
-period. About a quarter of GaitNet's measured swings, moreover, fall
-below its shortest commanded swing time of \corlSwingDurationMin\,s.
-Hence the measured swing medians, \corlGaitSwingMedian{} and
-\corlGaitSwingMedianTrot\,s, compare GaitNet with the trot under the
-same detector and do not measure how long a swing lasted.
+\looseness=-1 The run's log holds one row per swing, from the
+simulator's ground-truth foot heights. The heights are sampled about
+every 21\,ms of simulated time (median; 20 to 34\,ms within a trial),
+so each lift-off and touchdown is known to about one sample. The
+statistics use only successful trials and only swings that land on the
+\emph{void field}, from when the rear feet reach the voids to the end
+of the trial: \corlGaitSwingsGaitNet{} swings of
+CADENCE and \corlGaitSwingsTrot{} of the trot. Since the trot failed
+more often in the hardest cells, the two methods are measured on
+different mixes of trials. The detector also shortens swings: the trot,
+scheduled with \corlTrotSwing\,s swings on a \corlTrotPeriod\,s period,
+measures a median swing of \corlGaitTrotSwingMeasured\,s, although its
+median time between a leg's lift-offs, \corlGaitTrotPeriodMeasured\,s,
+matches the period, and about a quarter of CADENCE's measured swings
+fall below its shortest commanded swing of
+\corlSwingDurationMin\,s. Hence the measured swing medians,
+\corlGaitSwingMedian{} and \corlGaitSwingMedianTrot\,s, compare the two
+methods under one detector and do not measure swing durations.
 
 \noindent\textbf{Overlapping swings.}
 \looseness=-1 Two swings of different legs overlap when their measured
-intervals intersect. Of GaitNet's \corlGaitOverlapPairs{} overlapping
+intervals intersect. Of CADENCE's \corlGaitOverlapPairs{} overlapping
 pairs, 24{,}370 (\corlGaitDiagPairPct\%) paired diagonal legs, 227 the
 rear legs, 158 the two legs of one side, and 38 the front legs, whereas
-all of the trot's pairs were diagonal. GaitNet's diagonal partners
+all of the trot's pairs were diagonal. CADENCE's diagonal partners
 lifted off a median \corlGaitLiftLagMs\,ms apart (10th to 90th
-percentile, 21 to \corlGaitEventWindowMs\,ms). This is about one
-\corlControlTickMs\,ms tick, the shortest gap that starting at most one
-step per tick allows, measured to one or two samples. The trot's partners
-lifted off in the same sample in 97\% of its pairs.
+percentile, 21 to \corlGaitEventWindowMs\,ms), about one
+\corlControlTickMs\,ms tick, the shortest gap that one step per tick
+allows.
 
 % Counts: writerB/acyclicity_stats.py on timming.md (2026-11-13), see the
 % comment at \corlGaitEventRepeatPct in constants.tex.
 \noindent\textbf{Period and stepping order.}
-\looseness=-1 We call GaitNet's gait acyclic because neither its period
-nor its stepping order is fixed, and we measure the two separately, on
-the counted swings of each successful trial. A leg's time between
-lift-offs runs from one of its lift-offs to its next. The coefficient
-of variation (CV) of Fig.~\ref{fig:gait}b is the standard deviation of
-these times over their mean, pooled over all legs, cells, and
-successful trials, and it is \corlGaitStrideCv{} for GaitNet against
-\corlGaitStrideCvTrot{} for the trot. A step rate is the number of
-counted lift-offs on the void field per second of void-field time,
-pooled over successful trials: \corlGaitStepsSlow{} and
-\corlGaitStepsFast{} for GaitNet at \corlBenchSpeedSlow{} and
-\corlBenchSpeedFast\,m/s, and \corlGaitStepsTrot{} for the trot. The stepping order is read from
-each trial's sequence of lift-offs, sorted by lift-off time and, for
-lift-offs in the same sample, by leg. A \emph{step event} groups the
-lift-offs within \corlGaitEventWindowMs\,ms of its first one. This
-window is the 90th percentile of the lift-off lag between GaitNet's
-diagonal partners, so an event holds the legs that lift together, and
-grouping instead by gaps of at most \corlGaitEventWindowMs\,ms between
-successive lift-offs gives the same result. The first measure is how
-often a step event lifts the same set of legs as the one before it,
-the second how often a leg lifts \emph{twice in a row}, that is, two
-consecutive lift-offs are of the same leg, and the third how often four
-consecutive lift-offs cover all four legs. \verify{The first held for
-5{,}102 of GaitNet's 32{,}186 pairs of consecutive events
-(\corlGaitEventRepeatPct\%) and for none of the trot's 26{,}214, the
-second for 3{,}338 of GaitNet's 54{,}621 pairs of consecutive lift-offs
-(\corlGaitLegTwicePct\%) and for none of the trot's 52{,}927, and the
-third for 21{,}565 of GaitNet's 53{,}523 overlapping windows of four
-(\corlGaitFourAllPct\%) and for 51{,}561 of the trot's 51{,}919
-(\corlGaitFourAllPctTrot\%).} A commanded swing lasts at least
-\corlSwingDurationMin\,s, longer than the event window, so under the
-contact rule an event of commanded steps holds at most
-\numberstringnum{\corlMaxConcurrentSwingLegs} legs. A gait that lifts
-each leg once per cycle in a fixed order therefore has at least two
-events per cycle and scores 0, 0, and 100\% on these three measures.
-Like the other statistics, these are measured on successful trials only
-and to about one sample.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig_frames}
-  \caption{GaitNet on OCS2, not the runs of Table~\ref{tab:results}.
-    (a)~A separate OCS2 trial on a track whose voids
-    ramp from 10 to 60\%, at 0.15\,m/s, re-rendered in MuJoCo; with no
-    state log, the void fraction under the robot is not known. (b)~An
-    OCS2 trial of the earlier evaluation run, at \corlBenchVoidHigh\% voids
-    and \corlBenchSpeedFast\,m/s.}
-  \label{fig:frames}
-\end{figure}
-
-\noindent\textbf{Frames.}
-\looseness=-1 Fig.~\ref{fig:frames} shows two OCS2 trials of this run's
-GaitNet policy: (a)~on a track whose voids ramp from 10 to 60\% at
-0.15\,m/s, re-rendered in MuJoCo, and (b)~at \corlBenchVoidHigh\% voids
-and \corlBenchSpeedFast\,m/s. They illustrate the stepping only; no
-claim rests on them.
+\looseness=-1 We measure the period and the stepping order separately,
+on the counted swings of each successful trial and to about one sample.
+The coefficient of variation (CV) of Fig.~\ref{fig:gait}b is the
+standard deviation over the mean of the times from a leg's lift-off to
+its next, pooled over legs, cells, and successful trials
+(\corlGaitStrideCv{} for CADENCE against \corlGaitStrideCvTrot{} for the
+trot). A step rate is the number of counted lift-offs per second of
+void-field time, pooled likewise (\corlGaitStepsSlow{} and
+\corlGaitStepsFast{} for CADENCE at \corlBenchSpeedSlow{} and
+\corlBenchSpeedFast\,m/s, and \corlGaitStepsTrot{} for the trot). The
+stepping order is read from each trial's lift-offs, sorted by time and,
+within a sample, by leg. A \emph{step event} groups the lift-offs within
+\corlGaitEventWindowMs\,ms of its first one, the 90th percentile of the
+lift-off lag between CADENCE's diagonal partners. A step event lifted
+the same
+set of legs as the one before it in 5{,}102 of CADENCE's 32{,}186 pairs
+of consecutive events (\corlGaitEventRepeatPct\%) and in none of the
+trot's 26{,}214. A leg lifted \emph{twice in a row}, that is, two
+consecutive lift-offs were of the same leg, in 3{,}338 of CADENCE's
+54{,}621 pairs of consecutive lift-offs (\corlGaitLegTwicePct\%) and in
+none of the trot's 52{,}927. Four consecutive lift-offs covered all
+four legs in 21{,}565 of CADENCE's 53{,}523 overlapping windows of four
+(\corlGaitFourAllPct\%) and in 51{,}561 of the trot's 51{,}919
+(\corlGaitFourAllPctTrot\%). Since a commanded swing outlasts the
+event window, an event of commanded steps holds at most
+\numberstringnum{\corlMaxConcurrentSwingLegs} legs under the contact
+rule, so a gait that lifts each leg once per cycle in a fixed order
+scores 0, 0, and 100\% on these three measures.

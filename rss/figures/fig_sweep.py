@@ -24,6 +24,15 @@ marks. Here only GaitNet's values are printed (five lines in (a), three in
 shaded bands either, so the speeds above training in (b) are marked by a thin
 dashed vertical divider between 0.20 and 0.25 m/s with the label "beyond
 training" on its right (it replaced a grey axvspan).
+Author, 2026-11-13 ("add legend all the figure"): the legend follows the
+paper's common legend style (Fira Sans 7 pt, ink text, no frame, short
+handles) and now also keys the divider ("Beyond training →", drawn as a
+short vertical dashed handle); the floating label "beyond training" in (b) is
+removed, so that no mark is explained twice. No data, axis or value label moved.
+The entry names the side of the line, not the line: the divider is drawn at
+0.225 m/s, halfway between the last trained speed (0.20 m/s, \\corlCmdVxMax)
+and 0.25 m/s, so calling it the training speed limit would put the limit at the
+wrong speed (review of 2026-11-13).
 
 Panels
 - (a) Success vs void fraction (0-70 %), 80 trials per point spread over
@@ -52,8 +61,11 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import cadence_names  # noqa: F401  (paper name: CADENCE)
 import numpy as np
 from matplotlib import font_manager
+from matplotlib.legend_handler import HandlerBase
+from matplotlib.lines import Line2D
 from matplotlib.transforms import Bbox
 
 HERE = Path(__file__).resolve().parent
@@ -135,6 +147,9 @@ assert Decimal(MACROS["corlOcsSpeedMax"]) == Decimal(str(SPEEDS[-1]))
 assert Decimal(MACROS["corlCmdVxMax"]) == Decimal(str(TRAINED_MAX_SPEED))
 # Exactly the speeds right of the divider are above training (here only 0.25).
 assert [s for s in SPEEDS if s > X_DIVIDER] == [s for s in SPEEDS if s > TRAINED_MAX_SPEED] == [0.25]
+# The divider is NOT at the training limit, so its legend entry (DIVIDER_NAME,
+# below) must not call it one.
+assert X_DIVIDER > TRAINED_MAX_SPEED
 print("all value checks passed")
 
 # ---------------------------------------------------------------- style
@@ -156,9 +171,15 @@ INK, MUTED, GRIDLINE = "#1F2937", "#4B5563", "#E5E7EB"
 GAITNET, TROT = "#4F46E5", "#4B5563"
 TITLE = dict(loc="left", fontsize=7.5, fontweight="semibold", color=INK, pad=4)
 VALUE_PT = 6.5                  # value labels of (a)
-DIVIDER_PT = 7.0                # "beyond training" label of (b); 7 pt floor at final size
 DIVIDER_LW = 0.7                # dashed divider in (b) [pt]
-DIVIDER_PAD_PT = 1.5            # gap between the divider and its label [pt]
+DIVIDER_DASH = (3.0, 2.0)       # its dash pattern: on, off [line widths]
+# Its legend entry. It names the side right of the line (the author's earlier
+# label "beyond training"), not the line: the line is at X_DIVIDER = 0.225 m/s,
+# the training limit at 0.20 m/s (\corlCmdVxMax), so "limit" would be wrong.
+DIVIDER_NAME = "Beyond training →"
+# The paper's common legend style, shared by every figure script.
+LEGEND_STYLE = dict(frameon=False, fontsize=7, labelcolor=INK, handlelength=1.6,
+                    handletextpad=0.5, columnspacing=1.2, labelspacing=0.3)
 PAD_PT = 0.8                    # gap between a marker's edge and its value [pt]
 SHIFT_PT = 3.0                  # sideways shift of a value off a line [pt]
 GAITNET_MS, TROT_MS, VARIANT_MS = 3.6, 4.0, 3.0      # marker sizes [pt]
@@ -210,30 +231,49 @@ for m in ("Per-candidate + IFM", "GaitNet-Single", "OCS2's own trot", "GaitNet")
     (lines["a"][m],) = ax_a.plot(VOIDS, [float(pct(k, N)) for k in BY_VOID[m]], label=m, **STYLE[m])
 
 # (b) by speed; 0.25 m/s is above the training range: a thin dashed divider
-# (no shaded band), from 0 to 100 % like the left spine, labelled on its right.
+# (no shaded band), from 0 to 100 % like the left spine. It is named in the
+# legend (2026-11-13), not by a label inside the panel.
 style_axes(ax_b, SPEEDS, 0.0225, "Commanded speed [m/s]")
 ax_b.set_xticklabels([f"{s:.2f}" for s in SPEEDS])
 ax_b.set_ylabel("")              # same axis as (a); its label is there
 divider = ax_b.axvline(X_DIVIDER, ymin=0, ymax=100 / Y_MAX, color=MUTED, lw=DIVIDER_LW,
-                       ls=(0, (3.0, 2.0)), zorder=1)
-# Lower-right corner: below GaitNet-Single's 40 % at 0.25 m/s. The white box only
-# hides the light 20 % gridline behind the text; it is invisible on the white axes.
-divider_label = ax_b.annotate("beyond\ntraining", (X_DIVIDER, 3), xytext=(DIVIDER_PAD_PT, 0),
-                              textcoords="offset points", ha="left", va="bottom",
-                              fontsize=DIVIDER_PT, color=MUTED, linespacing=1.05, zorder=2,
-                              bbox=dict(boxstyle="square,pad=0.1", fc="white", ec="none"))
+                       ls=(0, DIVIDER_DASH), zorder=1)
 ax_b.set_title("(b) By speed, all void fractions", **TITLE)
 for m in ("GaitNet-Single", "OCS2's own trot", "GaitNet"):
     (lines["b"][m],) = ax_b.plot(SPEEDS, [float(pct(k, N)) for k in BY_SPEED[m]], label=m,
                                  **STYLE[m])
 
-# One legend for both panels, a column between them.
+
+class VerticalDividerHandle(HandlerBase):
+    """Legend handle of (b)'s divider: a short VERTICAL dashed line.
+
+    The divider and the trot's line are both dashed and #4B5563, so the default
+    horizontal handle would read as a second trot entry. The handle is centred in
+    the handle box and is three dashes and two gaps long (9.1 pt), so it starts
+    and ends on a full dash.
+    """
+
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height,
+                       fontsize, trans):
+        on, off = (d * orig_handle.get_linewidth() for d in DIVIDER_DASH)
+        half = 0.5 * (3 * on + 2 * off)
+        x, y = 0.5 * width - xdescent, 0.5 * height - ydescent
+        handle = Line2D([x, x], [y - half, y + half])
+        self.update_prop(handle, orig_handle, legend)   # colour, width, dashes
+        handle.set_transform(trans)
+        return [handle]
+
+
+# One legend for both panels, a column between them: every line of (a) and (b)
+# (Per-candidate + IFM is drawn in (a) only) and (b)'s divider.
 order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "Per-candidate + IFM"]
-leg = fig.legend(handles=[lines["a"][m] for m in order], labels=order, loc="center left",
-                 ncol=1, frameon=False, handlelength=1.7, fontsize=6.8,
+assert set(lines["a"]) == set(order) and set(lines["b"]) <= set(order)
+leg = fig.legend(handles=[lines["a"][m] for m in order] + [divider],
+                 labels=order + [DIVIDER_NAME], loc="center left", ncol=1,
+                 handler_map={divider: VerticalDividerHandle()},
                  bbox_to_anchor=((LEFT + W_A + LEG_X) / FIG_W,
                                  (BOTTOM + 0.5 * (FIG_H - TOP - BOTTOM)) / FIG_H),
-                 borderaxespad=0.0, borderpad=0.0, labelspacing=0.45, handletextpad=0.45)
+                 borderaxespad=0.0, borderpad=0.0, **LEGEND_STYLE)
 
 # ---------------------------------------------------------------- GaitNet's values
 # Each value goes to the first candidate position around its marker that
@@ -334,8 +374,7 @@ def place_values(ax, xs, ks, panel_lines, extra_obstacles=()):
 
 print("label positions (a):", place_values(ax_a, VOIDS, BY_VOID["GaitNet"], lines["a"]))
 print("label positions (b):", place_values(
-    ax_b, SPEEDS, BY_SPEED["GaitNet"], lines["b"],
-    extra_obstacles=[divider_box(), divider_label.get_bbox_patch().get_window_extent(renderer)]))
+    ax_b, SPEEDS, BY_SPEED["GaitNet"], lines["b"], extra_obstacles=[divider_box()]))
 
 # ---------------------------------------------------------------- checks
 # Nothing may leave the figure; the legend must not touch either panel or a
@@ -352,23 +391,28 @@ _bleft = min([t.get_window_extent(renderer).x0 for t in ax_b.get_yticklabels() i
              + [ax_b.yaxis.label.get_window_extent(renderer).x0])
 assert _lb.x1 < _bleft - 1, "legend reaches (b)'s y labels"
 assert ax_b.title.get_window_extent(renderer).x0 > ax_a.title.get_window_extent(renderer).x1
-# The divider label (box included) lies right of the divider, inside the figure,
-# and touches no line, marker, GaitNet value, title or the divider itself.
-_dl = grow(divider_label.get_bbox_patch().get_window_extent(renderer), 0.4)
+# The divider is named by the legend only: (b) holds GaitNet's five values and no
+# other text, and the divider crosses none of them.
 _div = divider_box()
-assert _dl.x0 > _div.x1, "divider label reaches the divider"
-assert _dl.x1 <= fig_box.x1 and _dl.y0 >= ax_b.get_window_extent(renderer).y0, _dl
-assert not any(_dl.overlaps(o) for o in marker_boxes(ax_b, lines["b"])), "label on a marker"
-assert not any(hits_polyline(grow(_dl, 0.5 * ln.get_linewidth()), pl)
-               for ln, pl in polylines(ax_b, lines["b"])), "label on a line"
-assert not any(_dl.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts
-               if t is not divider_label), "label on a value"
-assert not _dl.overlaps(ax_b.title.get_window_extent(renderer)), "label on the title"
-# The divider crosses no GaitNet value either.
-assert not any(_div.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts
-               if t is not divider_label), "divider through a value"
-print("divider at %.3f m/s; label %.1f x %.1f mm" % (
-    X_DIVIDER, *(np.array([_dl.width, _dl.height]) / fig.dpi * 25.4)))
+assert [t.get_text() for t in ax_b.texts] == [value_label(k) for k in BY_SPEED["GaitNet"]]
+assert not any(_div.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts), \
+    "divider through a value"
+# Legend: one entry per drawn line and one for the divider, in the common style
+# (compared on the data keys; cadence_names shows "CADENCE" for "GaitNet").
+assert [t.get_text() for t in leg.get_texts()] == [
+    m.replace("GaitNet", "CADENCE").replace("Per-candidate + IFM", "GaitNet + IFM")
+    for m in order] + [DIVIDER_NAME], "legend entries"   # display names: cadence_names.py
+assert all(t.get_fontsize() >= 7 for t in leg.get_texts()), "legend text below 7 pt"
+assert "limit" not in DIVIDER_NAME.lower(), "the divider is at 0.225 m/s, not at the limit"
+# The divider's vertical handle (drawn past its handle box) stays clear of the
+# legend entry above it and inside the figure.
+_handles = leg.legend_handles if hasattr(leg, "legend_handles") else leg.legendHandles
+_vh = _handles[-1].get_window_extent(renderer)
+_above = grow(_handles[-2].get_window_extent(renderer), 0.5 * VARIANT_MS)
+assert _vh.height > _vh.width and not _vh.overlaps(_above) and _vh.y0 > 0, _vh
+assert abs(_vh.height / px_per_pt - (3 * DIVIDER_DASH[0] + 2 * DIVIDER_DASH[1]) * DIVIDER_LW) < 0.1
+print("divider at %.3f m/s; legend %.1f x %.1f mm" % (
+    X_DIVIDER, *(np.array([_lb.width, _lb.height]) / fig.dpi * 25.4)))
 
 fig.savefig(HERE / "fig_sweep.png", dpi=300)
 # Text to outlines with Inkscape, like Figs. 1 and 2.

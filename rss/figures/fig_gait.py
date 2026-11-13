@@ -32,6 +32,8 @@ single panel before):
       each other. A bar is a measured swing (foot up); white space is stance.
       Filled bars are the FL+RR pair and open bars the FR+RL pair (no light
       shade: light indigo means GaitNet-Diagonal elsewhere in the paper).
+      Legend row under the title (2026-11-13): colour = method, filled or
+      open = diagonal pair; the arm names left of the rows were removed.
       The seed is not hand-picked: among the seeds that succeeded in that
       cell for BOTH arms, it is the one whose GaitNet feet-up shares
       (0 / 1 / 2 feet up) are closest (L1) to the cell's pooled shares.
@@ -42,9 +44,10 @@ single panel before):
       Step-style line histograms, 0.1 s bins on multiples of 0.1 s, each bin
       in % of ALL of the arm's intervals; intervals above X_MAX_B are in the
       denominator but off the axis (printed below for the caption). The
-      trot's two-bin block is its 0.6 s period straddling a bin edge. The
-      panel carries exactly two labels, "GaitNet, CV 0.61" and "OCS2's own
-      trot, CV 0.02" (coefficient of variation = sample std / mean); the
+      trot's two-bin block is its 0.6 s period straddling a bin edge. A
+      legend names the two lines (2026-11-13), and the panel carries exactly
+      two value labels in the arms' colours, "CV 0.61" and "CV 0.02"
+      (coefficient of variation = sample std / mean); the
       medians were dropped from the panel on 2026-11-12 (GaitNet's has no
       macro) and are printed below only. The CVs and the trot's median must
       reproduce \\corlGaitStrideCv, \\corlGaitStrideCvTrot and
@@ -65,6 +68,20 @@ Design rules (user, 2026-11-03): no error bars, whiskers, bands or heatmaps;
 plain bars and lines with the values printed on them; at most about four
 short labels per panel.
 
+LEGENDS (author, 2026-11-13: "add legend all the figure"), in the paper's
+common legend style (Fira Sans 7 pt, ink, no frame, handle length 1.6):
+  (a) one row between the title and the rows. Handles are pairs of swatches:
+      indigo filled + open = GaitNet, grey filled + open = OCS2's own trot,
+      indigo + grey filled = FL-RR, indigo + grey open = FR-RL. The arm names
+      that stood left of the rows said the same and were removed; the freed
+      left margin went to the time axis (55 -> 66.5 mm), and the rows lost
+      3.5 mm of height to the legend row. The canvas is unchanged.
+  (b) two rows at the top left, above the 60 % tick and the trot's 57.5 %
+      peak (y axis end 70 -> 78 %, ticks unchanged): solid indigo = GaitNet,
+      dashed grey = OCS2's own trot. The direct labels lost the arm names and
+      keep the CVs.
+  (c) one series, named in the panel title; no legend.
+
 usage: python fig_gait.py   (writes fig_gait.pdf and fig_gait.png here)
 """
 import re
@@ -76,8 +93,12 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import cadence_names  # noqa: F401  (paper name: CADENCE)
 import numpy as np
 from matplotlib import font_manager
+from matplotlib.legend_handler import HandlerTuple
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from matplotlib.text import Text
 from matplotlib.transforms import Bbox
 
@@ -185,28 +206,43 @@ ARM_COLOR = {"c0": (INDIGO, LIGHT_INDIGO), "trot": (GRAY, LIGHT_GRAY)}   # (FL+R
 # (b) lines as in fig_sweep.py: GaitNet solid, the trot dashed and thinner.
 LINE_STYLE = {"c0": dict(color=INDIGO, lw=1.4),
               "trot": dict(color=GRAY, lw=1.2, ls=(0, (3.2, 1.8)))}
+OPEN_LW = 0.8                           # (a) outline of an open bar [pt]
+# Common legend style of the paper's figures (2026-11-13): Fira Sans 7 pt,
+# ink, no frame, short handles. The figure is printed at its canvas width
+# (\textwidth = 152 mm), so 7 pt here is 7 pt in print.
+LEGEND_KW = dict(frameon=False, fontsize=7, labelcolor=INK, handlelength=1.6,
+                 handletextpad=0.5, columnspacing=1.2, labelspacing=0.3,
+                 borderpad=0.0, borderaxespad=0.0)
 
 # ---------------------------------------------------------------- layout [mm]
 MM = 1 / 25.4
 FIG_W, FIG_H = 152.0, 45.0              # PMLR \textwidth x 45 mm
 TOP, BOTTOM = 5.0, 9.0
-LEFT = 17.0                             # (a): arm names and leg labels
+LEFT = 5.5                              # (a): leg labels (17.0 with the arm names, until 2026-11-13)
+# (a) only: its legend row sits between the title and the rows, so its axes
+# start LEGEND_ROW_A lower than (b)'s and (c)'s; the titles stay on one line.
+LEGEND_ROW_A = 3.5
+TOP_A = TOP + LEGEND_ROW_A
+LEGEND_A_X, LEGEND_A_TOP = 1.0, 5.1     # legend's upper left corner: mm from the canvas's left, top
 # Axes [x0, width] in mm. Gaps hold (b)'s y labels and (c)'s pair-type labels.
-X_A, W_A = LEFT, 55.0
+X_A, W_A = LEFT, 66.5                   # right edge at 72 mm, as before
 X_B, W_B = 83.0, 32.0
 X_C, W_C = 129.5, 20.5
+assert X_A + W_A == 72.0
 assert X_C + W_C <= FIG_W - 1.5
 XTICK_PAD = 3.5                         # pt, as in fig_bench.py
 _h = (FIG_H - TOP - BOTTOM) / FIG_H
 
 fig = plt.figure(figsize=(FIG_W * MM, FIG_H * MM))
-ax_a = fig.add_axes([X_A / FIG_W, BOTTOM / FIG_H, W_A / FIG_W, _h])
+ax_a = fig.add_axes([X_A / FIG_W, BOTTOM / FIG_H, W_A / FIG_W, (FIG_H - TOP_A - BOTTOM) / FIG_H])
 ax_b = fig.add_axes([X_B / FIG_W, BOTTOM / FIG_H, W_B / FIG_W, _h])
 ax_c = fig.add_axes([X_C / FIG_W, BOTTOM / FIG_H, W_C / FIG_W, _h])
 
 
-def title(ax, text, x=0.0):
-    ax.set_title(text, loc="left", fontsize=7.5, fontweight="semibold", color=INK, pad=3, x=x)
+def title(ax, text, x=0.0, pad_mm=0.0):
+    """Panel title; pad_mm lifts it by that much more than the usual 3 pt."""
+    ax.set_title(text, loc="left", fontsize=7.5, fontweight="semibold", color=INK,
+                 pad=3 + pad_mm / 25.4 * 72, x=x)
 
 
 # ---------------------------------------------------------------- (a) swing (footfall) diagram
@@ -231,7 +267,7 @@ for a in ("trot", "c0"):              # bottom to top: trot, then GaitNet
                 for lo, td in zip(sw.liftoff_s, sw.touchdown_s)]
         # Filled = FL+RR, open = FR+RL (see the header for why not a light shade).
         ax_a.broken_barh(segs, (y - ROW_H / 2, ROW_H), facecolors=col if filled else "white",
-                         edgecolors=col, linewidth=0 if filled else 0.8, zorder=2)
+                         edgecolors=col, linewidth=0 if filled else OPEN_LW, zorder=2)
         y_ticks.append(y)
         y_labels.append(leg)
         ys.append(y)
@@ -249,15 +285,31 @@ ax_a.tick_params(axis="x", pad=XTICK_PAD)
 for x in np.arange(0.5, WINDOW_S, 0.5):
     ax_a.axvline(x, color=GRID, lw=0.5, zorder=0)
 ax_a.spines[["top", "right", "left"]].set_visible(False)
-for a, name in (("c0", "GaitNet"), ("trot", "OCS2's\nown trot")):
-    ax_a.annotate(name, xy=(0, arm_mid[a]), xycoords=("axes fraction", "data"),
-                  xytext=(-17, 0), textcoords="offset points", ha="right", va="center",
-                  fontsize=7.5, fontweight="semibold", color=ARM_COLOR[a][0], linespacing=1.0)
-# Starts over the arm labels.
-title(ax_a, f"(a) Swings, {EX_VOID} % voids, {EX_SPEED:.2f} m/s", x=-(LEFT - 1.0) / W_A)
+assert not ax_a.texts                 # no direct labels: the legend names the arms
+# Starts over the leg labels, on the line of (b)'s and (c)'s titles.
+title(ax_a, f"(a) Swings, {EX_VOID} % voids, {EX_SPEED:.2f} m/s", x=-(LEFT - 1.0) / W_A,
+      pad_mm=LEGEND_ROW_A)
+
+
+# Legend of (a), one row under the title. A handle is a pair of swatches, so
+# that colour reads as the method (whatever the fill) and filled or open as
+# the diagonal pair (whatever the colour).
+def swatch(color: str, filled: bool) -> Patch:
+    """A small bar drawn as in (a): filled, or white with an outline."""
+    return Patch(facecolor=color if filled else "white", edgecolor=color,
+                 linewidth=0 if filled else OPEN_LW)
+
+
+_ca, _ct = ARM_COLOR["c0"][0], ARM_COLOR["trot"][0]
+legend_a = fig.legend(
+    handles=[(swatch(_ca, True), swatch(_ca, False)), (swatch(_ct, True), swatch(_ct, False)),
+             (swatch(_ca, True), swatch(_ct, True)), (swatch(_ca, False), swatch(_ct, False))],
+    labels=["GaitNet", "OCS2's own trot", "FL\u2013RR", "FR\u2013RL"], ncol=4, loc="upper left",
+    bbox_to_anchor=(LEGEND_A_X / FIG_W, 1 - LEGEND_A_TOP / FIG_H),
+    handler_map={tuple: HandlerTuple(ndivide=None, pad=0.25)}, **LEGEND_KW)
 
 # ---------------------------------------------------------------- (b) lift-off intervals
-Y_MAX_B = 70.0
+Y_MAX_B = 78.0                        # 70 until 2026-11-13; the top holds the legend
 for a in ("trot", "c0"):              # GaitNet on top
     edges, share = HIST[a]
     nz = np.flatnonzero(share)
@@ -275,17 +327,24 @@ for g in (20, 40, 60):
 ax_b.set_xlabel("Time between lift-offs [s]", labelpad=2)
 ax_b.set_ylabel("Intervals per 0.1 s [%]", labelpad=2)
 ax_b.tick_params(axis="x", pad=XTICK_PAD)
-# One single-line label per arm, name and CV only (2026-11-12): the medians
-# were dropped from the panel since GaitNet's has no macro; both medians are
-# still asserted/printed below. The trot's label (26.8 mm) is too wide to
-# start right of its block, so it sits above the block, under the axes top;
-# GaitNet's sits right of the trot's block and above GaitNet's line.
-LABEL_B = {"trot": (0.06, 69.0), "c0": (0.80, 41.0)}       # (x [s], top [%])
-for a, name in (("trot", "OCS2's own trot"), ("c0", "GaitNet")):
+# One value label per arm, the CV only, in the arm's colour (2026-11-13: the
+# legend names the arms; the medians were dropped from the panel on
+# 2026-11-12 since GaitNet's has no macro, and are still asserted/printed
+# below). Both sit right of the trot's block: the trot's beside the block,
+# GaitNet's below it, above GaitNet's line.
+LABEL_B = {"trot": (0.78, 50.0), "c0": (0.78, 32.0)}       # (x [s], top [%])
+for a in ("trot", "c0"):
     cv = TIMING[a][1]
-    ax_b.text(*LABEL_B[a], f"{name}, CV {cv:.2f}", ha="left", va="top",
+    ax_b.text(*LABEL_B[a], f"CV {cv:.2f}", ha="left", va="top",
               fontsize=VALUE_PT, color=ARM_COLOR[a][0], zorder=4, bbox=HALO)
 assert len(ax_b.texts) == 2, [t.get_text() for t in ax_b.texts]   # at most two labels in (b)
+# Legend of (b): two rows at the top left, above the y axis's 60 % end and
+# the trot's peak. Handles repeat the drawn lines.
+LEGEND_B_X, LEGEND_B_TOP = 0.7, LEGEND_A_TOP - TOP      # mm right of the y axis, below the axes top
+legend_b = ax_b.legend(
+    handles=[Line2D([], [], **LINE_STYLE["c0"]), Line2D([], [], **LINE_STYLE["trot"])],
+    labels=["GaitNet", "OCS2's own trot"], ncol=1, loc="upper left",
+    bbox_to_anchor=(LEGEND_B_X / W_B, 1 - LEGEND_B_TOP / (FIG_H - TOP - BOTTOM)), **LEGEND_KW)
 title(ax_b, "(b) Timing of each leg")
 
 # ---------------------------------------------------------------- (c) overlapping pairs
@@ -342,6 +401,28 @@ def layout_problems(fig):
         data += [s.get_window_extent(r) for s in ax.spines.values() if s.get_visible()]
         for t in ax.texts:
             out += [f"label on data: {t.get_text()!r}" for d in data if extent(t).overlaps(d)]
+    # Legends. (a)'s row: four entries, inside the canvas, below (a)'s title
+    # and above (a)'s axes, and clear of every other text. (b)'s: two
+    # entries, inside (b)'s axes, clear of the drawn data, the visible spines
+    # and the value labels.
+    own = {id(t) for leg in (legend_a, legend_b) for t in leg.get_texts()}
+    la, lb = legend_a.get_window_extent(r), legend_b.get_window_extent(r)
+    if len(legend_a.get_texts()) != 4 or len(legend_b.get_texts()) != 2:
+        out.append("legend entries: expected 4 in (a) and 2 in (b)")
+    if not (la.x0 >= canvas.x0 and la.x1 <= canvas.x1):
+        out.append("legend (a) outside the canvas")
+    if la.y1 > ax_a.title.get_window_extent(r).y0 or la.y0 < ax_a.get_window_extent(r).y1:
+        out.append("legend (a) not between (a)'s title and axes")
+    bb = ax_b.get_window_extent(r)
+    if not (lb.x0 >= bb.x0 and lb.x1 <= bb.x1 and lb.y0 >= bb.y0 and lb.y1 <= bb.y1):
+        out.append("legend (b) outside (b)'s axes")
+    data_b = [p.get_window_extent(r) for p in ax_b.patches]
+    data_b += [s.get_window_extent(r) for s in ax_b.spines.values() if s.get_visible()]
+    if any(lb.overlaps(d) for d in data_b):
+        out.append("legend (b) on data")
+    for name, box in (("a", la), ("b", lb)):
+        out += [f"legend ({name}) on text: {t.get_text()!r}" for t, b in boxes
+                if id(t) not in own and box.overlaps(b)]
     return sorted(set(out))
 
 

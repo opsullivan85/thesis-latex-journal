@@ -1,4 +1,4 @@
-% 2026-11-12 L4DC rewrite (timing-first story): gait schedule defined, the
+% 2026-11-12 L4DC rewrite: gait schedule defined, the
 % per-tick decision as the core, the closed-loop footstep map with explicit
 % frames, desired foothold / command / landing kept apart, the history
 % caveat, and Problems 1-2 without the restated reward terms.
@@ -17,8 +17,8 @@ an input or as a constraint.
 \looseness=-1 At each tick, the planner takes the no-step option
 $\varnothing$ or starts one step \mbox{$(\ell, \mathbf u^\star, T)$},
 which lifts leg $\ell$ and should land it at the \emph{desired foothold}
-$\mathbf u^\star$ after a swing time $T \in [\corlSwingDurationMin,
-\corlSwingDurationMax]$\,s. Since the step starts at the tick it is
+$\mathbf u^\star$ after a swing time $T \in [T_{\min}, T_{\max}] =
+[\corlSwingDurationMin, \corlSwingDurationMax]$\,s. Since the step starts at the tick it is
 chosen, one decision fixes which leg steps, where, for how long, and
 when. A leg may start a step only if at least
 \numberstringnum{\corlMinContactLegs} legs, itself among them, are in
@@ -41,8 +41,10 @@ leg $\ell$, and a swing time $T$, the controller lands the foot at
 where $\mathbf s$ is everything else that affects the swing. Footholds,
 commands, landings, and voids are planar offsets from the stepping
 leg's hip at the decision tick, in the gravity-aligned \emph{yaw frame}
-along the robot's heading at that tick, so the \emph{landing offset}
-$\boldsymbol\delta_c$ includes the base's motion until touchdown. It is
+along the robot's heading at that tick. Since this frame stays fixed in
+the world after the decision tick, the \emph{landing offset}
+$\boldsymbol\delta_c$ also contains whatever part of the base's motion
+until touchdown the controller passes on to the foot. It is
 a property of the controller and differs between controllers, whereas
 the \emph{landing error} $\mathbf o - \mathbf u^\star$ compares the
 landing with the desired foothold. The execution layer therefore sends
@@ -56,10 +58,10 @@ still shift between controllers.
 \looseness=-1 \emph{Problem~1:} with the \emph{training controller}, the
 convex MPC of \citet{dicarlo_dynamic_2018} randomized at every reset,
 and its IFM fitted beforehand and frozen, find the planner that
-maximizes $\mathbb E[\sum_{k} \gamma^k r_k]$ with the reward of
-Eq.~\eqref{eq:reward}. \emph{Problem~2:} on the \emph{new controller},
+maximizes $\mathbb E[\sum_{k} \gamma^k r_k]$, with discount $\gamma$
+and the reward of Eq.~\eqref{eq:reward}. \emph{Problem~2:} on the \emph{new controller},
 OCS2's NMPC and WBC, keep the planner frozen and fit only its IFM, on
-\verify{fewer than 20{,}000} OCS2 steps, so that the planner succeeds on held-out
-worlds at least as often as OCS2's own gaits. Moving to OCS2 also
+fewer than 20{,}000 OCS2 steps, so that the planner succeeds at least
+as often as OCS2's own gaits. Moving to OCS2 also
 changes the simulator, odometry, and terrain source (a depth camera),
 and no planner setting is tuned for it (App.~\ref{app:deployment}).

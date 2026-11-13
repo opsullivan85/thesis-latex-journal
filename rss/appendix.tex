@@ -2,99 +2,114 @@
 % nothing a claim in the main text depends on may live only here.
 % 2026-11-12 rewrite: App. C takes the foothold-constraint detail moved out of
 % Sec. 4.5; App. F (appendix_earlier.tex) describes the earlier evaluation run
-% behind the gait statistics and the frames.
+% behind the gait statistics.
 % 2026-11-13 appendix pass (author: "only the math needed ... add the
-% important things"): App. A regrouped, its sweep sentence left to App. G
-% (appendix_sweep.tex), and the per-cell benchmark table (tab:percell)
-% added; App. B prints the command, curriculum and randomization settings
-% that constants.tex and gaitnet-docs/training-setup.md 4, 8, 9, 12 hold;
-% the sigma_T repeated in App. B is now given once, in App. A.
+% important things"): App. A regrouped and the per-cell benchmark table
+% (tab:percell) added; App. B prints the command, curriculum and
+% randomization settings that constants.tex and gaitnet-docs/training-setup.md
+% 4, 8, 9, 12 hold; the sigma_T repeated in App. B is given once, in App. A.
+% 2026-11-13 reduction (author: "reduce the appendix"): the sweep protocol is
+% now the "Sweep" paragraph of App. A (label app:sweep; appendix_sweep.tex is
+% emptied and no longer input), and the prose of every section is tightened.
 
+% 2026-11-13: the appendix starts on its own page, so that the paper and the
+% supplementary PDF split at a page boundary whatever the length of the
+% reference list (main.tex has no page break before \appendix).
+\clearpage
 \section{Settings}
 \label{app:settings}
 
-% source: gaitnet-docs/methodology.md 3-6, training-setup.md 2-12,
+% source: gaitnet-docs/methodology.md 2-6, training-setup.md 2-12,
 % experiment-setup.md 2 (state of 2026-10-13; the sc_idm preset).
 
 \noindent\textbf{Action space and network.}
-\looseness=-1 The tick is $\Delta t = \corlControlTickMs$\,ms, and a
-swing lasts $T_{\min} = \corlSwingDurationMin$ to $T_{\max} =
-\corlSwingDurationMax$\,s. With $K = \corlTrainCandidatesPerLeg$
-candidates for each of the \corlNumLegs{} legs and the no-step option,
-there are at most \corlTotalCandidates{} choices per tick. The
-candidate grid spans $\pm\corlGridReachCm$\,cm around the hip in cells
-of $h = \corlScanResCm$\,cm, and the unsafe region is grown by $k = 2$
-cells, so the candidate margin is $m = \corlMarginCm$\,cm: by
-construction, no unsafe ray lies within $m$ of a remaining safe cell
-along the grid axes. The history covers $H =
-\corlHistTicks$ ticks (\corlHistSeconds\,s). The candidate mixer has
-\corlMixerLayers{} layers of width \corlMixerDim{} with
-\corlMixerHeads{} heads and feed-forward blocks of width
-\corlMixerFF. GaitNet has \corlParamsGaitNetK{}k parameters, and the
-per-candidate network has \corlParamsPerCandidateK{}k.
+\looseness=-1 The candidate grid spans
+$\pm\corlGridReachCm$\,cm around the hip in \corlScanResCm\,cm cells,
+and the unsafe region is grown by two cells, so no unsafe ray lies
+within the candidate margin $m = \corlMarginCm$\,cm of a remaining safe
+cell along the grid axes. The history covers $H = \corlHistTicks$
+ticks. The candidate mixer has \corlMixerLayers{} layers of width
+\corlMixerDim, \corlMixerHeads{} heads, and feed-forward blocks of
+width \corlMixerFF. CADENCE has
+\corlParamsGaitNetK{}k parameters and GaitNet's per-candidate network
+(Sec.~\ref{subsec:method-network}) \corlParamsPerCandidateK{}k.
+% 2026-11-13: frames from gaitnet-docs/methodology.md 3-4 and
+% training-setup.md 5.
+Base and commanded velocities and the history's hip-relative foot
+positions are in the base frame, and candidates are in each hip's yaw
+frame (Sec.~\ref{sec:setup}).
 
 \noindent\textbf{IFM of the training controller.}
 \looseness=-1 Its network $\Delta_\theta$ (Eq.~\eqref{eq:idm-loss}) is
 a $2 \times \corlIdmHidden$ MLP fitted on \corlIdmFootsteps{} steps,
-logged at up to 30\% voids and over our speed range. Gaussian noise on
-each command widens the data around a policy's preferred footholds. On
-a held-out \corlIdmHeldOutPct\% of the steps, its error is
-\corlIdmRmsCm\,cm RMS, against \corlIdmIdentityRmsCm\,cm for the
-identity map (no correction). Without correction, the training
-controller lands the foot +\corlOvershootSlowMin{} to
-+\corlOvershootSlowMax\,cm past the command along the walking
-direction at \corlSimSpeedSlow\,m/s and +\corlOvershootFastMin{} to
-+\corlOvershootFastMax\,cm at \corlSimSpeedFast\,m/s.
+logged at up to 30\% voids and over our speed range, with Gaussian
+noise on each command to widen the data. On a held-out \corlIdmHeldOutPct\% of the steps, its error
+is \corlIdmRmsCm\,cm RMS, against \corlIdmIdentityRmsCm\,cm for the
+identity map. Without correction, the training controller lands the
+foot +\corlOvershootSlowMin{} to +\corlOvershootSlowMax\,cm past the
+command along the walking direction at \corlSimSpeedSlow\,m/s and
++\corlOvershootFastMin{} to +\corlOvershootFastMax\,cm at
+\corlSimSpeedFast\,m/s.
 
+% 2026-11-13: one rollout step is one tick, and the controller's rates, from
+% gaitnet-docs/training-setup.md 2 and 10 and methodology.md 2.
 \noindent\textbf{Training (Eq.~\eqref{eq:reward}).}
 \looseness=-1 PPO runs \corlParallelEnvs{} robots with rollouts of
-\corlRolloutSteps{} environment steps, a learning rate of
-$\corlLearningRate$, \corlPpoEpochs{} epochs, and \corlMiniBatches{}
-minibatches. The clip is \corlClip, the entropy coefficient is
-\corlEntropyCoef, $\gamma = \corlGamma$, and $\lambda = \corlLambda$.
-The reward weights are $w_a = \corlAliveWeight$, $w_s =
-\corlActionPenalty$, and $w_f = \corlTerminationPenalty$. The tracking
-widths are $\sigma_v = \corlTrackXyStd$\,m/s and $\sigma_\omega =
-\corlTrackYawStd$\,rad/s, and swing times are drawn with standard
-deviation $\sigma_T = \corlDurationExploreStd$\,s. Commanded forward
-speeds span 0--\corlCmdVxMax\,m/s and yaw rates
-$\pm\corlCmdYawMax$\,rad/s. Tiles are \corlTerrainCellCm\,cm with
-voids \corlVoidDepth\,m deep, and the \corlNumLevels{} curriculum
-levels span 0--\corlMaxVoidPct\% voids.
+\corlRolloutSteps{} ticks, a learning rate of $\corlLearningRate$,
+\corlPpoEpochs{} epochs, \corlMiniBatches{} minibatches, a clip of
+\corlClip, an entropy coefficient of \corlEntropyCoef, $\gamma =
+\corlGamma$, and $\lambda = \corlLambda$. The reward has weights $w_a =
+\corlAliveWeight$, $w_s = \corlActionPenalty$, and $w_f =
+\corlTerminationPenalty$ and tracking widths $\sigma_v =
+\corlTrackXyStd$\,m/s and $\sigma_\omega = \corlTrackYawStd$\,rad/s,
+and swing times are drawn with standard deviation $\sigma_T =
+\corlDurationExploreStd$\,s. Commanded forward speeds span
+0--\corlCmdVxMax\,m/s and yaw rates $\pm\corlCmdYawMax$\,rad/s. Tiles
+are \corlTerrainCellCm\,cm with voids \corlVoidDepth\,m deep, and the
+\corlNumLevels{} curriculum levels span 0--\corlMaxVoidPct\% voids. The
+training controller's MPC runs at \corlMpcHz\,Hz over a
+\corlMpcHorizon\,s horizon, with leg torques at \corlPhysicsHz\,Hz.
 
 \noindent\textbf{OCS2 IFM and footstep corrections.}
-\looseness=-1 Of GaitNet and its execution layer, only the IFM is
-fitted for OCS2. Steps start at the tick they are chosen, as in
-training, the candidate margin is the training margin, and all OCS2
-settings are stock. Each training seed has its own OCS2 IFM, with the
-network and fit of the training controller's IFM, fitted on \verify{fewer
-than 20{,}000} steps that this seed's frozen GaitNet took on OCS2 through
-the training controller's IFM, \verify{on worlds disjoint from the
-evaluation's}.
-GaitNet + offset adds to each desired foothold a constant per-leg
-offset, the mean of command minus landing over the same logged steps.
-GaitNet without the IFM sends the desired foothold unchanged, and
-GaitNet + training IFM sends it through the training controller's IFM.
+\looseness=-1 Each training seed has its own OCS2 IFM, with the network
+and fit of the training controller's IFM, fitted on fewer than 20{,}000 steps that this seed's frozen CADENCE
+took on OCS2 through the training controller's IFM, on the benchmark's
+worlds but not the sweep's. GaitNet + IFM and CADENCE-Single run
+with the OCS2 IFM of CADENCE's same training seed. Table~\ref{tab:percell} gives the success of every
+method, the controls included, in each benchmark cell.
 
-\noindent\textbf{Benchmark per cell.}
-\looseness=-1 The benchmark uses \corlBenchTileCm\,cm tiles and the
-same \corlBenchTrialsPerCell{} worlds per cell for every method, with
-trials of \corlBenchTrialSeconds\,s. A trial succeeds if the robot does
-not fall and covers at least half the commanded distance. Every learned
-method is evaluated with each of its \corlNumTrainSeeds{} training seeds
-at iteration \corlOcsCheckpoint. Table~\ref{tab:percell} gives each
-method's success in each of the six cells. Fig.~\ref{fig:bench} plots
-these values for four of the methods, and Table~\ref{tab:results} pools
-the unrounded values over the cells.
+% Sweep protocol, folded in from the former App. G (appendix_sweep.tex) on
+% 2026-11-13. Design: the two panels are separate run sets of 80 trials per
+% point (memory note ocs2-benchmark-design and author, 2026-10-27 and
+% 2026-11-04). Sources: figures/fig_sweep.py (BY_VOID, BY_SPEED) and
+% constants.tex (\corlSweep*, \corlOcs*). The author states the learned values
+% are means of the five training seeds at iteration \corlOcsCheckpoint, but
+% their per-seed counts are not in results_to_fill.md (sections 4-5 empty), so
+% these statements stay in \verify. Not printed any more: the pooled sweep
+% rates of GaitNet-Single (\corlSweepSingle) and Per-candidate + IFM
+% (\corlSweepMlp), which only the former App. G gave.
+\noindent\textbf{Sweep.}\phantomsection\label{app:sweep}
+\looseness=-1 The sweep (Fig.~\ref{fig:sweep-main}) covers eight void
+fractions from 0 to \corlOcsMaxVoidPct\% and five speeds
+from \corlOcsSpeedMin{} to \corlOcsSpeedMax\,m/s, \verify{on Isaac's
+nominal scale, on which the benchmark's \corlBenchVoidLow,
+\corlBenchVoidMid, and \corlBenchVoidHigh\% are \corlBenchIsaacVoidLow,
+\corlBenchIsaacVoidMid, and \corlBenchIsaacVoidHigh\%}, with
+the benchmark's checkpoints, on worlds other than the
+benchmark's, shared by all methods. A trial succeeds only if the robot
+reaches the end of a \corlOcsTrackM\,m track within \corlOcsTimeFactor{}
+times the time needed at the commanded speed. The two panels are separate run sets with
+\corlOcsTrialsPerPoint{} trials per point, spread over the five speeds
+at each void fraction in panel~(a) and 10 per void fraction at each
+speed in panel~(b).
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Success (\%) per cell of the OCS2 benchmark, for every method
-  of Table~\ref{tab:results}, in its row order. Learned methods: mean of
-  \corlSeedsGaitNet{} training seeds at iteration \corlOcsCheckpoint,
-  \corlBenchTrialsPerCell{} trials per cell and seed, in whole percent.
-  The trot and the static walk ran once, so each value is a count of
-  successes in \corlBenchTrialsPerCell{} trials.}
+\caption{Success (\%) per cell of the OCS2 benchmark, in whole percent
+  (Table~\ref{tab:results} pools the unrounded values). Learned methods:
+  mean of \corlSeedsGaitNet{} training seeds at iteration
+  \corlOcsCheckpoint, \corlBenchTrialsPerCell{} trials per cell and
+  seed. The stock gaits ran once.}
 \label{tab:percell}
 % Computed on 2026-11-13 from results_to_fill.md, section 2 (successes of
 % 100 per training seed and cell): a learned value is the sum over its five
@@ -113,19 +128,19 @@ the unrounded values over the cells.
   & \thd{\corlBenchVoidHigh\%} & \thd{\corlBenchVoidLow\%}
   & \thd{\corlBenchVoidMid\%} & \thd{\corlBenchVoidHigh\%} \\
 \midrule
-GaitNet                 & 93 & 90 & 76 & 92 & 90 & 70 \\
+CADENCE                 & 93 & 90 & 76 & 92 & 90 & 70 \\
 \midrule
 OCS2's own trot         & 91 & 72 & 46 & 88 & 70 & 40 \\
 OCS2's static walk      & 94 & 78 & 45 & 80 & 61 & 35 \\
 \midrule
-Per-candidate + IFM     & 81 & 79 & 69 & 73 & 71 & 54 \\
+GaitNet + IFM           & 81 & 79 & 69 & 73 & 71 & 54 \\
 \midrule
-GaitNet-Diagonal        & 93 & 90 & 72 & 89 & 87 & 67 \\
-GaitNet-Single          & 45 & 45 & 40 & 38 & 38 & 31 \\
+CADENCE-Diagonal        & 93 & 90 & 72 & 89 & 87 & 67 \\
+CADENCE-Single          & 45 & 45 & 40 & 38 & 38 & 31 \\
 \midrule
-GaitNet + offset        & 67 & 66 & 54 & 64 & 63 & 47 \\
-GaitNet without the IFM & 21 & 20 & 14 & 18 & 17 & 12 \\
-GaitNet + training IFM  &  8 &  6 &  7 &  6 &  4 &  2 \\
+CADENCE + offset        & 67 & 66 & 54 & 64 & 63 & 47 \\
+CADENCE without the IFM & 21 & 20 & 14 & 18 & 17 & 12 \\
+CADENCE + training IFM  &  8 &  6 &  7 &  6 &  4 &  2 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -133,27 +148,24 @@ GaitNet + training IFM  &  8 &  6 &  7 &  6 &  4 &  2 \\
 \section{Training Details}
 \label{app:training}
 
-\looseness=-1 Each training seed took about \verify{\corlTrainHours}\,h
-to reach iteration \corlOcsCheckpoint{} on one NVIDIA RTX PRO 6000
-Blackwell GPU.
-% \verify on the hours: the author's "about 4 h" was recorded together with a
-% wrong iteration number; confirm it for iteration \corlOcsCheckpoint.
-
 \noindent\textbf{Policy and critic.}
-\looseness=-1 The action is a slot $a$, a leg and candidate or the
-no-step option, and a swing time $d$. The policy factors as
-$\pi(a, d \mid s) = \pi(a \mid s)\,\mathcal N(d;\, \mu_a(s),
-\sigma_T^2)$, with $\pi(a \mid s)$ the softmax of the scores over the
-valid slots, $\mu_a$ the swing time of Eq.~\eqref{eq:heads}, and
-$\sigma_T$ fixed (App.~\ref{app:settings}). PPO's ratio and clipping act
-on the joint log-probability. For the no-step option, the Gaussian term
-does not depend on the parameters. The critic has no attention and pools
-no embeddings. An MLP on the state embedding and each slot's candidate
-embedding gives one value per slot, and the no-step option and empty
-slots share a learned embedding. A second MLP ($\corlTotalCandidates
-\to 32 \to 32 \to 1$) maps the \corlTotalCandidates{} slot values to the
-value estimate. It reads the slots in a fixed order, in which the first
-slot of each leg holds the pinned nominal foothold
+% 2026-11-13: notation of Secs. 3-4 (choice i, swing time T, mean T_i). The
+% sampled swing time is not clamped (gaitnet-docs/methodology.md 5).
+\looseness=-1 The action is a choice $i$ among \corlTotalCandidates{}
+\emph{slots}, each a leg and candidate, the no-step option, or empty,
+and a swing time $T$. With $\mathbf x$ the planner's input, the policy
+factors as $\pi(i, T \mid \mathbf x) = \pi(i \mid \mathbf x)\,\mathcal
+N(T;\, T_i(\mathbf x), \sigma_T^2)$, with $\pi(i \mid \mathbf x)$ the
+softmax of the scores $\alpha_i$ over the non-empty slots, $T_i$ the
+swing time of Eq.~\eqref{eq:heads}, and $\sigma_T$ fixed
+(App.~\ref{app:settings}). The sampled swing time is not clipped, so in
+training it can fall outside $[T_{\min}, T_{\max}]$, whereas deployment
+uses the mean $T_i$. The critic has no attention: an MLP on the state embedding and each slot's candidate
+embedding gives one value per slot, with one learned embedding for the
+no-step option and the empty slots, and a second MLP
+($\corlTotalCandidates \to 32 \to 32 \to 1$) maps the slot values to
+the value estimate. It reads the slots in a fixed order, each leg's
+first slot holding the pinned nominal foothold
 (App.~\ref{app:sampler}).
 
 \noindent\textbf{Episodes and failure.}
@@ -161,12 +173,15 @@ slot of each leg holds the pinned nominal foothold
 earlier if the trunk tilts by more than \corlTiltLimitDeg$^\circ$, drops
 below \corlMinBaseHeight\,m, or a foot drops more than
 \corlFootDepthLimit\,m below the ground. Commanded velocities are
-forward-only, since the deployed robot maps terrain with a
-forward-facing camera. The tracking widths $\sigma_v$ and $\sigma_\omega$
-are narrow on purpose, since with wider widths a robot standing still
-would still earn most of the tracking reward at our speeds. Observations
-are not normalized and carry no added noise, and there are no external
-pushes.
+forward-only, since the robot maps terrain with a forward-facing
+camera, and the tracking widths are narrow, since with wider ones a
+standing robot would earn most of the tracking reward at our speeds.
+Observations are not normalized and carry no added noise, and there are
+no external pushes. Each training seed took about
+\corlTrainHours\,h to reach iteration \corlOcsCheckpoint{} on
+one NVIDIA RTX PRO 6000 Blackwell GPU.
+% \verify on the hours: the author's "about 4 h" was recorded together with a
+% wrong iteration number; confirm it for iteration \corlOcsCheckpoint.
 
 % Curriculum: gaitnet-docs/training-setup.md 9 and 12 (the sc_idm preset
 % sets --walk_p_down 0.3 --walk_random_fraction 0.25
@@ -178,13 +193,13 @@ pushes.
 \noindent\textbf{Curriculum.}
 \looseness=-1 Higher levels have more voids, and robots start on the
 three lowest levels. A robot progresses if it walks at least
-\corlCurriculumProgress{} times the commanded distance. It moves up a level
-with probability $p_{\text{up}}$ after a progressing time-out and down
-with probability $p_{\text{down}} = \corlWalkPDown$ after a failure or a
-stalled time-out. The share of failed or stalled episodes therefore
-settles where the two moves balance, near $p_{\text{up}}/(p_{\text{up}}
-+ p_{\text{down}})$, \verify{which is $1/4$ for $p_{\text{up}} =
-\corlWalkPUp$}. A further \corlWalkRandomPct\% of episodes run on a
+\corlCurriculumProgress{} times the commanded distance, and it moves up
+a level with probability $p_{\text{up}}$ after a progressing time-out
+and down with probability $p_{\text{down}} = \corlWalkPDown$ after a
+failure or a stalled time-out. The share of failed or stalled episodes
+therefore settles near $p_{\text{up}}/(p_{\text{up}} +
+p_{\text{down}})$, which is $1/4$ for $p_{\text{up}} =
+\corlWalkPUp$. A further \corlWalkRandomPct\% of episodes run on a
 random level and do not move the robot's level.
 
 % Randomization ranges: gaitnet-docs/training-setup.md 8, the step recipe
@@ -198,35 +213,35 @@ tracks, a scale of \corlRandPlanarMin{} to 1 on its planar tracking
 weights, a swing apex height of \corlRandApexMin{} to
 \corlRandApexMax\,m, each drawn uniformly, a constant per-leg landing
 bias of up to $\pm\corlRandBiasCm$\,cm per axis, Gaussian landing noise
-with a standard deviation of \corlRandNoiseCm\,cm, and a lift-off delay
-of zero or one tick. Every chosen candidate is first corrected by the
-IFM and then executed by this randomized controller. GaitNet's touchdown
-errors are measured against the IFM's output, so its history reports
-how far the controller missed the corrected command.
+of standard deviation \corlRandNoiseCm\,cm, and a lift-off delay
+of zero or one tick, the only case in which a step starts after the
+tick it is chosen. Every chosen candidate is corrected by the IFM
+before this controller executes it, and CADENCE's touchdown errors are
+measured against the IFM's output, so its history reports how far the
+controller missed the corrected command.
 
 \section{Deployment Details}
 \label{app:deployment}
 
 \noindent\textbf{Steps and footholds.}
-\looseness=-1 On OCS2, GaitNet is queried every tick, also while two legs
-swing, and each step it starts joins the steps already planned in OCS2's
-contact schedule, at absolute times on the NMPC clock. The OCS2 IFM's
-command reaches the NMPC as a foot-placement constraint. The command is
-first projected onto the nearest planar region of the segmented terrain
-map \citep{grandia_perceptive_2022}, and the foot must then land inside
-that region, in a box of $\pm$\corlAuthorityCm\,cm around the projected
-point. OCS2's swing planner receives only the touchdown heights.
+\looseness=-1 On OCS2, CADENCE is queried every tick, also while two legs
+swing, and each step it starts joins those already in OCS2's contact
+schedule, at absolute times on the NMPC clock. The OCS2 IFM's
+command is projected onto the nearest planar region of the segmented
+terrain map \citep{grandia_perceptive_2022}, and the NMPC constrains
+the foot to land inside that region, in a box of
+$\pm$\corlAuthorityCm\,cm around the projected point. OCS2's swing
+planner receives only the touchdown heights.
 
 \noindent\textbf{Terrain and odometry.}
-\looseness=-1 GaitNet and the controller get terrain from a simulated
-RealSense D435 depth camera through a depth-vote map. This map is a fine
-grid in which each depth frame votes hit or miss for the squares it sees.
-A square is walkable while its fading vote total is positive and it lies
-far enough from unwalkable squares. That distance grows with how far the
-robot has walked since it last saw the square. The simulated depth images
-carry no noise. Odometry comes from OCS2's leg-based state estimator with
-a slip gate, which ignores feet whose velocity disagrees with the
-estimate. The base's pose reference, which integrates the commanded
+\looseness=-1 CADENCE and the controller get terrain from a simulated,
+noise-free RealSense D435 depth camera through a depth-vote map, a fine
+grid whose squares each depth frame votes hit or miss. A square is
+walkable while its fading vote total is positive and it lies far enough
+from unwalkable ones, a distance that grows with the distance walked
+since the robot last saw it. Odometry is OCS2's leg-based state
+estimate with a slip gate, which ignores feet whose velocity disagrees
+with it, and the base's pose reference, which integrates the commanded
 velocity, stays a short distance ahead of the base.
 
 \input{appendix_idm}
@@ -234,5 +249,3 @@ velocity, stays a short distance ahead of the base.
 \input{appendix_sampler}
 
 \input{appendix_earlier}
-
-\input{appendix_sweep}
