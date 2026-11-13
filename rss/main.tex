@@ -152,18 +152,19 @@
   footholds are. We present CADENCE, a learned step planner with a small
   action space. Every \corlControlTickMs\,ms, it picks one of at most
   \corlTotalCandidates{} discrete choices: no step, or one leg's step to
-  a safe foothold. It also predicts a swing time, and the controller
-  still tracks the motion. We train CADENCE by reinforcement learning on
-  a convex model predictive controller (MPC), with no gait schedule. Its
-  reward has no gait term, only a cost per step, and at most
+  a safe foothold. It also predicts a swing time. 
+  We train CADENCE by reinforcement learning on top of a convex model
+  predictive controller (MPC). Nothing prescribes a gait: there is no
+  gait schedule, and the reward has no gait term, only a cost per step.
+  The one structural constraint is that at most
   \numberstringnum{\corlMaxConcurrentSwingLegs} legs may swing at once.
-  The policy we analysed developed an acyclic gait, with no fixed period
+  The policy we analyzed developed an acyclic gait, with no fixed period
   or stepping order, yet it still paired diagonal legs. An
   inverse footstep model (IFM), fitted on a controller's logged steps,
   turns each foothold into a command. With only the IFM refitted, on
   fewer than 20{,}000 steps, CADENCE ran frozen on OCS2's
-  nonlinear MPC. In simulated trials on ground with voids, it succeeded
-  in \corlBenchFull\% (mean of \corlNumSeedsGaitNet{} training seeds),
+  nonlinear MPC. In simulated trials with voids, it succeeded
+  in \corlBenchFull\% (mean of \corlNumSeedsGaitNet{} seeds),
   against \corlBenchTrot\% for OCS2's cyclic trot and
   \corlBenchStaticWalk\% for its static walk. At \corlBenchVoidHigh\% voids, it
   succeeded in \corlBenchFullDense\%, against \corlBenchTrotDense\% for
