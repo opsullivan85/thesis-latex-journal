@@ -63,23 +63,27 @@ targets by hindsight regression, but within a fixed gait. To our
 knowledge, no learned gait-free footstep planner has moved between
 model-based controllers.
 
-\looseness=-1 We propose CADENCE (Fig.~\ref{fig:overview}), a learned
-planner with a small action space on top of an unchanged model-based
-controller. Every \corlControlTickMs\,ms, a \emph{tick}, it makes one
-of at most \corlTotalCandidates{} discrete choices: the \emph{no-step
-option}, or one leg's step to one of \corlTrainCandidatesPerLeg{}
-safe cells near its hip, the \emph{candidates}
-(Fig.~\ref{fig:action}), plus a swing time. Since a
-step starts at the tick it is chosen, the gait is never specified. Its
-timing, order, overlap, and pairing emerge from these choices, with no
-gait schedule, phase variable, or gait reward. A small transformer, the
-\emph{candidate mixer}, compares the options, and an \emph{inverse
-footstep model} (IFM), fitted by hindsight regression on logged steps,
-turns each chosen foothold into a command expected to land the foot
-there. Trained with proximal policy optimization (PPO) on the convex
-MPC, CADENCE runs frozen on OCS2's nonlinear MPC (NMPC) and whole-body
-controller (WBC), with only the IFM refitted on fewer than 20{,}000 OCS2
-steps. Our contributions are:
+\looseness=-1 The authors previously developed GaitNet
+\citep{Sullivan2025}, a learned planner with a small action space on
+top of an unchanged model-based controller. Every
+\corlControlTickMs\,ms, a \emph{tick}, it makes one of at most
+\corlTotalCandidates{} discrete choices: the \emph{no-step option}, or
+one leg's step to one of \corlTrainCandidatesPerLeg{} safe cells near
+its hip, the \emph{candidates} (Fig.~\ref{fig:action}), plus a swing
+time. Since a step starts at the tick it is chosen, the gait is never
+specified. Its timing, order, overlap, and pairing emerge from these
+choices, with no gait schedule, phase variable, or gait reward. GaitNet
+scores each candidate on its own. This paper builds on that foundation
+and extends GaitNet to CADENCE (Fig.~\ref{fig:overview}). A small
+transformer, the \emph{candidate mixer}, compares the options with each
+other, a history adds the recent motion, and an \emph{inverse footstep
+model} (IFM), fitted by hindsight regression on logged steps, turns each
+chosen foothold into a command expected to land the foot there. Trained
+with proximal policy optimization (PPO) on the convex MPC, CADENCE runs
+frozen on OCS2's nonlinear MPC (NMPC) and whole-body controller (WBC),
+with only the IFM refitted on fewer than 20{,}000 OCS2 steps. We
+evaluate both GaitNet and CADENCE against OCS2's own cyclic gaits.
+Our contributions are:
 \begin{enumerate}\setlength{\itemsep}{0pt}
   \item A learned step planner for an unchanged model-based controller.
     Its network compares the choices of a small per-tick action space
@@ -97,9 +101,3 @@ steps. Our contributions are:
     short (Sec.~\ref{subsec:exp-why}). The refit uses steps logged on
     the new controller, so the transfer is not data-free.
 \end{enumerate}
-
-\looseness=-1 Averaged over \corlNumSeedsGaitNet{} training seeds,
-CADENCE succeeded in \corlBenchFull\% of OCS2 benchmark trials, against
-\corlBenchTrot\% and \corlBenchStaticWalk\% for OCS2's trot and static
-walk, and its lead over the trot grew to 30 percentage points at
-\corlBenchVoidHigh\% voids (Sec.~\ref{sec:experiments}).
