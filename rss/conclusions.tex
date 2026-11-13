@@ -3,7 +3,9 @@
 % 2026-11-13 refocus: small action space, emergent acyclic gait.
 % 2026-11-13 16:00 (author: "make the conclusion and future work detailed"):
 % summary with the main numbers, then limitations and concrete future work.
-% No hardware experiment is named as future work (author, 2026-11-13 16:20).
+% No hardware experiment is named as future work, and the conclusion does not
+% restate "simulation only" (author, 2026-11-13 16:25); the abstract ("simulated
+% trials") and the title of Sec. 5 ("Simulation Experiments") say it.
 
 \looseness=-1 We presented CADENCE, a learned step planner that, every
 \corlControlTickMs\,ms, makes one of at most \corlTotalCandidates{}
@@ -18,9 +20,9 @@ over the trot of 30 points at \corlBenchVoidHigh\% voids. Swinging one leg at a 
 \corlBenchSingle\%, and with simpler footstep corrections at most
 \corlBenchCtrlMax\%.
 
-\looseness=-1 All experiments ran in simulation against OCS2's untuned
-stock gaits, acyclicity was measured on one earlier run of one policy,
-and the transfer needs steps logged on the new controller. Future work
+\looseness=-1 The non-learned baselines were OCS2's untuned stock gaits,
+acyclicity was measured on one earlier run of one policy, and the
+transfer needs steps logged on the new controller. Future work
 will move CADENCE to further model-based controllers, measure how few
 logged steps the refit needs, and test whether relogging
 with the deployed IFM \citep{christiano_transfer_2016} or online
