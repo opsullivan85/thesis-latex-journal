@@ -6,18 +6,19 @@
 \section{Method}
 \label{sec:method}
 
+% Fig. 3 regenerated 2026-11-13 in the paper's render style (author: "regenerate
+% the fig3 with match theme of the paper"): figures/fig_action.py, posed MuJoCo,
+% exact candidate rule; camera az 120, el -35 (55 of 64 dots visible).
 \begin{figure}[t]
   \centering
-  \subfigure[Candidate footholds of all four legs]{%
-    \includegraphics[height=38mm]{figures/gaitnet_thesis_images/figures/steps/0.png}}\hfill
-  \subfigure[One leg posed at its candidates]{%
-    \includegraphics[height=38mm]{figures/gaitnet_thesis_images/figures/training-fl-sweep.png}}
-  \caption{The discrete action space, illustrated with renders from
-    \citet{Sullivan2025}, whose candidates form a fixed grid around each
-    foot. Each tick, the policy takes no step or picks one leg and one
-    candidate, plus a swing time. GaitNet keeps up to
-    \corlTrainCandidatesPerLeg{} safe candidates per leg
-    (Sec.~\ref{subsec:method-step}).}
+  \includegraphics[width=\textwidth]{figures/fig_action}
+  \caption{The action space at one tick (posed MuJoCo scene,
+    illustrative). Each tick, GaitNet takes no step or picks one leg and
+    one of its candidates, plus a swing time. (a)~The
+    \corlTrainCandidatesPerLeg{} candidates of each leg, by the rule of
+    Sec.~\ref{subsec:method-step}; front-right in dark indigo, dots the
+    robot hides not drawn. (b)~The front-right leg posed at each of its
+    candidates.}
   \label{fig:action}
 \end{figure}
 
