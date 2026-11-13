@@ -25,9 +25,9 @@
 %    (App. F, app:earlier-run).
 % Plain figures, no p-values, no intervals (user, 2026-11-03).
 % Author's answers of 2026-11-13 (13:30): (1) each OCS2 IFM was fitted on
-% fewer than 20,000 steps; (2) those steps were logged on the BENCHMARK's
-% worlds (not on separate ones), and the sweep's worlds were not used, so
-% Sec. 5.1 says the benchmark is not held out for the IFM; (3) iteration 300
+% fewer than 20,000 steps; (2) those steps were logged on worlds SEPARATE
+% from the evaluation's (the author corrected an earlier "same worlds" answer
+% at 13:57, and the sentences that answer had produced were removed); (3) iteration 300
 % is where CADENCE's mean Isaac success was highest; (4) Per-candidate + IFM
 % and CADENCE-Single ran with the OCS2 IFM of CADENCE's same training seed,
 % so Sec. 5.2 lists that IFM among the confounds of the 13.8-point gap and
@@ -35,6 +35,13 @@
 % printed; (6) the flat-ground RMS values (6 and 2 cm) are NOT confirmed,
 % hence "about" and the remaining \verify{}; (7) the gait percentages are
 % kept as computed from timming.md.
+% 2026-11-13 14:10 (author: "remove this"): the paper no longer says in so
+% many words that the architecture changes are not isolated. The sentences
+% "We do not isolate the mixer or the history" (contribution 1) and "the
+% mixer, history, and timing alone are not isolated" (conclusion) are gone,
+% and Sec. 5.2 states neutrally how GaitNet + IFM differs from CADENCE. That
+% list of differences stays: without it the 13.8-point gap would read as an
+% ablation of the architecture, which the runs do not support.
 % 2026-11-13 13:40: the baseline row is named "GaitNet + IFM", as in the first
 % author's pushed version (commit f983b3b); it was "Per-candidate + IFM".
 % The macros (\corlBenchMlp*, \corlSweepMlp) and the figure-script keys keep
@@ -72,9 +79,7 @@ fractions of \corlBenchVoidLow, \corlBenchVoidMid, and
 \corlBenchIsaacVoidHigh\%) with speeds of \corlBenchSpeedSlow{} and
 \corlBenchSpeedFast\,m/s, and each cell holds
 \corlBenchTrialsPerCell{} trials of \corlBenchTrialSeconds\,s on the
-same worlds for every method. The OCS2 IFMs were fitted on steps logged
-on these worlds (Sec.~\ref{subsec:method-idm}), so the benchmark is not
-held out for the IFM, whereas the sweep's worlds are. A trial succeeds if the robot does not
+same worlds for every method. A trial succeeds if the robot does not
 fall and walks at least half the nominal distance, the speed times the
 trial time. Every learned method is trained with
 \corlNumTrainSeeds{} training seeds and evaluated at iteration
@@ -116,9 +121,9 @@ time. GaitNet + IFM and CADENCE-Single both run with the OCS2 IFM
 of the CADENCE policy with the same training seed, which was fitted on
 that policy's steps and not on their own.
 Three controls keep CADENCE's weights and change only the footstep
-correction: \emph{CADENCE + offset} adds a constant per-leg offset, the
-mean of command minus landing over the OCS2 IFM's logged steps;
-\emph{CADENCE without the IFM} sends the desired foothold unchanged;
+correction. \emph{CADENCE + offset} adds a constant per-leg offset, the
+mean of command minus landing over the OCS2 IFM's logged steps.
+\emph{CADENCE without the IFM} sends the desired foothold unchanged,
 and \emph{CADENCE + training IFM} uses the training controller's
 IFM.
 
@@ -194,9 +199,9 @@ points at \corlBenchSpeedSlow\,m/s and from 4 to 20 to 30 at
 cell (94 against 93\%). In the hardest cell, \corlBenchVoidHigh\% voids
 at \corlBenchSpeedFast\,m/s, CADENCE succeeded in 70\% against 40\% for
 the trot and 35\% for the walk (Fig.~\ref{fig:bench}b). GaitNet + IFM succeeded in
-\corlBenchMlpMean\%, 13.8 points below CADENCE, a gap that confounds the
-mixer, history, network size, IFM in training, and an OCS2 IFM fitted
-on CADENCE's steps. Since the stock gaits
+\corlBenchMlpMean\%, 13.8 points below CADENCE, from which it differs in
+the mixer, the history, network size, the IFM in training, and an OCS2
+IFM fitted on CADENCE's steps. Since the stock gaits
 also take footholds from another source, the lead belongs to CADENCE and
 its execution layer together.
 
@@ -213,12 +218,11 @@ its execution layer together.
   \label{fig:sweep-main}\label{fig:sweep}
 \end{figure*}
 
-\looseness=-1 The sweep, on worlds that neither CADENCE nor its IFM saw
-and with a criterion that also fails a robot that stalls, extends this
-result beyond training
-(Fig.~\ref{fig:sweep-main}). CADENCE succeeded in
-\corlSweepFull\% against the trot's \corlSweepTrot\%. The two were
-equal up to 10\% voids, and from 30\% voids on CADENCE led by 15 to 42
+\looseness=-1 The sweep, on other worlds and with a criterion that also
+fails a robot that stalls, extends this result beyond training. In
+Fig.~\ref{fig:sweep-main}a, CADENCE reached \corlSweepFull\% against
+the trot's \corlSweepTrot\%. The two were
+equal up to a nominal 10\%, and from 30\% on CADENCE led by 15 to 42
 points. Beyond the \corlMaxVoidPct\% curriculum, at 50, 60, and
 \corlOcsMaxVoidPct\% voids, it succeeded in 80, 60, and 50\% against
 the trot's 38, 30, and 12\%. It also led at every speed, and at
@@ -256,23 +260,22 @@ leg lifted twice in a row in \corlGaitLegTwicePct\% of consecutive
 lift-offs, against \corlGaitEventRepeatPctTrot{} and
 \corlGaitLegTwicePctTrot\% for the trot, and four consecutive lift-offs
 covered all four legs in \corlGaitFourAllPct{} against
-\corlGaitFourAllPctTrot\%. Its measured swings were shorter, with a
-median of \corlGaitSwingMedian{} against \corlGaitSwingMedianTrot\,s
-(Fig.~\ref{fig:swing-transfer}a). Yet \corlGaitDiagPairPct\% of its
+\corlGaitFourAllPctTrot\%. CADENCE's measured swings were shorter
+(median \corlGaitSwingMedian{} against \corlGaitSwingMedianTrot\,s;
+Fig.~\ref{fig:swing-transfer}a). Yet \corlGaitDiagPairPct\% of its
 \corlGaitOverlapPairs{} overlapping swing pairs were diagonal
 (Fig.~\ref{fig:gait}c), with partners lifting off a median
 \corlGaitLiftLagMs\,ms apart, about one tick. CADENCE therefore kept
 the trot's pairing but neither its period nor its order, in this one
 run of one policy.
 
-\looseness=-1 Restricting the action space showed which freedom
+\looseness=-1 Restricting the action space tested which freedom
 mattered. Retrained to swing one leg at a time, CADENCE-Single
-succeeded in only \corlBenchSingle\%. This loss mixes the missing
-overlap with an OCS2 IFM fitted on CADENCE's two-leg steps, and OCS2's
-static walk, also one leg at a time, reached \corlBenchStaticWalk\%. Restricted at test time to diagonal
+succeeded in only \corlBenchSingle\%, though OCS2's static walk, also
+one leg at a time, reached \corlBenchStaticWalk\%. This loss mixes the
+missing overlap with an OCS2 IFM fitted on CADENCE's two-leg steps. Restricted at test time to diagonal
 pairs, CADENCE-Diagonal lost only 2.2 points on the benchmark (1.2 to
-2.8 in each seed), but 9.4 in the sweep (\corlSweepDiag{}
-against \corlSweepFull\%).
+2.8 in each seed), but 9.4 in the sweep (\corlSweepDiag\%, not shown).
 
 \begin{figure}[t]
   \centering

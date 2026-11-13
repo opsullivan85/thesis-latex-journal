@@ -60,14 +60,14 @@ margolis_learning_2021, gangapurwala_rloc_2022,
 bratta_contactnet_2024}. At the footstep level,
 \citet{akizhanov_learning_2024} correct a nonlinear MPC's contact
 targets by hindsight regression, but within a fixed gait. To our
-knowledge, no gait-free footstep planner has been moved between two
+knowledge, no learned gait-free footstep planner has moved between
 model-based controllers.
 
 \looseness=-1 We propose CADENCE (Fig.~\ref{fig:overview}), a learned
 planner with a small action space on top of an unchanged model-based
 controller. Every \corlControlTickMs\,ms, a \emph{tick}, it makes one
 of at most \corlTotalCandidates{} discrete choices: the \emph{no-step
-option}, or one step, a leg and one of \corlTrainCandidatesPerLeg{}
+option}, or one leg's step to one of \corlTrainCandidatesPerLeg{}
 safe cells near its hip, the \emph{candidates}
 (Fig.~\ref{fig:action}), plus a swing time. Since a
 step starts at the tick it is chosen, the gait is never specified. Its
@@ -81,11 +81,10 @@ MPC, CADENCE runs frozen on OCS2's nonlinear MPC (NMPC) and whole-body
 controller (WBC), with only the IFM refitted on fewer than 20{,}000 OCS2
 steps. Our contributions are:
 \begin{enumerate}\setlength{\itemsep}{0pt}
-  \item A learned step planner with a small per-tick action space, on an
-    unchanged model-based controller, whose network compares the choices
+  \item A learned step planner for an unchanged model-based controller.
+    Its network compares the choices of a small per-tick action space
     with a candidate mixer and a history
-    (Secs.~\ref{subsec:method-step}--\ref{subsec:method-network}). We do
-    not isolate the mixer or the history.
+    (Secs.~\ref{subsec:method-step}--\ref{subsec:method-network}).
   \item An emergent acyclic gait, measured and compared with a
     model-based controller's own cyclic gaits: on OCS2, CADENCE's gait
     had neither a fixed period nor a fixed order, yet mostly paired
@@ -102,5 +101,5 @@ steps. Our contributions are:
 \looseness=-1 Averaged over \corlNumSeedsGaitNet{} training seeds,
 CADENCE succeeded in \corlBenchFull\% of OCS2 benchmark trials, against
 \corlBenchTrot\% and \corlBenchStaticWalk\% for OCS2's trot and static
-walk, and its lead over the trot grew to 30 percentage points in both
-\corlBenchVoidHigh\% cells (Sec.~\ref{sec:experiments}).
+walk, and its lead over the trot grew to 30 percentage points at
+\corlBenchVoidHigh\% voids (Sec.~\ref{sec:experiments}).

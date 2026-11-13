@@ -73,8 +73,8 @@ training controller's MPC runs at \corlMpcHz\,Hz over a
 \noindent\textbf{OCS2 IFM and footstep corrections.}
 \looseness=-1 Each training seed has its own OCS2 IFM, with the network
 and fit of the training controller's IFM, fitted on fewer than 20{,}000 steps that this seed's frozen CADENCE
-took on OCS2 through the training controller's IFM, on the benchmark's
-worlds but not the sweep's. GaitNet + IFM and CADENCE-Single run
+took on OCS2 through the training controller's IFM, on worlds disjoint
+from the evaluation's. GaitNet + IFM and CADENCE-Single run
 with the OCS2 IFM of CADENCE's same training seed. Table~\ref{tab:percell} gives the success of every
 method, the controls included, in each benchmark cell.
 

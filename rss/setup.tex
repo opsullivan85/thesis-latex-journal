@@ -61,7 +61,7 @@ and its IFM fitted beforehand and frozen, find the planner that
 maximizes $\mathbb E[\sum_{k} \gamma^k r_k]$, with discount $\gamma$
 and the reward of Eq.~\eqref{eq:reward}. \emph{Problem~2:} on the \emph{new controller},
 OCS2's NMPC and WBC, keep the planner frozen and fit only its IFM, on
-fewer than 20{,}000 OCS2 steps, so that the planner succeeds at least
-as often as OCS2's own gaits. Moving to OCS2 also
+fewer than 20{,}000 OCS2 steps, so that the planner succeeds on held-out
+worlds at least as often as OCS2's own gaits. Moving to OCS2 also
 changes the simulator, odometry, and terrain source (a depth camera),
 and no planner setting is tuned for it (App.~\ref{app:deployment}).

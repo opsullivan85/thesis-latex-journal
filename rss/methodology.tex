@@ -135,8 +135,8 @@ where $\Delta_\theta$ is a small multilayer perceptron whose output
 layer is initialized at zero, so an unfitted IFM is the identity. For
 OCS2, each training seed's frozen CADENCE logs
 fewer than 20{,}000 steps through the training controller's IFM, on
-the benchmark's worlds (Sec.~\ref{subsec:exp-setup}), and its own OCS2
-IFM is fitted on them.
+worlds separate from the evaluation, and its own OCS2 IFM is fitted on
+them.
 \phantomsection\label{subsec:idm-theory}Since the IFM does not see the
 full state, it can cancel only the part of the landing error that its
 inputs predict, and is guaranteed to cancel it only under conditions
