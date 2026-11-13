@@ -1,0 +1,52 @@
+% Sweep on OCS2, moved from Sec. 5 on 2026-11-13 for the 10-page limit. The
+% main text shows panel (a) again (results.tex, label fig:sweep-main); this
+% section keeps the full figure (fig:sweep) and the description of both run
+% sets.
+% 2026-11-13 appendix pass: the design corrected (the two panels are separate
+% run sets of 80 trials per point; memory note ocs2-benchmark-design and
+% author, 2026-10-27 and 2026-11-04), the plotted methods named after
+% figures/fig_sweep.py (a: GaitNet, trot, Single, Per-candidate + IFM;
+% b: GaitNet, Single, trot), and Per-candidate + IFM's pooled rate
+% (\corlSweepMlp) added. The sweep settings formerly repeated in App. A are
+% given here only.
+% Sources: figures/fig_sweep.py (BY_VOID, BY_SPEED) and constants.tex
+% (\corlSweep*, \corlOcs*). The author states the learned values are means of
+% the five training seeds at iteration \corlOcsCheckpoint, but their per-seed
+% counts are not in results_to_fill.md (sections 4-5 empty), so every number
+% stays in \verify. GaitNet-Diagonal has only a pooled value (author,
+% 2026-11-05) and is not plotted.
+\section{Sweep on OCS2}
+\label{app:sweep}
+
+\looseness=-1 The sweep (Fig.~\ref{fig:sweep-main}) extends the benchmark to
+eight nominal void fractions from 0 to \corlOcsMaxVoidPct\% (above
+\corlMaxVoidPct\%, beyond the training curriculum) and five speeds from
+\corlOcsSpeedMin{} to \corlOcsSpeedMax\,m/s (the highest above the
+training speeds), \verify{on Isaac's nominal scale, on which the
+benchmark's \corlBenchVoidLow, \corlBenchVoidMid, and
+\corlBenchVoidHigh\% are \corlBenchIsaacVoidLow,
+\corlBenchIsaacVoidMid, and \corlBenchIsaacVoidHigh\%}. It uses
+\verify{the benchmark's checkpoints (five training seeds per learned
+method, learned values their means)} and tiles on
+worlds other than the benchmark's, shared by all methods, and a
+stricter criterion: a trial succeeds only if the robot reaches the end
+of a \corlOcsTrackM\,m track within \corlOcsTimeFactor{} times the time
+needed at the commanded speed, which also fails a robot that stalls.
+A method's rate here therefore differs from its rate
+in Table~\ref{tab:results}. The two panels are separate run sets with
+\corlOcsTrialsPerPoint{} trials per point. In panel~(a), each void
+fraction's trials are spread over the five speeds, and in panel~(b),
+each speed's trials are 10 per void fraction. Panel~(a) shows GaitNet,
+OCS2's own trot, GaitNet-Single, and Per-candidate + IFM, and panel~(b)
+GaitNet, GaitNet-Single, and the trot. For GaitNet-Diagonal, only the
+overall rate is available.
+
+\looseness=-1 \verify{Overall, GaitNet succeeded in \corlSweepFull\%
+against the trot's \corlSweepTrot\%. The two were equal at 0 and 10\%
+voids, and from 30\% voids on GaitNet led by 15 to 42 points. At 50,
+60, and \corlOcsMaxVoidPct\% voids it succeeded in 80, 60, and 50\%
+against the trot's 38, 30, and 12\%, and at \corlOcsSpeedMax\,m/s in 66
+against 51\%. GaitNet-Single succeeded in \corlSweepSingle\%,
+Per-candidate + IFM in \corlSweepMlp\%, and GaitNet-Diagonal in
+\corlSweepDiag\%.}
+

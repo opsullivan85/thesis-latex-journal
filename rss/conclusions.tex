@@ -1,13 +1,13 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
-% 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
+% 2026-11-13 refocus: small action space, emergent acyclic gait.
 
-\looseness=-1 Trained on a convex MPC, GaitNet ran frozen on OCS2 with
-only its IFM refitted and succeeded more often than OCS2's own trot and
-static walk, and far less often without the refit. These results are from simulation, with one pair of
-controllers, stock gaits as the only non-learned baselines, one void
-size on flat ground, noise-free depth, speeds up to
-\corlOcsSpeedMax\,m/s, and no test that isolates the mixer or the
-history. Next, we will deploy GaitNet on hardware, test other
-controllers, and measure how few logged steps the refit needs
-\citep{xie_fada_2026}.
+\looseness=-1 With one of at most \corlTotalCandidates{} choices per
+tick, GaitNet stepped for a model-based controller without a gait
+schedule, and its emergent gait was acyclic yet paired diagonal legs. On
+OCS2, it beat the controller's own cyclic gaits, most on dense voids,
+with only its IFM refitted. These results are from simulation, against
+stock untuned gaits, with acyclicity measured on one earlier run, and
+the mixer, history, and timing alone are not isolated. Next, we will
+test GaitNet on hardware and other controllers, and measure how few
+logged steps the refit needs \citep{xie_fada_2026}.

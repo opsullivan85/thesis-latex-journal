@@ -20,7 +20,10 @@ from the paper; it is kept only in git history.
 Design rule (user, 2026-11-03): no error bars, whiskers, confidence bands or
 heatmaps. Lines with markers, the values a reader needs printed next to the
 marks. Here only GaitNet's values are printed (five lines in (a), three in
-(b) leave no room for more); App. D lists every count.
+(b) leave no room for more); App. D lists every count. Author, 2026-11-12: no
+shaded bands either, so the speeds above training in (b) are marked by a thin
+dashed vertical divider between 0.20 and 0.25 m/s with the label "beyond
+training" on its right (it replaced a grey axvspan).
 
 Panels
 - (a) Success vs void fraction (0-70 %), 80 trials per point spread over
@@ -60,6 +63,9 @@ CONSTANTS_TEX = HERE.parent / "constants.tex"
 VOIDS = [0, 10, 20, 30, 40, 50, 60, 70]                 # void fraction [%]
 SPEEDS = [0.05, 0.10, 0.15, 0.20, 0.25]                 # commanded speed [m/s]
 TRAINED_MAX_SPEED = 0.2                                 # \corlCmdVxMax
+# Divider in (b) halfway between the last trained speed and the first one above
+# it: a line at exactly 0.20 m/s would cross three markers and a value.
+X_DIVIDER = 0.5 * (TRAINED_MAX_SPEED + min(s for s in SPEEDS if s > TRAINED_MAX_SPEED))
 TRIALS = 80                                             # trials per point and training seed
 # Author, 2026-11-05: every value is the success rate [%] averaged over the five
 # training seeds, rounded to a whole percent. The script therefore works in whole
@@ -127,6 +133,8 @@ assert MACROS["corlOcsDenseFull"] == str(half_up(pct(g_dense, 4 * N), "1"))
 assert MACROS["corlOcsDenseTrot"] == str(half_up(pct(t_dense, 4 * N), "1"))
 assert Decimal(MACROS["corlOcsSpeedMax"]) == Decimal(str(SPEEDS[-1]))
 assert Decimal(MACROS["corlCmdVxMax"]) == Decimal(str(TRAINED_MAX_SPEED))
+# Exactly the speeds right of the divider are above training (here only 0.25).
+assert [s for s in SPEEDS if s > X_DIVIDER] == [s for s in SPEEDS if s > TRAINED_MAX_SPEED] == [0.25]
 print("all value checks passed")
 
 # ---------------------------------------------------------------- style
@@ -148,6 +156,9 @@ INK, MUTED, GRIDLINE = "#1F2937", "#4B5563", "#E5E7EB"
 GAITNET, TROT = "#4F46E5", "#4B5563"
 TITLE = dict(loc="left", fontsize=7.5, fontweight="semibold", color=INK, pad=4)
 VALUE_PT = 6.5                  # value labels of (a)
+DIVIDER_PT = 7.0                # "beyond training" label of (b); 7 pt floor at final size
+DIVIDER_LW = 0.7                # dashed divider in (b) [pt]
+DIVIDER_PAD_PT = 1.5            # gap between the divider and its label [pt]
 PAD_PT = 0.8                    # gap between a marker's edge and its value [pt]
 SHIFT_PT = 3.0                  # sideways shift of a value off a line [pt]
 GAITNET_MS, TROT_MS, VARIANT_MS = 3.6, 4.0, 3.0      # marker sizes [pt]
@@ -198,11 +209,19 @@ lines = {"a": {}, "b": {}}
 for m in ("Per-candidate + IFM", "GaitNet-Single", "OCS2's own trot", "GaitNet"):
     (lines["a"][m],) = ax_a.plot(VOIDS, [float(pct(k, N)) for k in BY_VOID[m]], label=m, **STYLE[m])
 
-# (b) by speed; 0.25 m/s is above the training range (shaded x band)
+# (b) by speed; 0.25 m/s is above the training range: a thin dashed divider
+# (no shaded band), from 0 to 100 % like the left spine, labelled on its right.
 style_axes(ax_b, SPEEDS, 0.0225, "Commanded speed [m/s]")
 ax_b.set_xticklabels([f"{s:.2f}" for s in SPEEDS])
 ax_b.set_ylabel("")              # same axis as (a); its label is there
-ax_b.axvspan(TRAINED_MAX_SPEED + 0.025, SPEEDS[-1] + 0.04, color="#F3F4F6", zorder=0, lw=0)
+divider = ax_b.axvline(X_DIVIDER, ymin=0, ymax=100 / Y_MAX, color=MUTED, lw=DIVIDER_LW,
+                       ls=(0, (3.0, 2.0)), zorder=1)
+# Lower-right corner: below GaitNet-Single's 40 % at 0.25 m/s. The white box only
+# hides the light 20 % gridline behind the text; it is invisible on the white axes.
+divider_label = ax_b.annotate("beyond\ntraining", (X_DIVIDER, 3), xytext=(DIVIDER_PAD_PT, 0),
+                              textcoords="offset points", ha="left", va="bottom",
+                              fontsize=DIVIDER_PT, color=MUTED, linespacing=1.05, zorder=2,
+                              bbox=dict(boxstyle="square,pad=0.1", fc="white", ec="none"))
 ax_b.set_title("(b) By speed, all void fractions", **TITLE)
 for m in ("GaitNet-Single", "OCS2's own trot", "GaitNet"):
     (lines["b"][m],) = ax_b.plot(SPEEDS, [float(pct(k, N)) for k in BY_SPEED[m]], label=m,
@@ -251,15 +270,36 @@ def candidates(r_pt: float):
             ("SE", (d, -d), "left", "top"), ("SW", (-d, -d), "right", "top")]
 
 
-def place_values(ax, xs, ks, panel_lines):
-    ax_box = ax.get_window_extent(renderer)
-    markers = []
+def marker_boxes(ax, panel_lines):
+    """Pixel boxes of every drawn marker of a panel."""
+    boxes = []
     for m, ln in panel_lines.items():
         r = 0.5 * EXTENT[m] * px_per_pt
         for cx, cy in ax.transData.transform(ln.get_xydata()):
-            markers.append(Bbox.from_extents(cx - r, cy - r, cx + r, cy + r))
-    polys = [(ln, ax.transData.transform(ln.get_xydata())) for ln in panel_lines.values()]
-    obstacles = [leg.get_window_extent(renderer), ax.title.get_window_extent(renderer)]
+            boxes.append(Bbox.from_extents(cx - r, cy - r, cx + r, cy + r))
+    return boxes
+
+
+def polylines(ax, panel_lines):
+    """(line, pixel vertices) of every data line of a panel."""
+    return [(ln, ax.transData.transform(ln.get_xydata())) for ln in panel_lines.values()]
+
+
+def divider_box() -> Bbox:
+    """Pixel box of (b)'s dashed divider: x from data, y from 0 to 100 % (axvline is
+    drawn in a blended data/axes transform, so it is not a data polyline)."""
+    x = ax_b.transData.transform((X_DIVIDER, 0))[0]
+    y0, y1 = ax_b.transData.transform([(X_DIVIDER, 0), (X_DIVIDER, 100)])[:, 1]
+    d = 0.5 * DIVIDER_LW * px_per_pt
+    return Bbox.from_extents(x - d, y0, x + d, y1)
+
+
+def place_values(ax, xs, ks, panel_lines, extra_obstacles=()):
+    ax_box = ax.get_window_extent(renderer)
+    markers = marker_boxes(ax, panel_lines)
+    polys = polylines(ax, panel_lines)
+    obstacles = [leg.get_window_extent(renderer), ax.title.get_window_extent(renderer),
+                 *extra_obstacles]
     placed, chosen = [], []
     for x, k in zip(xs, ks):
         y, text = float(pct(k, N)), value_label(k)
@@ -293,7 +333,9 @@ def place_values(ax, xs, ks, panel_lines):
 
 
 print("label positions (a):", place_values(ax_a, VOIDS, BY_VOID["GaitNet"], lines["a"]))
-print("label positions (b):", place_values(ax_b, SPEEDS, BY_SPEED["GaitNet"], lines["b"]))
+print("label positions (b):", place_values(
+    ax_b, SPEEDS, BY_SPEED["GaitNet"], lines["b"],
+    extra_obstacles=[divider_box(), divider_label.get_bbox_patch().get_window_extent(renderer)]))
 
 # ---------------------------------------------------------------- checks
 # Nothing may leave the figure; the legend must not touch either panel or a
@@ -310,6 +352,23 @@ _bleft = min([t.get_window_extent(renderer).x0 for t in ax_b.get_yticklabels() i
              + [ax_b.yaxis.label.get_window_extent(renderer).x0])
 assert _lb.x1 < _bleft - 1, "legend reaches (b)'s y labels"
 assert ax_b.title.get_window_extent(renderer).x0 > ax_a.title.get_window_extent(renderer).x1
+# The divider label (box included) lies right of the divider, inside the figure,
+# and touches no line, marker, GaitNet value, title or the divider itself.
+_dl = grow(divider_label.get_bbox_patch().get_window_extent(renderer), 0.4)
+_div = divider_box()
+assert _dl.x0 > _div.x1, "divider label reaches the divider"
+assert _dl.x1 <= fig_box.x1 and _dl.y0 >= ax_b.get_window_extent(renderer).y0, _dl
+assert not any(_dl.overlaps(o) for o in marker_boxes(ax_b, lines["b"])), "label on a marker"
+assert not any(hits_polyline(grow(_dl, 0.5 * ln.get_linewidth()), pl)
+               for ln, pl in polylines(ax_b, lines["b"])), "label on a line"
+assert not any(_dl.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts
+               if t is not divider_label), "label on a value"
+assert not _dl.overlaps(ax_b.title.get_window_extent(renderer)), "label on the title"
+# The divider crosses no GaitNet value either.
+assert not any(_div.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts
+               if t is not divider_label), "divider through a value"
+print("divider at %.3f m/s; label %.1f x %.1f mm" % (
+    X_DIVIDER, *(np.array([_dl.width, _dl.height]) / fig.dpi * 25.4)))
 
 fig.savefig(HERE / "fig_sweep.png", dpi=300)
 # Text to outlines with Inkscape, like Figs. 1 and 2.

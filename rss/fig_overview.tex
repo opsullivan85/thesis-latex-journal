@@ -6,14 +6,13 @@
 % (III-D), (d) deployment on OCS2 (III-E).
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.87\textwidth]{figures/fig_overview}
-\caption{GaitNet overview. (a)~Given the state $\mathbf x_g$ and the
-  history $\mathbf h$, a candidate mixer compares the safe candidates
-  $\mathbf q_i \in \mathcal C$ and the no-step option $\varnothing$, and
-  GaitNet gives each a score and a swing time. (b)~Each controller's IFM
-  is fitted offline on logged steps. (c)~PPO training keeps the training
-  controller's IFM frozen in the loop. (d)~On OCS2, GaitNet is frozen and
-  the execution layer sets the command with the OCS2 IFM. Amber arrows: training signals (solid) and parameter updates
-  (dashed). \hot~trained, \frz~frozen.}
+\includegraphics[width=0.74\textwidth]{figures/fig_overview}
+\caption{GaitNet overview. (a)~Given the state $\mathbf x_g$ and history
+  $\mathbf h$, a candidate mixer scores the safe candidates
+  $\mathbf q_i \in \mathcal C$ and the no-step option $\varnothing$.
+  (b)~Each controller $c$ gets its own IFM $I^c$, fitted offline on its
+  logged steps. (c)~PPO keeps the training controller's IFM frozen.
+  (d)~On OCS2, GaitNet stays frozen and only the IFM changes.
+  \hot~trained, \frz~frozen.}
 \label{fig:overview}
 \end{figure*}

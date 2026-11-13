@@ -1,84 +1,65 @@
-% 2026-11-04 flow rewrite: plainer words, less repetition; same facts, numbers and \verify items.
+% 2026-11-12 L4DC rewrite (timing-first story): gait schedule defined, the
+% per-tick decision as the core, the closed-loop footstep map with explicit
+% frames, desired foothold / command / landing kept apart, the history
+% caveat, and Problems 1-2 without the restated reward terms.
 \section{Problem Formulation}
 \label{sec:setup}
 
 \noindent\textbf{Setting.}
-A Unitree Go1 walks forward at a commanded velocity over level ground
-with voids. A planner decides the steps, and a
-model-based controller $c$ executes them. The planner is queried every
-tick of $\Delta t = \corlControlTickMs$\,ms. It
-is given no \emph{gait schedule}, a map from a phase variable to the legs
-in stance (on the ground), as an input or a constraint.
+\looseness=-1 A Unitree Go1 walks forward at a given speed over level
+ground with voids. A planner, queried every tick of
+$\Delta t = \corlControlTickMs$\,ms, decides the steps, and a
+model-based controller $c$ executes them. The planner is given no
+\emph{gait schedule}, a map from a gait phase to the legs in stance, as
+an input or as a constraint.
 
 \noindent\textbf{Decisions.}
-\looseness=-1 At each tick, the planner takes the no-step option $\varnothing$ or
-starts a step \mbox{$(\ell, \mathbf u^\star, T)$}, which lifts leg
-$\ell$ and should land it at the desired foothold $\mathbf u^\star$ after
-a swing of duration $T \in [T_{\min}, T_{\max}]$. Since the step starts at
-the tick it is chosen, one decision fixes which leg steps, where, for how
-long, and when. A leg may step
-only if at least \numberstringnum{\corlMinContactLegs} legs, itself among
-them, are in stance in the \emph{contact schedule} set by the planner's
-earlier steps. A chosen leg counts as lifted from the tick it is
-chosen, even if the controller lifts it late. Hence at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs
-swing at once: without a gait schedule, contacts are still constrained.
-The foothold must be one of the leg's
-\emph{candidates} $\mathcal C$, cells near the hip chosen to cover
-those that a terrain mask with a candidate margin marks as safe
-(Sec.~\ref{subsec:method-step}). The planner observes the robot's state,
-a short window of its recent motion (the history), and the
-candidates (Sec.~\ref{subsec:method-network}). It sees neither the rest
-of the terrain nor the controller's internal state, so the decision
-process is partially observed, with the controller as part of the
-environment \citep{yang_fast_2021}.
+\looseness=-1 At each tick, the planner takes the no-step option
+$\varnothing$ or starts one step \mbox{$(\ell, \mathbf u^\star, T)$},
+which lifts leg $\ell$ and should land it at the \emph{desired foothold}
+$\mathbf u^\star$ after a swing time $T \in [\corlSwingDurationMin,
+\corlSwingDurationMax]$\,s. Since the step starts at the tick it is
+chosen, one decision fixes which leg steps, where, for how long, and
+when. A leg may start a step only if at least
+\numberstringnum{\corlMinContactLegs} legs, itself among them, are in
+stance in the \emph{contact schedule} set by earlier steps, so at most
+\numberstringnum{\corlMaxConcurrentSwingLegs} legs swing at once. The
+desired foothold must be one of the leg's \emph{candidates}
+(Sec.~\ref{subsec:method-step}). The planner sees the robot's state, a
+\corlHistSeconds\,s history, and the candidates, but neither the rest of
+the terrain nor the controller's internal state, so the decision process
+is partially observed \citep{yang_fast_2021}.
 
-\noindent\textbf{Execution.}
+\noindent\textbf{Closed-loop footstep map.}
 \looseness=-1 Given a \emph{command} $\mathbf u$, the foothold sent for
-the leg, and a swing time, the controller lands the foot at
+leg $\ell$, and a swing time $T$, the controller lands the foot at
 \begin{equation}
   \mathbf o = F_c(\mathbf s, \ell, T, \mathbf u)
     = \mathbf u + \boldsymbol\delta_c(\mathbf s, \ell, T, \mathbf u),
   \label{eq:forward}
 \end{equation}
-where $\mathbf s$ is
-everything that affects the swing: the robot's state, the other legs,
-the terrain, and the controller's internal state. Footholds, commands,
-landings, and voids are planar offsets from the stepping leg's hip
-at the decision tick, in the gravity-aligned \emph{yaw frame} that points along the
-robot's heading then. The \emph{landing offset}
-$\boldsymbol\delta_c$ includes the base's motion between the decision and
-touchdown. The offset is in general not zero, and it
-differs between controllers (Sec.~\ref{subsec:method-idm}), so sending
-the desired foothold unchanged can put
-the foot in a void. An
-\emph{execution layer} between planner and controller guards against
-this. Its IFM sends the command
-$\mathbf u = I^c(\zeta, \mathbf u^\star)$ expected to land the foot at
-the desired foothold, where $\zeta$
-holds the newest tick of the history, the leg, and the swing time.
+where $\mathbf s$ is everything else that affects the swing. Footholds,
+commands, landings, and voids are planar offsets from the stepping
+leg's hip at the decision tick, in the gravity-aligned \emph{yaw frame}
+along the robot's heading at that tick, so the \emph{landing offset}
+$\boldsymbol\delta_c$ includes the base's motion until touchdown. It is
+a property of the controller and differs between controllers, whereas
+the \emph{landing error} $\mathbf o - \mathbf u^\star$ compares the
+landing with the desired foothold. The execution layer therefore sends
+$\mathbf u = I^c(\zeta, \mathbf u^\star)$, where the IFM $I^c$ is meant
+to invert $F_c$ and $\zeta$ holds the newest tick of the history, the
+leg, and the swing time. The planner has no controller-specific
+parameter, but its history reflects the controller, so its inputs can
+still shift between controllers.
 
-\noindent\textbf{Problem 1 (planning on the training controller).}
-\looseness=-1 The planner is trained with the \emph{training controller}, the
-convex MPC of \citet{dicarlo_dynamic_2018}. The controller's parameters, including its lift-off delay, are
-redrawn at every reset (Sec.~\ref{subsec:method-training}). With
-the training controller's IFM fitted beforehand and frozen, we seek the planner that
-maximizes the expected discounted return $\mathbb E[\sum_{k \ge 0}
-\gamma^k r_k]$ when this controller executes its
-steps on random void worlds and commanded velocities. The reward $r_k$ at tick $k$
-(Eq.~\eqref{eq:reward}) pays for staying up and tracking the commanded
-velocity and yaw rate, and charges for each step and failure. A
-failure, such as a foot dropping into a void, ends the episode, with no
-reward after it. A time-out is not a failure
-(App.~\ref{app:training}). The reward has no void-clearance, landing,
-or track-completion term; trial success (Sec.~\ref{subsec:exp-setup})
-is judged by criteria outside it.
-
-\noindent\textbf{Problem 2 (deployment on a new controller).}
-\looseness=-1 The \emph{new controller} is OCS2's NMPC and WBC.
-The planner is frozen, and only the new controller's IFM is fitted, by
-regression on fewer than 20{,}000 steps that OCS2 executed
-(Sec.~\ref{subsec:method-idm}). The goal is that the planner succeeds on
-held-out worlds (Sec.~\ref{subsec:exp-setup}) at least as often as OCS2 with its own gait. Moving to OCS2 also changes the
-simulator, odometry, and terrain source (a depth camera). No planner
-setting is tuned for OCS2: the hand-set candidate margin stays the
-same on the depth map that all methods share (App.~\ref{app:deployment}).
+\noindent\textbf{Problems.}
+\looseness=-1 \emph{Problem~1:} with the \emph{training controller}, the
+convex MPC of \citet{dicarlo_dynamic_2018} randomized at every reset,
+and its IFM fitted beforehand and frozen, find the planner that
+maximizes $\mathbb E[\sum_{k} \gamma^k r_k]$ with the reward of
+Eq.~\eqref{eq:reward}. \emph{Problem~2:} on the \emph{new controller},
+OCS2's NMPC and WBC, keep the planner frozen and fit only its IFM, on
+\verify{fewer than 20{,}000} OCS2 steps, so that the planner succeeds on held-out
+worlds at least as often as OCS2's own gaits. Moving to OCS2 also
+changes the simulator, odometry, and terrain source (a depth camera),
+and no planner setting is tuned for it (App.~\ref{app:deployment}).

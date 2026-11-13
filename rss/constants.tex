@@ -601,3 +601,40 @@
 % Gait statistics (Q3): \corlGaitTrialsGaitNet = 549 successful trials is one
 % run's count, not five seeds'. State which run they come from.
 \newcommand{\corlGaitSource}{\corlGaitTrialsGaitNet{} successful trials of one training seed}
+
+% ---- Acyclicity of the gait, earlier evaluation run (added 2026-11-13) -----
+% Author's new focus (rewrite_decisions.md, UPDATE 2026-11-13 00:35). Source:
+% rss/timming.md, the counted (void-field) swings of the SUCCESSFUL trials, as
+% in figures/gait_stats.py (549 GaitNet / 504 trot trials). Within each trial,
+% lift-offs are sorted by lift-off time, ties (same ~21 ms sample) by leg name;
+% lift-off-only stable sorting gives the same values. Computed on 2026-11-13 by
+% the session script writerB/acyclicity_stats.py (scratchpad, not in the repo;
+% fold it into figures/gait_stats.py). gait_stats.py's own report agrees on the
+% leg-twice share ("same leg 6.1 %") and on the swing counts and medians.
+%   leg twice   two consecutive lift-offs of the same leg, share of consecutive
+%               lift-off pairs: GaitNet 3338/54621 = 6.111 %, trot 0/52927.
+%   four-cover  overlapping windows of four consecutive lift-offs that contain
+%               all four legs: GaitNet 21565/53523 = 40.291 %, trot
+%               51561/51919 = 99.310 %.
+%   event       the lift-offs within 66 ms of the event's first lift-off (66 ms
+%               = 90th percentile of GaitNet's diagonal lift-off lag; chaining
+%               gaps of <= 66 ms gives the same value); repeat = the next event
+%               lifts the same set of legs: GaitNet 5102/32186 = 15.852 %, trot
+%               0/26214.
+% NOTE: rewrite_decisions.md listed 15.7 / 6.2 / 40 / 82 (trot four-cover);
+% none of 15.7, 6.2 or 82 could be reproduced from timming.md under any sorting,
+% grouping or swing subset tried, so the reproduced values are used here and
+% the prose keeps them in \verify.
+\newcommand{\corlGaitEventWindowMs}{66}      % ms, step-event window (= q90 of the diagonal lift-off lag)
+\newcommand{\corlGaitEventRepeatPct}{15.9}   % 15.852 %
+\newcommand{\corlGaitEventRepeatPctTrot}{0}
+\newcommand{\corlGaitLegTwicePct}{6.1}       % 6.111 %
+\newcommand{\corlGaitLegTwicePctTrot}{0}
+\newcommand{\corlGaitFourAllPct}{40}         % 40.291 %
+\newcommand{\corlGaitFourAllPctTrot}{99}     % 99.310 %
+% Measured swings (fig_swing.py, gait_stats.py): medians over the counted
+% swings; detector-limited (the trot's scheduled 0.3 s swings measure 0.235 s).
+\newcommand{\corlGaitSwingMedian}{0.128}     % s, GaitNet
+\newcommand{\corlGaitSwingMedianTrot}{\corlGaitTrotSwingMeasured} % s, trot (0.235), same value as above
+\newcommand{\corlGaitSwingsGaitNet}{55{,}170} % counted swings, GaitNet
+\newcommand{\corlGaitSwingsTrot}{53{,}431}    % counted swings, trot

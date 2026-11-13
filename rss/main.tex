@@ -31,6 +31,13 @@
 \usepackage{booktabs}
 \usepackage{fmtcount}
 \usepackage{array}
+% 2026-11-12 integrator: \usepackage{subfigure} (author's Overleaf edit)
+% is commented out because the jmlr class already defines \subfigure,
+% \c@subfigure and \c@subtable, so loading the package gives three LaTeX
+% errors ("already defined"). No file uses \subfigure; the class's own
+% \subfigure is available if one is needed.
+% \usepackage{subfigure}
+% \usepackage{subfig}
 
 % Theorem environments. jmlr defines proposition, lemma and remark but
 % refuses amsthm and has no assumption environment.
@@ -74,8 +81,8 @@
 \newcommand{\verify}[1]{\ifrevmarkup\textcolor{magenta}{#1}\else#1\fi}
 \newcommand{\xx}{\pending{\text{xx}}}
 
-\title[GaitNet]{GaitNet: Learning to Choose the Gait for a Model-Based
-  Locomotion Controller}
+\title[GaitNet]{GaitNet: Learning When and Where to Step for Model-Based
+  Quadruped Controllers}
 
 % L4DC is single-blind: real names and affiliations are required.
 % TODO before submission: the author list, order, emails and affiliations
@@ -97,43 +104,46 @@
 \begin{center}
 \teasercaptype
 \includegraphics[width=\textwidth]{figures/fig_teaser}
-\caption{GaitNet chooses the steps of a model-based controller (posed
-  MuJoCo scene, illustrative step). (a)~Every \corlControlTickMs\,ms, it
-  takes the no-step option or starts one step, choosing the leg, the swing
-  time, and a foothold among safe candidates (dots: the front-right leg's,
-  by the rule of Sec.~\ref{subsec:method-step}). (b)~The controller swings
-  the leg there. (c)~Trained on a convex MPC, GaitNet runs
-  frozen on OCS2 with only its inverse footstep model (IFM) refitted;
-  circles: OCS2's RMS landing error on flat ground without the IFM and
-  with the refitted one.}
+\caption{GaitNet decides when and where a model-based controller steps
+  (posed MuJoCo scene, illustrative step). (a)~Every
+  \corlControlTickMs\,ms, it picks one of at most
+  \corlTotalCandidates{} choices, no step or a leg's safe foothold, and
+  a swing time. (b)~The controller swings the
+  leg there. (c)~On OCS2, RMS landing error on flat ground without the
+  inverse footstep model (IFM) and with the refitted one.}
 \label{fig:teaser}
 \end{center}
 \vspace{-0.8em}
 
 \begin{abstract}%
-  % 2026-11-04: review R06, R19, R23; author's facts of 2026-11-04.
-  Model-based legged controllers usually follow a fixed gait, and a
-  footstep planner learned on one controller can miss footholds on
-  another. We present GaitNet, a learned planner that chooses the gait
-  outside a model-based controller and runs frozen on a second one. Every \corlControlTickMs\,ms, it may start one
-  step, choosing the leg, swing time, and safe foothold, even while
-  another leg swings. An inverse footstep model (IFM), fitted on each
-  controller's logged steps, turns the foothold into a command expected
-  to land the foot there. Trained by reinforcement learning on a convex
-  model predictive controller (MPC), GaitNet ran on OCS2's nonlinear MPC
-  and whole-body controller with only the IFM refitted, on fewer than
-  20{,}000 steps logged on OCS2. In
-  \corlBenchTrialsPerArm{} Gazebo trials per training seed, with a
-  simulated depth camera, it succeeded on average over seeds in
-  \corlBenchFull\% against \corlBenchTrot\% for OCS2's own trot and
-  \corlBenchStaticWalk\% for its static walk (\corlBenchFullDense\%
-  against \corlBenchTrotDense\% on the densest voids), and in
-  \corlBenchIsaacIdm\% on the convex MPC in Isaac. With the
-  training controller's IFM, a constant offset per leg, or no IFM, it
-  succeeded in at most \corlBenchCtrlMax\%. Without a gait reward,
-  \corlGaitDiagPairPct\% of its overlapping swings in successful trials
-  paired diagonal legs, as in the trot, but with no fixed period between
-  a leg's lift-offs.%
+  % 2026-11-13 refocus (rewrite_decisions.md, update 00:35): small action
+  % space and emergent acyclic gait. No Isaac number, no earlier-run number
+  % and no gait statistic here: the gait claim is in words only, since its
+  % qualifiers (earlier run, one policy, successful trials) do not fit the
+  % word budget; the introduction and Sec. 5 carry them. Typed: 20,000
+  % (no macro).
+  Model-based quadruped controllers usually step on a cyclic gait, which
+  lifts the legs in a fixed order on a fixed period, wherever the safe
+  footholds are. We present GaitNet, a learned step planner with a small
+  action space. Every \corlControlTickMs\,ms, it picks one of at most
+  \corlTotalCandidates{} discrete choices, no step or one leg's step to
+  a safe foothold, and predicts a swing time. It sets no joint targets
+  and no gait parameters, so the controller still tracks the motion.
+  Trained by reinforcement learning on a convex model predictive
+  controller (MPC), with no gait schedule or gait reward, only a cost
+  per step and at most \numberstringnum{\corlMaxConcurrentSwingLegs} legs in swing, the GaitNet policy we analysed developed
+  an acyclic gait, with neither a fixed period nor a fixed stepping order,
+  that still paired diagonal legs. An inverse footstep model (IFM), fitted on
+  a controller's logged steps, turns each foothold into a command. With
+  only the IFM refitted, on \verify{fewer than 20{,}000} steps, GaitNet ran frozen
+  on OCS2's nonlinear MPC. In \corlBenchTrialsPerArm{} simulated trials
+  per training seed on ground with voids, it succeeded in
+  \corlBenchFull\% (mean of \corlNumSeedsGaitNet{} seeds), against
+  \corlBenchTrot\% for OCS2's cyclic trot and \corlBenchStaticWalk\% for
+  its static walk, and \corlBenchFullDense\% against \corlBenchTrotDense\%
+  on the densest voids. Retrained to swing one leg at a time, it
+  succeeded in \corlBenchSingle\%. With simpler footstep corrections, it
+  reached at most \corlBenchCtrlMax\%.%
 \end{abstract}
 
 \begin{keywords}%
