@@ -7,25 +7,31 @@
 % restate "simulation only" (author, 2026-11-13 16:25); the abstract ("simulated
 % trials") and the title of Sec. 5 ("Simulation Experiments") say it.
 
-\looseness=-1 We presented CADENCE, a learned step planner that, every
-\corlControlTickMs\,ms, makes one of at most \corlTotalCandidates{}
-discrete choices for an unchanged model-based controller (no step, or one
-leg's step to a safe foothold) and predicts a swing time. Trained on a
-convex MPC with no gait schedule or gait reward, the policy we analyzed
-developed an acyclic gait that still paired diagonal legs. With only its
-IFM refitted, CADENCE ran frozen on OCS2 and succeeded in
-\corlBenchFull\% of benchmark trials, against \corlBenchTrot\% for
-OCS2-Trot and \corlBenchStaticWalk\% for OCS2-Single, with a lead
-over the trot of 30 points at \corlBenchVoidHigh\% voids. Swinging one leg at a time, it reached
-\corlBenchSingle\%, and with simpler footstep corrections at most
-\corlBenchCtrlMax\%.
+% 2026-11-13 22:00: reworded to the refined positioning of the abstract,
+% introduction and Sec. 5 (small action space; nothing prescribes a gait;
+% acyclic gait with diagonal pairing; transfer by refitting only the IFM;
+% OCS2-Trot / OCS2-Single / CADENCE-Single names); no longer than before.
 
-\looseness=-1 The non-learned baselines were OCS2's untuned stock gaits,
-acyclicity was measured on one earlier run of one policy, and the
-transfer needs steps logged on the new controller. Future work
-will move CADENCE to further model-based controllers, measure how few
-logged steps the refit needs, and test whether relogging
-with the deployed IFM \citep{christiano_transfer_2016} or online
-adaptation \citep{xie_fada_2026} reduces the remaining landing error. We
-will also extend the candidates to stairs and slopes, and compare with
-tuned gaits and gait-free planners.
+\looseness=-1 We presented CADENCE, a learned step planner with a small
+action space for model-based controllers. Every
+\corlControlTickMs\,ms, it picks one of at most \corlTotalCandidates{}
+choices, no step, or one leg's step to a safe foothold, and
+predicts a swing time. Nothing in training prescribed a gait, yet the
+policy we analyzed developed an acyclic gait, with no fixed period or
+stepping order, that still paired diagonal legs. With only its IFM
+refitted, CADENCE ran frozen on OCS2's NMPC and succeeded in
+\corlBenchFull\% of benchmark trials, against \corlBenchTrot\% for
+OCS2-Trot and \corlBenchStaticWalk\% for OCS2-Single, and
+\corlBenchFullDense\% against OCS2-Trot's \corlBenchTrotDense\% at
+\corlBenchVoidHigh\% voids. Retrained to swing one leg at a time, it
+reached only \corlBenchSingle\%, and no simpler footstep correction lifted CADENCE
+above OCS2-Trot. The baselines were OCS2's untuned gaits, acyclicity was measured on one earlier run of one policy,
+and the refit needed steps logged on the new controller. 
+
+\looseness=-1 Future work will move CADENCE to additional
+model-based controllers, measure how few logged steps the refit needs,
+and test whether relogging with the deployed IFM
+\citep{christiano_transfer_2016} or online adaptation
+\citep{xie_fada_2026} reduces the remaining landing error. We will also
+extend the candidates to stairs and slopes and compare with tuned
+gaits and gait-free planners.
