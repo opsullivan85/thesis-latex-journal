@@ -337,7 +337,7 @@ legend = fig.legend(handles=[Patch(label=a, linewidth=0, **BAR_STYLE[a]) for a i
 # (compared on the data keys; cadence_names shows "CADENCE" for "GaitNet").
 assert tuple(PANEL_A) == tuple(PANEL_B) == BAR_ARMS
 assert [t.get_text() for t in legend.get_texts()] == [
-    a.replace("GaitNet", "CADENCE") for a in BAR_ARMS], "legend entries"
+    cadence_names.STOCK_NAMES.get(a, a.replace("GaitNet", "CADENCE")) for a in BAR_ARMS], "legend entries"
 
 
 # ---------------------------------------------------------------- layout checks

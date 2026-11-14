@@ -4,12 +4,14 @@ Imported by the figure scripts before plotting. Every matplotlib Text (titles, l
 legend entries, annotations) shows "CADENCE" where the data and checks say "GaitNet",
 so the scripts' value checks and dict keys stay unchanged. The baseline key
 "Per-candidate + IFM" is shown as "CADENCE-without-mixer-or-history"
-(2026-11-13, author; it was shown as "GaitNet + IFM").
+(2026-11-13, author; it was shown as "GaitNet + IFM"), and the stock gaits'
+keys "OCS2's own trot" and "OCS2's static walk" as "OCS2-Trot" and "OCS2-Single".
 """
 import matplotlib.text as _mt
 
 _orig_set_text = _mt.Text.set_text
 _BASELINE = "CADENCE-without-mixer-or-history"
+STOCK_NAMES = {"OCS2's own trot": "OCS2-Trot", "OCS2's static walk": "OCS2-Single"}
 
 
 def _set_text(self, s):
@@ -20,6 +22,9 @@ def _set_text(self, s):
         hold = "\x00BASELINE\x00"
         s = s.replace("Per-candidate + IFM", hold).replace(_BASELINE, hold)
         s = s.replace("GaitNet", "CADENCE")
+        # 2026-11-13 (author): the stock gaits are named OCS2-Trot and OCS2-Single.
+        for old, new in STOCK_NAMES.items():
+            s = s.replace(old, new)
         s = s.replace(hold, _BASELINE)
     return _orig_set_text(self, s)
 

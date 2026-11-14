@@ -116,8 +116,8 @@ worlds, with a stricter criterion (App.~\ref{app:sweep}).
 CADENCE & \corlBenchFull & \corlBenchFullMin--\corlBenchFullMax
   & \corlBenchFullDense \\
 \midrule
-OCS2-trot & \corlBenchTrot & --- & \corlBenchTrotDense \\
-OCS2-static & \corlBenchStaticWalk & --- & \corlBenchStaticWalkDense \\
+OCS2-Trot & \corlBenchTrot & --- & \corlBenchTrotDense \\
+OCS2-Single & \corlBenchStaticWalk & --- & \corlBenchStaticWalkDense \\
 \midrule
 CADENCE-without-mixer-or-history & \corlBenchMlpMean
   & \corlBenchMlpSeedMin--\corlBenchMlpSeedMax & \corlBenchMlpDense \\
@@ -139,9 +139,9 @@ CADENCE-with-training-IFM & \corlBenchTrainIfm
 
 \noindent\textbf{Methods.}
 \looseness=-1 Here we detail nine methods shown in Table~\ref{tab:results}: CADENCE, 
-two cyclic trots from OCS2, and six ablations of CADENCE. 
+two cyclic gaits from OCS2, and six ablations of CADENCE. 
 All methods share the depth map, NMPC, and WBC.
-OCS2-trot and OCS2-static are the stock cyclic gaits
+OCS2-Trot and OCS2-Single are the stock cyclic gaits
 of \citet{leggedperceptive}. The default OCS2 gait parameters were used, having a \corlTrotSwing\,s swing time, a \corlTrotPeriod\,s period for the trot, and
 a \corlWalkPeriod\,s period for the static gait. OCS2 chooses footholds from planar regions
 using a heuristic \citep{grandia_perceptive_2022}.
@@ -208,8 +208,8 @@ the desired foothold to the landing.
 \noindent\textbf{CADENCE beat OCS2's cyclic gaits, most where
 voids are densest (Fig.~\ref{fig:bench}, Table~\ref{tab:results}).}
 \looseness=-1 CADENCE succeeded in \corlBenchFull\% of benchmark
-trials, against \corlBenchTrot\% for OCS2's own trot and
-\corlBenchStaticWalk\% for its static walk, leads of 17.3 and 19.6
+trials, against \corlBenchTrot\% for OCS2-Trot and
+\corlBenchStaticWalk\% for OCS2-Single, leads of 17.3 and 19.6
 percentage points, and even its lowest seed led the trot by 10.5. The
 lead over the trot grew with the void fraction, from 2 to 18 to 30
 points at \corlBenchSpeedSlow\,m/s and from 4 to 20 to 30 at
@@ -251,7 +251,7 @@ voids, and a higher speed than it was trained on.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=0.94\textwidth]{figures/fig_gait}
-  \caption{Gait of CADENCE and OCS2's own trot (earlier evaluation run,
+  \caption{Gait of CADENCE and OCS2-Trot (earlier evaluation run,
     successful trials). (a)~Swings in one trial each (world seed
     \corlGaitExampleSeed, \corlBenchVoidHigh\% voids,
     \corlBenchSpeedFast\,m/s; FL:~front left, RR:~rear right).
@@ -290,7 +290,7 @@ run of one policy.
 
 \looseness=-1 Restricting the action space tested which freedom
 mattered. Retrained to swing one leg at a time, CADENCE-Single
-succeeded in only \corlBenchSingle\%, though OCS2's static walk, also
+succeeded in only \corlBenchSingle\%, though OCS2-Single, also
 one leg at a time, reached \corlBenchStaticWalk\%. This loss mixes the
 missing overlap with an OCS2 IFM fitted on CADENCE's two-leg steps. Restricted at test time to diagonal
 pairs, CADENCE-Diagonal lost only 2.2 points on the benchmark (1.2 to
