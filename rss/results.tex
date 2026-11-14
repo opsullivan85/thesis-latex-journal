@@ -116,8 +116,8 @@ worlds, with a stricter criterion (App.~\ref{app:sweep}).
 CADENCE & \corlBenchFull & \corlBenchFullMin--\corlBenchFullMax
   & \corlBenchFullDense \\
 \midrule
-OCS2's own trot & \corlBenchTrot & --- & \corlBenchTrotDense \\
-OCS2's static walk & \corlBenchStaticWalk & --- & \corlBenchStaticWalkDense \\
+OCS2-trot & \corlBenchTrot & --- & \corlBenchTrotDense \\
+OCS2-static & \corlBenchStaticWalk & --- & \corlBenchStaticWalkDense \\
 \midrule
 CADENCE-without-mixer-or-history & \corlBenchMlpMean
   & \corlBenchMlpSeedMin--\corlBenchMlpSeedMax & \corlBenchMlpDense \\
@@ -138,15 +138,20 @@ CADENCE-with-training-IFM & \corlBenchTrainIfm
 \end{table}
 
 \noindent\textbf{Methods.}
-\looseness=-1 Here we detail 9 methods from Table~\ref{tab:results}. CADENCE, 
-2 cyclic trots from OCS2, and 6 ablations of CADENCE. 
+\looseness=-1 Here we detail nine methods shown in Table~\ref{tab:results}: CADENCE, 
+two cyclic trots from OCS2, and six ablations of CADENCE. 
 All methods share the depth map, NMPC, and WBC.
-\emph{OCS2's own trot} and \emph{static walk} are the stock cyclic gaits
-of \citet{leggedperceptive}, untuned for voids: the trot lifts diagonal
-pairs with \corlTrotSwing\,s swings on a \corlTrotPeriod\,s period, the
-walk one leg at a time with \corlWalkSwing\,s swings on a
-\corlWalkPeriod\,s period, both with heuristic footholds projected onto
-planar regions \citep{grandia_perceptive_2022}. They ran once each.
+OCS2-trot and OCS2-static are the stock cyclic gaits
+of \citet{leggedperceptive}. The default OCS2 gait parameters were used, having a \corlTrotSwing\,s swing time, a \corlTrotPeriod\,s period for the trot, and
+a \corlWalkPeriod\,s period for the static gait. OCS2 chooses footholds from planar regions
+using a heuristic \citep{grandia_perceptive_2022}.
+% OCS2's gaits were not tuned, using the default 
+% settings where the trot lifts diagonal
+% pairs with \corlTrotSwing\,s swings on a \corlTrotPeriod\,s period, the
+% walk one leg at a time with \corlWalkSwing\,s swings on a
+% \corlWalkPeriod\,s period, both with heuristic footholds projected onto
+% planar regions \citep{grandia_perceptive_2022}. 
+% They ran once each.
 CADENCE runs with its refitted OCS2 IFM and lets any two legs
 swing at once. CADENCE-without-mixer-or-history scores each candidate
 alone from the state and its code (Sec.~\ref{subsec:method-network})
@@ -193,18 +198,7 @@ the desired foothold to the landing.
   \label{fig:bench}
 \end{figure*}
 
-\begin{figure*}[!b]
-  \centering
-  \includegraphics[width=0.94\textwidth]{figures/fig_sweep}
-  \caption{Sweep on OCS2, on worlds other than the benchmark's, with a
-    stricter criterion (reach the end of a \corlOcsTrackM\,m track in
-    time); \corlOcsTrialsPerPoint{} trials per point and training
-    seed; learned methods: mean of \corlNumTrainSeeds{} seeds. (a)~By nominal void
-    fraction, speeds mixed; above \corlMaxVoidPct\%, beyond the training
-    curriculum. (b)~By speed; right of the dashed line, above the
-    training speeds.}
-  \label{fig:sweep-main}\label{fig:sweep}
-\end{figure*}
+
 
 \subsection{Results}
 \label{subsec:exp-transfer}
@@ -240,6 +234,19 @@ the trot's 38, 30, and 12\%. It also led at every speed, and at
 \corlOcsSpeedMax\,m/s, above the training speeds, it succeeded in 66
 against 51\%. CADENCE therefore kept its lead on unseen worlds, denser
 voids, and a higher speed than it was trained on.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.94\textwidth]{figures/fig_sweep}
+  \caption{Sweep on OCS2, on worlds other than the benchmark's, with a
+    stricter criterion (reach the end of a \corlOcsTrackM\,m track in
+    time); \corlOcsTrialsPerPoint{} trials per point and training
+    seed; learned methods: mean of \corlNumTrainSeeds{} seeds. (a)~By nominal void
+    fraction, speeds mixed; above \corlMaxVoidPct\%, beyond the training
+    curriculum. (b)~By speed; right of the dashed line, above the
+    training speeds.}
+  \label{fig:sweep-main}\label{fig:sweep}
+\end{figure*}
 
 \begin{figure*}[t]
   \centering
