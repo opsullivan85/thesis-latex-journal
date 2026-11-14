@@ -89,10 +89,10 @@ trial time. Every learned method is trained with
 \corlNumTrainSeeds{} training seeds and evaluated at iteration
 \corlOcsCheckpoint, where CADENCE's mean success on the training
 controller in Isaac was highest; this iteration was fixed before any
-trial of Table~\ref{tab:results} and may not be the best one for the
+result trials and may not be the best one for the
 other methods. We report
-the mean over seeds and, in Table~\ref{tab:results}, the lowest and
-highest seed. A sweep adds more void fractions and speeds on other
+the mean, lowest, and
+highest seed scores. A sweep adds more void fractions and speeds on other
 worlds, with a stricter criterion (App.~\ref{app:sweep}).
 
 
@@ -143,7 +143,7 @@ two cyclic gaits from OCS2, and six ablations of CADENCE.
 All methods share the depth map, NMPC, and WBC.
 OCS2-Trot and OCS2-Single are the stock cyclic gaits
 of \citet{leggedperceptive}. The default OCS2 gait parameters were used, having a \corlTrotSwing\,s swing time, a \corlTrotPeriod\,s period for the trot, and
-a \corlWalkPeriod\,s period for the static gait. OCS2 chooses footholds from planar regions
+a \corlWalkPeriod\,s period for the static gait (OCS2-Single). OCS2 chooses footholds from planar regions
 using a heuristic \citep{grandia_perceptive_2022}.
 % OCS2's gaits were not tuned, using the default 
 % settings where the trot lifts diagonal
@@ -162,7 +162,7 @@ partner, and CADENCE-Single is retrained to swing one leg at a
 time. Both CADENCE-without-mixer-or-history and CADENCE-Single run with the OCS2 IFM
 of the CADENCE policy with the same training seed, which was fitted on
 that policy's steps and not on their own.
-Three controls keep CADENCE's weights and change only the footstep
+Three ablations keep CADENCE's weights and change only the footstep
 correction. CADENCE-with-offset adds a constant per-leg offset, the
 mean of command minus landing over the OCS2 IFM's logged steps.
 CADENCE-without-IFM sends the desired foothold unchanged,
