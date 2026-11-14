@@ -6,7 +6,7 @@
 (c) Close-up of u*: OCS2's RMS landing error on flat ground, without and with the
     refitted IFM, as circles about u*.
 A legend row under the panels names every mark (2026-11-13, author: "add legend all
-the figure"). It replaces the leader labels "safe candidates" and "chosen foothold",
+the figure"); "void" with a dark swatch added on 2026-11-13. It replaces the leader labels "safe candidates" and "chosen foothold",
 and the words of "no IFM: 6 cm" and "refitted IFM: 2 cm" (the two values stay on (c)).
 The canvas is unchanged: the panels are the same camera frames as before with CROP_TOP
 cut at the top and the rest of LEG_H at the bottom (no mark, no part of the robot).
@@ -49,15 +49,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import font_manager
 from matplotlib.colors import to_hex
-from matplotlib.legend_handler import HandlerPatch
-from matplotlib.lines import Line2D
-from matplotlib.patches import Circle, FancyArrowPatch, Patch
+from matplotlib.patches import FancyArrowPatch
 from PIL import Image, ImageDraw
 from scipy import ndimage as ndi
 
 import teaser_cands as C
 import teaser_hero as hero
 import teaser_scene as S
+import teaser_legend
 import teaser_stack
 
 HERE = Path(__file__).resolve().parent
@@ -168,6 +167,8 @@ for x0, w, rgb in ((XA, WA, rgb_a), (XB, WB, hb.rgb),
 canvas.save(TMP / "base.png")
 # the legend's swatch is the tint as it shows on a lit tile top in (a)
 TINT = to_hex(np.median(rgb_a[ha.safe_mask], axis=0) / 255)
+# and the void's swatch is a void as it shows in (a): neither tile top nor robot
+VOID = to_hex(np.median(ha.rgb[~ha.cap & ~ha.robot], axis=0) / 255)
 
 # ---- vector layer (figure inches) --------------------------------------------------------
 fig = plt.figure(figsize=(W_IN, H_IN))
@@ -265,29 +266,8 @@ y2 = Y_PAN + 0.13
 chip_text(p2[0], y2, f"{RMS_FIT:g} cm", color=EMERALD_TEXT, ha="center", z=16)
 leader((p2[0], y2 + 0.06), p2, color=EMERALD_TEXT)
 
-# ---- legend row under the panels: one entry per kind of mark ------------------------------
-# The paper's common legend style (Fira Sans 7 pt, ink, no frame, short handles), as in
-# the other figure scripts. Handles repeat the marks' own colours, sizes and dashes.
-LEGEND_STYLE = dict(frameon=False, fontsize=7, labelcolor=INK, handlelength=1.6,
-                    handletextpad=0.5, columnspacing=1.2, labelspacing=0.3)
-R_NO = 3.2                           # legend ring radius [pt]; six whole dashes around it
-DASH = 2 * np.pi * R_NO / 6
-LEGEND = [
-    (Patch(fc=TINT, ec="none"), "safe cells"),                                    # tint, (a) and (c)
-    (Line2D([], [], ls="none", marker="o", ms=5.5, mfc="white", mec=INDIGO, mew=1.1), "candidate"),
-    (Line2D([], [], ls="none", marker="o", ms=6.8, mfc=INDIGO, mew=0), "chosen foothold"),
-    (Line2D([], [], color=INDIGO, lw=2.0, solid_capstyle="round"), "swing path"),
-    (Line2D([], [], color=INDIGO, lw=1.2, ls=(0, (2.5, 1.8))), "path ahead"),      # (b), ahead of the foot
-    (Circle((0, 0), R_NO, fc="none", ec=INK, lw=1.0, ls=(0, (0.58 * DASH, 0.42 * DASH))), "no IFM"),
-    (Circle((0, 0), 2.3, fc="none", ec=EMERALD, lw=1.3), "refitted IFM"),
-]
-# a ring's handle is a ring of its own radius [pt], centred in the handle box
-ring_handle = HandlerPatch(patch_func=lambda legend, orig_handle, xdescent, ydescent, width, height, fontsize:
-                           Circle((width / 2 - xdescent, height / 2 - ydescent), orig_handle.get_radius()))
-legend = ax.legend([h for h, _ in LEGEND], [t for _, t in LEGEND], ncol=len(LEGEND), loc="lower center",
-                   bbox_to_anchor=(W_IN / 2, 0.008), bbox_transform=ax.transData,
-                   borderpad=0.0, borderaxespad=0.0, handler_map={Circle: ring_handle}, **LEGEND_STYLE)
-legend.set_zorder(20)
+# ---- legend row under the panels: one entry per kind of mark (teaser_legend.py) ---------
+legend, LEGEND_LABELS = teaser_legend.draw(ax, W_IN / 2, TINT, VOID)
 
 # every chip inside its panel
 fig.canvas.draw()
@@ -322,12 +302,12 @@ for h in (ha, hb):
     v = np.nonzero(h.robot.any(axis=1))[0] / h.robot.shape[0] * px(H_REN)
     assert v.min() >= CROP_PX + 0.04 * PPI and v.max() <= CROP_PX + H_PAN_PX - 0.04 * PPI
 # the legend row: one entry per kind of mark, inside the canvas, clear of the panels
-assert [t.get_text() for t in legend.get_texts()] == [t for _, t in LEGEND]
+assert [t.get_text() for t in legend.get_texts()] == LEGEND_LABELS
 lb = inv.transform(legend.get_tightbbox(fig.canvas.get_renderer()))
 assert lb[:, 0].min() >= 0.02 and lb[:, 0].max() <= W_IN - 0.02, np.round(lb, 3)
 assert lb[:, 1].min() >= 0.0 and lb[:, 1].max() <= Y_PAN - 0.03, np.round(lb, 3)
 print(f"legend row x {lb[0, 0]:.3f}-{lb[1, 0]:.3f} in, y {lb[0, 1]:.3f}-{lb[1, 1]:.3f} in; "
-      f"panels from y = {Y_PAN:.3f} in; tint swatch {TINT}")
+      f"panels from y = {Y_PAN:.3f} in; tint swatch {TINT}, void swatch {VOID}")
 
 fig.savefig(TMP / "overlay_raw.pdf", transparent=True)
 plt.close(fig)
