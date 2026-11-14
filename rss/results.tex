@@ -95,64 +95,10 @@ the mean over seeds and, in Table~\ref{tab:results}, the lowest and
 highest seed. A sweep adds more void fractions and speeds on other
 worlds, with a stricter criterion (App.~\ref{app:sweep}).
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig_bench}
-  \caption{Success on the OCS2 benchmark per cell, at
-    (a)~\corlBenchSpeedSlow\,m/s and (b)~\corlBenchSpeedFast\,m/s,
-    \corlBenchTrialsPerCell{} trials per bar and training seed. Learned
-    methods: mean of \corlNumTrainSeeds{} training seeds, in whole
-    percent. Overall success is in Table~\ref{tab:results}.}
-  \label{fig:bench}
-\end{figure*}
 
-\noindent\textbf{Methods.}
-\looseness=-1 All methods share the depth map, NMPC, and WBC.
-\emph{OCS2's own trot} and \emph{static walk} are the stock cyclic gaits
-of \citet{leggedperceptive}, untuned for voids: the trot lifts diagonal
-pairs with \corlTrotSwing\,s swings on a \corlTrotPeriod\,s period, the
-walk one leg at a time with \corlWalkSwing\,s swings on a
-\corlWalkPeriod\,s period, both with heuristic footholds projected onto
-planar regions \citep{grandia_perceptive_2022}. They ran once each.
-CADENCE runs with its refitted OCS2 IFM and lets any two legs
-swing at once. \emph{CADENCE without mixer or history} scores each candidate
-alone from the state and its code (Sec.~\ref{subsec:method-network})
-and is trained with CADENCE's recipe but with no IFM in the training
-loop. \emph{CADENCE-Diagonal} keeps CADENCE's weights but, at
-test time, starts a second swing only on the swinging leg's diagonal
-partner, and \emph{CADENCE-Single} is retrained to swing one leg at a
-time. Both CADENCE without mixer or history and CADENCE-Single run with the OCS2 IFM
-of the CADENCE policy with the same training seed, which was fitted on
-that policy's steps and not on their own.
-Three controls keep CADENCE's weights and change only the footstep
-correction. \emph{CADENCE + offset} adds a constant per-leg offset, the
-mean of command minus landing over the OCS2 IFM's logged steps.
-\emph{CADENCE without the IFM} sends the desired foothold unchanged,
-and \emph{CADENCE + training IFM} uses the training controller's
-IFM.
 
-\noindent\textbf{Gait data.}
-\looseness=-1 The gait statistics come from the successful trials of an
-earlier evaluation run of one CADENCE policy
-(\corlGaitTrialsGaitNet{} of \corlBenchTrialsPerArm) and of the trot
-(\corlGaitTrialsTrot) on other worlds, not from the runs of
-Table~\ref{tab:results} (App.~\ref{app:earlier-run}). A fixed period
-gives a near-zero coefficient of variation (CV) of a leg's time between
-lift-offs, and a fixed order that lifts each leg once per cycle, at
-most two at a time, never repeats a \emph{step event} (the legs lifting
-within \corlGaitEventWindowMs\,ms of its first lift-off) immediately,
-nor lifts a leg twice in a row.
 
-\noindent\textbf{Metrics.}
-\looseness=-1 We report success rates and their differences in
-percentage points, and, on flat ground at \corlBenchSpeedSlow{} and
-\corlBenchSpeedFast\,m/s, OCS2's RMS landing error, the distance from
-the desired foothold to the landing.
-
-\subsection{Results}
-\label{subsec:exp-transfer}
-
-\begin{table}[t]
+\begin{table}[b]
 \centering\footnotesize
 \caption{Success (\%) on the OCS2 benchmark: mean of
   \corlSeedsGaitNet{} training seeds at iteration \corlOcsCheckpoint{}
@@ -173,7 +119,7 @@ CADENCE & \corlBenchFull & \corlBenchFullMin--\corlBenchFullMax
 OCS2's own trot & \corlBenchTrot & --- & \corlBenchTrotDense \\
 OCS2's static walk & \corlBenchStaticWalk & --- & \corlBenchStaticWalkDense \\
 \midrule
-CADENCE without mixer or history & \corlBenchMlpMean
+CADENCE-without-mixer-or-history & \corlBenchMlpMean
   & \corlBenchMlpSeedMin--\corlBenchMlpSeedMax & \corlBenchMlpDense \\
 \midrule
 CADENCE-Diagonal & \corlBenchDiag & \corlBenchDiagMin--\corlBenchDiagMax
@@ -181,15 +127,89 @@ CADENCE-Diagonal & \corlBenchDiag & \corlBenchDiagMin--\corlBenchDiagMax
 CADENCE-Single & \corlBenchSingle & \corlBenchSingleMin--\corlBenchSingleMax
   & \corlBenchSingleDense \\
 \midrule
-CADENCE + offset & \corlBenchOffset & \corlBenchOffsetMin--\corlBenchOffsetMax
+CADENCE-with-offset & \corlBenchOffset & \corlBenchOffsetMin--\corlBenchOffsetMax
   & \corlBenchOffsetDense \\
-CADENCE without the IFM & \corlBenchNoIdm
+CADENCE-without-the-IFM & \corlBenchNoIdm
   & \corlBenchNoIdmMin--\corlBenchNoIdmMax & \corlBenchNoIdmDense \\
-CADENCE + training IFM & \corlBenchTrainIfm
+CADENCE-training-IFM & \corlBenchTrainIfm
   & \corlBenchTrainIfmMin--\corlBenchTrainIfmMax & \corlBenchTrainIfmDense \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent\textbf{Methods.}
+\looseness=-1 Here we detail 9 methods from Table~\ref{tab:results}. CADENCE, 
+2 cyclic trots from OCS2, and 6 ablations of CADENCE. 
+All methods share the depth map, NMPC, and WBC.
+\emph{OCS2's own trot} and \emph{static walk} are the stock cyclic gaits
+of \citet{leggedperceptive}, untuned for voids: the trot lifts diagonal
+pairs with \corlTrotSwing\,s swings on a \corlTrotPeriod\,s period, the
+walk one leg at a time with \corlWalkSwing\,s swings on a
+\corlWalkPeriod\,s period, both with heuristic footholds projected onto
+planar regions \citep{grandia_perceptive_2022}. They ran once each.
+CADENCE runs with its refitted OCS2 IFM and lets any two legs
+swing at once. CADENCE-without-mixer-or-history scores each candidate
+alone from the state and its code (Sec.~\ref{subsec:method-network})
+and is trained with CADENCE's recipe but with no IFM in the training
+loop. CADENCE-Diagonal keeps CADENCE's weights but, at
+test time, starts a second swing only on the swinging leg's diagonal
+partner, and CADENCE-Single is retrained to swing one leg at a
+time. Both CADENCE-without-mixer-or-history and CADENCE-Single run with the OCS2 IFM
+of the CADENCE policy with the same training seed, which was fitted on
+that policy's steps and not on their own.
+Three controls keep CADENCE's weights and change only the footstep
+correction. CADENCE-with-offset adds a constant per-leg offset, the
+mean of command minus landing over the OCS2 IFM's logged steps.
+CADENCE-without-IFM sends the desired foothold unchanged,
+and CADENCE-with-training-IFM uses the training controller's
+IFM.
+
+\noindent\textbf{Gait data.}
+\looseness=-1 The gait statistics come from the successful trials of an
+earlier evaluation run of one CADENCE policy
+(\corlGaitTrialsGaitNet{} of \corlBenchTrialsPerArm) and of the trot
+(\corlGaitTrialsTrot) on other worlds, not from the runs of
+Table~\ref{tab:results} (App.~\ref{app:earlier-run}). A fixed period
+gives a near-zero coefficient of variation (CV) of a leg's time between
+lift-offs, and a fixed order that lifts each leg once per cycle, at
+most two at a time, never repeats a \emph{step event} (the legs lifting
+within \corlGaitEventWindowMs\,ms of its first lift-off) immediately,
+nor lifts a leg twice in a row.
+
+\noindent\textbf{Metrics.}
+\looseness=-1 We report success rates and their differences in
+percentage points, and, on flat ground at \corlBenchSpeedSlow{} and
+\corlBenchSpeedFast\,m/s, OCS2's RMS landing error, the distance from
+the desired foothold to the landing.
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_bench}
+  \caption{Success on the OCS2 benchmark per cell, at
+    (a)~\corlBenchSpeedSlow\,m/s and (b)~\corlBenchSpeedFast\,m/s,
+    \corlBenchTrialsPerCell{} trials per bar and training seed. Learned
+    methods: mean of \corlNumTrainSeeds{} training seeds, in whole
+    percent. Overall success is in Table~\ref{tab:results}.}
+  \label{fig:bench}
+\end{figure*}
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=0.94\textwidth]{figures/fig_sweep}
+  \caption{Sweep on OCS2, on worlds other than the benchmark's, with a
+    stricter criterion (reach the end of a \corlOcsTrackM\,m track in
+    time); \corlOcsTrialsPerPoint{} trials per point and training
+    seed; learned methods: mean of \corlNumTrainSeeds{} seeds. (a)~By nominal void
+    fraction, speeds mixed; above \corlMaxVoidPct\%, beyond the training
+    curriculum. (b)~By speed; right of the dashed line, above the
+    training speeds.}
+  \label{fig:sweep-main}\label{fig:sweep}
+
+
+\subsection{Results}
+\label{subsec:exp-transfer}
+
+
 
 \noindent\textbf{CADENCE beat OCS2's cyclic gaits, most where
 voids are densest (Fig.~\ref{fig:bench}, Table~\ref{tab:results}).}
@@ -209,17 +229,6 @@ IFM fitted on CADENCE's steps. Since the stock gaits
 also take footholds from another source, the lead belongs to CADENCE and
 its execution layer together.
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=0.94\textwidth]{figures/fig_sweep}
-  \caption{Sweep on OCS2, on worlds other than the benchmark's, with a
-    stricter criterion (reach the end of a \corlOcsTrackM\,m track in
-    time); \corlOcsTrialsPerPoint{} trials per point and training
-    seed; learned methods: mean of \corlNumTrainSeeds{} seeds. (a)~By nominal void
-    fraction, speeds mixed; above \corlMaxVoidPct\%, beyond the training
-    curriculum. (b)~By speed; right of the dashed line, above the
-    training speeds.}
-  \label{fig:sweep-main}\label{fig:sweep}
 \end{figure*}
 
 \looseness=-1 The sweep, on other worlds and with a criterion that also

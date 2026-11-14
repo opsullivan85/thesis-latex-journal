@@ -31,7 +31,7 @@ cell along the grid axes. The history covers $H = \corlHistTicks$
 ticks. The candidate mixer has \corlMixerLayers{} layers of width
 \corlMixerDim, \corlMixerHeads{} heads, and feed-forward blocks of
 width \corlMixerFF. CADENCE has
-\corlParamsGaitNetK{}k parameters, and CADENCE without mixer or history
+\corlParamsGaitNetK{}k parameters, and CADENCE-without-mixer-or-history
 (Sec.~\ref{subsec:exp-setup}) has \corlParamsPerCandidateK{}k.
 % 2026-11-13: frames from gaitnet-docs/methodology.md 3-4 and
 % training-setup.md 5.
@@ -74,7 +74,7 @@ training controller's MPC runs at \corlMpcHz\,Hz over a
 \looseness=-1 Each training seed has its own OCS2 IFM, with the network
 and fit of the training controller's IFM, fitted on fewer than 20{,}000 steps that this seed's frozen CADENCE
 took on OCS2 through the training controller's IFM, on worlds disjoint
-from the evaluation's. Both CADENCE without mixer or history and CADENCE-Single run
+from the evaluation's. Both CADENCE-without-mixer-or-history and CADENCE-Single run
 with the OCS2 IFM of CADENCE's same training seed. Table~\ref{tab:percell} gives the success of every
 method, the controls included, in each benchmark cell.
 
@@ -133,14 +133,14 @@ CADENCE                 & 93 & 90 & 76 & 92 & 90 & 70 \\
 OCS2's own trot         & 91 & 72 & 46 & 88 & 70 & 40 \\
 OCS2's static walk      & 94 & 78 & 45 & 80 & 61 & 35 \\
 \midrule
-CADENCE without mixer or history & 81 & 79 & 69 & 73 & 71 & 54 \\
+CADENC- without-mixer-or-history & 81 & 79 & 69 & 73 & 71 & 54 \\
 \midrule
 CADENCE-Diagonal        & 93 & 90 & 72 & 89 & 87 & 67 \\
 CADENCE-Single          & 45 & 45 & 40 & 38 & 38 & 31 \\
 \midrule
-CADENCE + offset        & 67 & 66 & 54 & 64 & 63 & 47 \\
-CADENCE without the IFM & 21 & 20 & 14 & 18 & 17 & 12 \\
-CADENCE + training IFM  &  8 &  6 &  7 &  6 &  4 &  2 \\
+CADENCE-with-offset        & 67 & 66 & 54 & 64 & 63 & 47 \\
+CADENCE-without-IFM & 21 & 20 & 14 & 18 & 17 & 12 \\
+CADENCE-with-training-IFM  &  8 &  6 &  7 &  6 &  4 &  2 \\
 \bottomrule
 \end{tabular}
 \end{table}
