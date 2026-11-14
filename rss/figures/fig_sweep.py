@@ -268,8 +268,13 @@ class VerticalDividerHandle(HandlerBase):
 # (Per-candidate + IFM is drawn in (a) only) and (b)'s divider.
 order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "Per-candidate + IFM"]
 assert set(lines["a"]) == set(order) and set(lines["b"]) <= set(order)
+# The baseline's display name (cadence_names._BASELINE) is long for the legend
+# column, so it is wrapped onto two lines here (2026-11-13).
+BASELINE_LABEL = "CADENCE without\nmixer or history"
+assert BASELINE_LABEL.replace("\n", " ") == cadence_names._BASELINE
+leg_labels = [BASELINE_LABEL if m == "Per-candidate + IFM" else m for m in order]
 leg = fig.legend(handles=[lines["a"][m] for m in order] + [divider],
-                 labels=order + [DIVIDER_NAME], loc="center left", ncol=1,
+                 labels=leg_labels + [DIVIDER_NAME], loc="center left", ncol=1,
                  handler_map={divider: VerticalDividerHandle()},
                  bbox_to_anchor=((LEFT + W_A + LEG_X) / FIG_W,
                                  (BOTTOM + 0.5 * (FIG_H - TOP - BOTTOM)) / FIG_H),
@@ -400,8 +405,7 @@ assert not any(_div.overlaps(t.get_window_extent(renderer)) for t in ax_b.texts)
 # Legend: one entry per drawn line and one for the divider, in the common style
 # (compared on the data keys; cadence_names shows "CADENCE" for "GaitNet").
 assert [t.get_text() for t in leg.get_texts()] == [
-    m.replace("GaitNet", "CADENCE").replace("Per-candidate + IFM", "GaitNet + IFM")
-    for m in order] + [DIVIDER_NAME], "legend entries"   # display names: cadence_names.py
+    m.replace("GaitNet", "CADENCE") for m in leg_labels] + [DIVIDER_NAME], "legend entries"   # display names: cadence_names.py
 assert all(t.get_fontsize() >= 7 for t in leg.get_texts()), "legend text below 7 pt"
 assert "limit" not in DIVIDER_NAME.lower(), "the divider is at 0.225 m/s, not at the limit"
 # The divider's vertical handle (drawn past its handle box) stays clear of the
