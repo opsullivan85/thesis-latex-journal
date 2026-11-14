@@ -75,18 +75,32 @@ controller without retraining the underlying footstep planning
 \subsection{A Small Action Space}
 \label{subsec:method-step}
 
+% \looseness=-1 At each tick, CADENCE takes one of at most
+% \corlTotalCandidates{} discrete choices, the no-step option or one of
+% \corlTrainCandidatesPerLeg{} candidate footholds for each of the
+% \corlNumLegs{} legs (Fig.~\ref{fig:action}), and predicts a swing time
+% for the chosen step. The action holds no joint target, continuous
+% foothold, gait parameter, or phase, so the controller still plans and
+% tracks the motion, and the timing, order, overlap, and pairing of steps
+% follow only from which choice wins each tick. %Apart from the contact
+% %rule, the per-step cost $w_s$ of Eq.~\eqref{eq:reward}, and one
+% %candidate per leg pinned near a regular stride's foothold, which sets
+% %where but not when a leg steps. 
+% CADENCE's gait timing and order are emergent.
+% It's candidate footsteps are chosen from nearby steppable terrain, which we
+% sample uniformly from safe locations in a 1cm grid with 2cm of clearance added around voids.
+
+
 \looseness=-1 At each tick, CADENCE takes one of at most
-\corlTotalCandidates{} discrete choices, the no-step option or one of
+\corlTotalCandidates{} discrete choices, the no-step option, or one of
 \corlTrainCandidatesPerLeg{} candidate footholds for each of the
-\corlNumLegs{} legs (Fig.~\ref{fig:action}), and predicts a swing time
-for the chosen step. The action holds no joint target, continuous
-foothold, gait parameter, or phase, so the controller still plans and
-tracks the motion, and the timing, order, overlap, and pairing of steps
-follow only from which choice wins each tick. Apart from the contact
-rule, the per-step cost $w_s$ of Eq.~\eqref{eq:reward}, and one
-candidate per leg pinned near a regular stride's foothold, which sets
-where but not when a leg steps. CADENCE's gait timing and order are emergent.
-It's candidate footsteps are chosen from nearby steppable terrain, which we
+\corlNumLegs{} legs (Fig.~\ref{fig:action}). 
+The gait, timing, and order are emergent properties of CADENCE's action
+space and sampling rate. The foothold choices contain desired
+swing durations, but not joint targets, or gait parameters. The
+model-based controller has full control over the swing within the position
+and timing constraints set by CADENCE.
+The candidate footsteps are chosen from nearby steppable terrain, which we
 sample uniformly from safe locations in a 1cm grid with 2cm of clearance added around voids.
 
 % The candidates come from a terrain mask: vertical
@@ -125,9 +139,10 @@ gives each mixed token $\tilde{\mathbf t}_i$ a score and a swing time,
 where $\operatorname{sig}$ is the logistic function, and the policy is
 a softmax of the scores, sampled in training and maximized at
 deployment. With $W_h$ and the mixer's output layers
-initialized at zero, CADENCE starts as GaitNet, a \emph{per-candidate network},
-which scores each candidate alone from the state and its code
-(App.~\ref{app:settings}).
+% initialized at zero, CADENCE starts as GaitNet, a \emph{per-candidate network},
+% which scores each candidate alone from the state and its code
+% (App.~\ref{app:settings}).
+initialized at zero, CADENCE starts out ranking each candidate in isolation and only introduces mixing as it learns to (App.~\ref{app:settings}).
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}

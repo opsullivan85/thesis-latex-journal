@@ -41,9 +41,7 @@ therefore call for a step when no safe foothold is in reach.
 \looseness=-1 Choosing the gait online instead raises two problems.
 First, contact decisions are discrete, so choosing them inside a model
 predictive controller (MPC) makes its optimization mixed-integer and increases the search space and compute required to find solutions
-\citep{Wensing2022Nov}, whereas learning them end to end replaces the
-model-based controller with a policy over joint or foot targets
-\citep{lee_learning_2020}. Second, a planner outside the controller only
+\citep{Wensing2022Nov}. Second, a planner outside the controller only
 commands where a foot should land, and the controller lands the foot at
 an offset from that command. This offset differs between controllers and
 can exceed the margin that keeps a chosen foothold clear of voids, so a
@@ -82,7 +80,7 @@ chosen foothold into a command accounting for controller error. Trained
 with proximal policy optimization (PPO) on the convex MPC, CADENCE runs
 frozen on OCS2's nonlinear MPC (NMPC) and whole-body controller (WBC),
 with only the IFM refitted on fewer than 20{,}000 OCS2 steps. We
-evaluate both GaitNet and CADENCE against OCS2's own cyclic gaits.
+evaluate both CADENCE and its ablations against OCS2's own cyclic gaits.
 Our contributions are:
 
 %\looseness=-1 The authors previously developed GaitNet
