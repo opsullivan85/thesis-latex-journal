@@ -65,7 +65,8 @@ controller without retraining the underlying footstep planning
 % pass; an earlier comment here said 55).
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig_action}
+  \includegraphics[width=0.98\textwidth]{figures/fig_action}
+  \vspace{-1em}
   \caption{The action space at one tick (posed MuJoCo scene,
     illustrative). Each tick, CADENCE takes no step or picks one leg and
     one of its candidates, plus a swing time. (a)~The
@@ -198,11 +199,11 @@ randomized at every reset (App.~\ref{app:training}).
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.84\textwidth]{figures/fig_terrain}
+  \includegraphics[width=0.92\textwidth]{figures/fig_terrain}
+  \vspace{-0.5em}
   \caption{(Left) One Unitree Go1 on the training terrain. (Right) The
     full training terrain, a grid of $12\times12$ sub-terrains of
-    $4\times4$\,m with voids and increasing difficulty. The scan area is
-    the ray grid of Sec.~\ref{subsec:method-step}..}
+    $4\times4$\,m with voids and increasing difficulty.}
   \label{fig:training-terrain-combined}
 \end{figure}
 
