@@ -116,14 +116,12 @@ Our contributions are:
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/fig_overview}
-\caption{CADENCE overview. (a)~GaitNet scores each footstep option
-  alone, from the state $\mathbf x_g$ and that option, and predicts a
-  swing time. (b)~CADENCE adds a history $\mathbf h$ and a candidate mixer
-  (orange), which compares the safe candidates $\mathbf q_i \in \mathcal C$
-  and the no-step option $\varnothing$ with each other. (c)~Each
-  controller $c$ gets its own IFM $I^c$, fitted offline on its logged
-  steps. (d)~PPO keeps the training controller's IFM frozen. (e)~On OCS2,
-  CADENCE stays frozen and only the IFM changes.}
+\caption{CADENCE overview. (a)~Given the state $\mathbf x_g$ and history
+  $\mathbf h$, a candidate mixer scores the safe candidates
+  $\mathbf q_i \in \mathcal C$ and the no-step option $\varnothing$.
+  (b)~Each controller $c$ gets its own IFM $I^c$, fitted offline on its
+  logged steps. (c)~PPO keeps the training controller's IFM frozen.
+  (d)~On OCS2, CADENCE stays frozen and only the IFM changes.}
 \vspace{-1.4em}
 \label{fig:overview}
 \end{figure*}
