@@ -57,8 +57,7 @@ command along the walking direction at \corlSimSpeedSlow\,m/s and
 \looseness=-1 PPO runs \corlParallelEnvs{} robots with rollouts of
 \corlRolloutSteps{} ticks, a learning rate of $\corlLearningRate$,
 \corlPpoEpochs{} epochs, \corlMiniBatches{} minibatches, a clip of
-\corlClip, an entropy coefficient of \corlEntropyCoef, $\gamma =
-\corlGamma$, and $\lambda = \corlLambda$. The reward has weights $w_a =
+\corlClip, an entropy coefficient of \corlEntropyCoef, a discount factor $\gamma = \corlGamma$, and a generalized-advantage parameter $\lambda = \corlLambda$. The reward has weights $w_a =
 \corlAliveWeight$, $w_s = \corlActionPenalty$, and $w_f =
 \corlTerminationPenalty$ and tracking widths $\sigma_v =
 \corlTrackXyStd$\,m/s and $\sigma_\omega = \corlTrackYawStd$\,rad/s,
@@ -157,7 +156,7 @@ and a swing time $T$. With $\mathbf x$ the planner's input, the policy
 factors as $\pi(i, T \mid \mathbf x) = \pi(i \mid \mathbf x)\,\mathcal
 N(T;\, T_i(\mathbf x), \sigma_T^2)$, with $\pi(i \mid \mathbf x)$ the
 softmax of the scores $\alpha_i$ over the non-empty slots, $T_i$ the
-swing time of Eq.~\eqref{eq:heads}, and $\sigma_T$ fixed
+swing time of Sec.~\ref{subsec:method-network}, and $\sigma_T$ fixed
 (App.~\ref{app:settings}). The sampled swing time is not clipped, so in
 training it can fall outside $[T_{\min}, T_{\max}]$, whereas deployment
 uses the mean $T_i$. The critic has no attention: an MLP on the state embedding and each slot's candidate

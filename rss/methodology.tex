@@ -54,6 +54,10 @@ controller without retraining the underlying footstep planning
 (Secs.~\ref{subsec:method-idm} and~\ref{subsec:method-training}).
 
 
+% 2026-11-13 22:40 (O. Sullivan's Overleaf comments, 7:27-7:28 pm: "Variables
+% not defined. Replace with wording." / "no mention of what gamma is"): the
+% network equations (eq:context, eq:heads) and the discounted-return formula
+% of Problem 1 are now in words.
 % Fig. 3 regenerated 2026-11-13 in the paper's render style (author: "regenerate
 % the fig3 with match theme of the paper"): figures/fig_action.py, posed MuJoCo,
 % exact candidate rule; camera az 120, el -35 (54 of 64 dots visible in (a):
@@ -118,31 +122,23 @@ sample uniformly from safe locations in a 1cm grid with 2cm of clearance added a
 \corlHistSeconds\,s history $\mathbf h$ of base velocities, foot
 positions, scheduled contacts, and each leg's last \emph{touchdown
 error} (its landing minus the command sent), and each candidate's code
-$\mathbf q_i$ (its leg and offset from the hip) into one token per
-choice (Fig.~\ref{fig:overview}a),
-\begin{equation}
-  \mathbf z = f_s(\mathbf x_g) + W_h\, f_h(\mathbf h), \qquad
-  \mathbf t_i = \mathrm{ReLU}\big(W_t [\mathbf z; f_c(\mathbf q_i)]\big),
-  \label{eq:context}
-\end{equation}
-with a learned embedding for the no-step option. The \emph{candidate
-mixer}, a small transformer encoder \citep{vaswani_attention_2017},
-lets the tokens attend to each other, so every choice, waiting
-included, is judged against the alternatives. A shared network $g$ then
-gives each mixed token $\tilde{\mathbf t}_i$ a score and a swing time,
-\begin{equation}
-  \alpha_i = \mathbf w_\alpha^\top g(\tilde{\mathbf t}_i), \qquad
-  T_i = T_{\min} + (T_{\max} - T_{\min})\,
-    \operatorname{sig}\big(\mathbf w_T^\top g(\tilde{\mathbf t}_i)\big),
-  \label{eq:heads}
-\end{equation}
-where $\operatorname{sig}$ is the logistic function, and the policy is
-a softmax of the scores, sampled in training and maximized at
-deployment. With $W_h$ and the mixer's output layers
-% initialized at zero, CADENCE starts as GaitNet, a \emph{per-candidate network},
-% which scores each candidate alone from the state and its code
-% (App.~\ref{app:settings}).
-initialized at zero, CADENCE starts out ranking each candidate in isolation and only introduces mixing as it learns to (App.~\ref{app:settings}).
+$\mathbf q_i$ (its leg and offset from the hip). The state and history
+embeddings are added into one context, which is joined with each
+candidate's embedding into one token per choice
+(Fig.~\ref{fig:overview}a), with a learned embedding for the no-step
+option. The \emph{candidate mixer}, a small transformer encoder
+\citep{vaswani_attention_2017}, lets the tokens attend to each other, so
+every choice, waiting included, is judged against the alternatives. A
+shared network then gives each mixed token a score $\alpha_i$ and a
+swing time $T_i$, which a logistic function keeps between $T_{\min}$ and
+$T_{\max}$, and the policy is a softmax of the scores, sampled in
+training and maximized at deployment. With the history's projection and
+the mixer's output layers initialized at zero, CADENCE starts out
+ranking each candidate in isolation and only introduces mixing as it
+learns to (App.~\ref{app:settings}).
+% Owen's earlier wording, kept as in his version: "CADENCE starts as GaitNet, a
+% per-candidate network, which scores each candidate alone from the state and
+% its code (App. A)."
 
 \subsection{Inverse Footstep Model}
 \label{subsec:method-idm}
