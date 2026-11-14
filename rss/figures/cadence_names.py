@@ -3,13 +3,13 @@
 Imported by the figure scripts before plotting. Every matplotlib Text (titles, labels,
 legend entries, annotations) shows "CADENCE" where the data and checks say "GaitNet",
 so the scripts' value checks and dict keys stay unchanged. The baseline key
-"Per-candidate + IFM" is shown as "CADENCE without mixer or history"
+"Per-candidate + IFM" is shown as "CADENCE-without-mixer-or-history"
 (2026-11-13, author; it was shown as "GaitNet + IFM").
 """
 import matplotlib.text as _mt
 
 _orig_set_text = _mt.Text.set_text
-_BASELINE = "CADENCE without mixer or history"
+_BASELINE = "CADENCE-without-mixer-or-history"
 
 
 def _set_text(self, s):

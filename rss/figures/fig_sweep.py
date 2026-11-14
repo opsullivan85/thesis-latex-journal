@@ -270,8 +270,8 @@ order = ["GaitNet", "OCS2's own trot", "GaitNet-Single", "Per-candidate + IFM"]
 assert set(lines["a"]) == set(order) and set(lines["b"]) <= set(order)
 # The baseline's display name (cadence_names._BASELINE) is long for the legend
 # column, so it is wrapped onto two lines here (2026-11-13).
-BASELINE_LABEL = "CADENCE without\nmixer or history"
-assert BASELINE_LABEL.replace("\n", " ") == cadence_names._BASELINE
+BASELINE_LABEL = "CADENCE-without-\nmixer-or-history"
+assert BASELINE_LABEL.replace("\n", "") == cadence_names._BASELINE
 leg_labels = [BASELINE_LABEL if m == "Per-candidate + IFM" else m for m in order]
 leg = fig.legend(handles=[lines["a"][m] for m in order] + [divider],
                  labels=leg_labels + [DIVIDER_NAME], loc="center left", ncol=1,

@@ -129,9 +129,9 @@ CADENCE-Single & \corlBenchSingle & \corlBenchSingleMin--\corlBenchSingleMax
 \midrule
 CADENCE-with-offset & \corlBenchOffset & \corlBenchOffsetMin--\corlBenchOffsetMax
   & \corlBenchOffsetDense \\
-CADENCE-without-the-IFM & \corlBenchNoIdm
+CADENCE-without-IFM & \corlBenchNoIdm
   & \corlBenchNoIdmMin--\corlBenchNoIdmMax & \corlBenchNoIdmDense \\
-CADENCE-training-IFM & \corlBenchTrainIfm
+CADENCE-with-training-IFM & \corlBenchTrainIfm
   & \corlBenchTrainIfmMin--\corlBenchTrainIfmMax & \corlBenchTrainIfmDense \\
 \bottomrule
 \end{tabular}
@@ -204,7 +204,7 @@ the desired foothold to the landing.
     curriculum. (b)~By speed; right of the dashed line, above the
     training speeds.}
   \label{fig:sweep-main}\label{fig:sweep}
-
+\end{figure*}
 
 \subsection{Results}
 \label{subsec:exp-transfer}
@@ -222,14 +222,12 @@ points at \corlBenchSpeedSlow\,m/s and from 4 to 20 to 30 at
 \corlBenchSpeedFast\,m/s, although the walk beat CADENCE in the easiest
 cell (94 against 93\%). In the hardest cell, \corlBenchVoidHigh\% voids
 at \corlBenchSpeedFast\,m/s, CADENCE succeeded in 70\% against 40\% for
-the trot and 35\% for the walk (Fig.~\ref{fig:bench}b). CADENCE without mixer or history succeeded in
+the trot and 35\% for the walk (Fig.~\ref{fig:bench}b). CADENCE-without-mixer-or-history succeeded in
 \corlBenchMlpMean\%, 13.8 points below CADENCE, from which it differs in
 the mixer, the history, network size, the IFM in training, and an OCS2
 IFM fitted on CADENCE's steps. Since the stock gaits
 also take footholds from another source, the lead belongs to CADENCE and
 its execution layer together.
-
-\end{figure*}
 
 \looseness=-1 The sweep, on other worlds and with a criterion that also
 fails a robot that stalls, extends this result beyond training. In
