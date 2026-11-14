@@ -163,15 +163,22 @@
   inverse footstep model (IFM), fitted on a controller's logged steps,
   turns each foothold into a command. With only the IFM refitted, on
   fewer than 20{,}000 steps, CADENCE ran frozen on OCS2's
-  nonlinear MPC. In simulated trials with voids, it succeeded
+  nonlinear MPC. In simulated trials on a range of terrains (26\% to 49\% voids) and speeds (0.1\,m/s and 0.2\,m/s), it succeeded
   in \corlBenchFull\% (mean of \corlNumSeedsGaitNet{} seeds),
-  against \corlBenchTrot\% for OCS2's cyclic trot and
-  \corlBenchStaticWalk\% for its static walk. At \corlBenchVoidHigh\% voids, it
+  against \corlBenchTrot\% for OCS2's cyclic trot,
+  \corlBenchStaticWalk\% for OCS2's static walk, and \corlBenchSingle\% in a static walk ablation of CADENCE. At \corlBenchVoidHigh\% voids, it
   succeeded in \corlBenchFullDense\%, against \corlBenchTrotDense\% for
-  the trot. Retrained to swing one leg at a time, it succeeded in
-  \corlBenchSingle\% instead of \corlBenchFull\%. With simpler footstep
-  corrections, it reached at most \corlBenchCtrlMax\%, below the trot's
-  \corlBenchTrot\%.%
+  the OCS2 trot. %When retrained to swing one leg at a time its success rate dropped from \corlBenchFull\% to \corlBenchSingle\%.
+  
+    % nonlinear MPC. In simulated trials on a range of terrains (26\% to 49\% voids) and speeds (0.1\,m/s and 0.2\,m/s), it succeeded
+  % in \corlBenchFull\% (mean of \corlNumSeedsGaitNet{} seeds),
+  % against \corlBenchTrot\% for OCS2's cyclic trot and
+  % \corlBenchStaticWalk\% for its static walk. At \corlBenchVoidHigh\% voids, it
+  % succeeded in \corlBenchFullDense\%, against \corlBenchTrotDense\% for
+  % the trot. When retrained to swing one leg at a time its success rate dropped from \corlBenchFull\% to \corlBenchSingle\%.
+  % With simpler footstep
+  %corrections, it reached at most \corlBenchCtrlMax\%, below the trot's
+  %\corlBenchTrot\%.
 \end{abstract}
 
 \begin{keywords}%

@@ -10,24 +10,26 @@
 ground with voids. A planner, queried every tick of
 $\Delta t = \corlControlTickMs$\,ms, decides the steps, and a
 model-based controller $c$ executes them. The planner is given no
-\emph{gait schedule}, a map from a gait phase to the legs in stance, as
-an input or as a constraint.
+gait schedule %, a map from a gait phase to the legs in stance, 
+as an input or constraint.
 
 \noindent\textbf{Decisions.}
 \looseness=-1 At each tick, the planner takes the no-step option
 $\varnothing$ or starts one step \mbox{$(\ell, \mathbf u^\star, T)$},
 which lifts leg $\ell$ and should land it at the \emph{desired foothold}
 $\mathbf u^\star$ after a swing time $T \in [T_{\min}, T_{\max}] =
-[\corlSwingDurationMin, \corlSwingDurationMax]$\,s. Since the step starts at the tick it is
-chosen, one decision fixes which leg steps, where, for how long, and
-when. A leg may start a step only if at least
-\numberstringnum{\corlMinContactLegs} legs, itself among them, are in
-stance in the \emph{contact schedule} set by earlier steps, so at most
-\numberstringnum{\corlMaxConcurrentSwingLegs} legs swing at once. The
-desired foothold must be one of the leg's \emph{candidates}
+[\corlSwingDurationMin, \corlSwingDurationMax]$\,s. %Since the step starts at the tick it is
+%chosen, one decision fixes which leg steps, where, for how long, and
+%when. 
+No more than 2 legs may be in swing at once,
+%A leg may start a step only if at least
+%\numberstringnum{\corlMinContactLegs} legs, itself among them, are in
+%stance in the \emph{contact schedule} set by earlier steps, so at most
+%\numberstringnum{\corlMaxConcurrentSwingLegs} legs swing at once. 
+and the desired foothold must be one of the leg's \emph{candidates}
 (Sec.~\ref{subsec:method-step}). The planner sees the robot's state, a
-\corlHistSeconds\,s history, and the candidates, but neither the rest of
-the terrain nor the controller's internal state, so the decision process
+\corlHistSeconds\,s history, and the candidates, but neither the %rest of the 
+terrain nor the controller's internal state, so the decision process
 is partially observed \citep{yang_fast_2021}.
 
 \noindent\textbf{Closed-loop footstep map.}

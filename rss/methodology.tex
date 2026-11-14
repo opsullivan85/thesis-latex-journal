@@ -19,18 +19,40 @@
 \section{Method}
 \label{sec:method}
 
-\looseness=-1 This work extends the framework developed in the first
-author's master's thesis \citep{Sullivan2025}, where further details
-on the original methodology and implementation can be found. CADENCE
-has three parts (Fig.~\ref{fig:overview}). Its core, \emph{GaitNet}
-(Fig.~\ref{fig:overview}a), scores the footstep options of a tick one at a
-time, each from the robot's state and that option alone, next to a
-no-step option, and predicts a swing time. One option is taken per
-tick, with up to two legs in swing. CADENCE adds a candidate
-mixer and a history (Fig.~\ref{fig:overview}b), which compare the options with each other and with
-the recent motion (Sec.~\ref{subsec:method-network}), and an IFM, with
-which it moves to a second controller (Secs.~\ref{subsec:method-idm}
-and~\ref{subsec:method-training}).
+%\looseness=-1 This work extends the framework developed in the first
+%author's thesis work \citep{Sullivan2025}, where further details
+%on the original methodology and implementation can be found. 
+%The full implementation of CADENCE is described here without reliance
+%on \citep{Sullivan2025}.
+
+% CADENCE
+% has three parts (Fig.~\ref{fig:overview}). Its core %, \emph{GaitNet},
+% scores the footstep options of a tick one at a
+% time, each from the robot's state and that option alone, next to a
+% no-step option, and predicts a swing time. One option is taken per
+% tick, with up to two legs in swing. CADENCE adds a candidate
+% mixer and a history, which compare the options with each other and with
+% the recent motion (Sec.~\ref{subsec:method-network}), and an IFM, with
+% which it moves to a second controller (Secs.~\ref{subsec:method-idm}
+% and~\ref{subsec:method-training}).
+
+% CADENCE (Fig.~\ref{fig:overview})
+% takes in individual footstep options alongside robot's current and historical state, and mixes candidate 
+% tokens, resulting in a score and proposed swing time for each candidate footstep option.
+% The selected footstep option is then run through an IFM, with
+% which it moves to a second controller (Secs.~\ref{subsec:method-idm}
+% and~\ref{subsec:method-training}).
+
+CADENCE (Fig.~\ref{fig:overview}) turns each candidate footstep, and a
+no-step option, into a token from that option and the robot's current
+state and recent history; a candidate mixer compares the tokens with each
+other, and each gets a score and a swing time
+(Sec.~\ref{subsec:method-network}). One option is taken per tick, with
+up to two legs in swing. The chosen footstep is sent through the
+controller's IFM, and swapping the IFM moves CADENCE to a second
+controller without retraining the underlying footstep planning
+(Secs.~\ref{subsec:method-idm} and~\ref{subsec:method-training}).
+
 
 % Fig. 3 regenerated 2026-11-13 in the paper's render style (author: "regenerate
 % the fig3 with match theme of the paper"): figures/fig_action.py, posed MuJoCo,
@@ -46,6 +68,7 @@ and~\ref{subsec:method-training}).
     \corlTrainCandidatesPerLeg{} candidates of each leg, by the rule of
     Sec.~\ref{subsec:method-step}; dots the robot hides are not drawn.
     (b)~The front-right leg at each of its candidates.}
+\vspace{-1.4em}
   \label{fig:action}
 \end{figure}
 
@@ -62,14 +85,17 @@ tracks the motion, and the timing, order, overlap, and pairing of steps
 follow only from which choice wins each tick. Apart from the contact
 rule, the per-step cost $w_s$ of Eq.~\eqref{eq:reward}, and one
 candidate per leg pinned near a regular stride's foothold, which sets
-where but not when a leg steps, nothing gait-related enters CADENCE, so
-its timing and order emerge. The candidates come from a terrain mask: vertical
-rays on a \corlScanResCm\,cm grid around each hip mark a cell safe
-when ground lies within reach below it, the unsafe region is grown by
-two cells into a \emph{candidate margin} $m = \corlMarginCm$\,cm, and
-\corlTrainCandidatesPerLeg{} safe cells that cover the rest are kept
-per leg, the one nearest a nominal foothold pinned
-(App.~\ref{app:sampler}).
+where but not when a leg steps. CADENCE's gait timing and order are emergent.
+It's candidate footsteps are chosen from nearby steppable terrain, which we
+sample uniformly from safe locations in a 1cm grid with 2cm of clearance added around voids.
+
+% The candidates come from a terrain mask: vertical
+% rays on a \corlScanResCm\,cm grid around each hip mark a cell safe
+% when ground lies within reach below it, the unsafe region is grown by
+% two cells into a \emph{candidate margin} $m = \corlMarginCm$\,cm, and
+% \corlTrainCandidatesPerLeg{} safe cells that cover the rest are kept
+% per leg, the one nearest a nominal foothold pinned
+% (App.~\ref{app:sampler}).
 
 \subsection{Network}
 \label{subsec:method-network}

@@ -31,7 +31,7 @@
 
 \looseness=-1 To cross level ground with holes, or \emph{voids}
 (Fig.~\ref{fig:teaser}), a quadruped must decide which leg to lift,
-where to place it, for how long, and when. Model-based controllers
+where to place it, when and for how long to swing. Model-based controllers
 \citep{dicarlo_dynamic_2018, ocs2} track such steps well, but they take
 them from a cyclic gait: a trot lifts diagonal leg pairs and a static
 walk lifts one leg at a time, in a fixed order and on a fixed period,
@@ -40,7 +40,7 @@ therefore call for a step when no safe foothold is in reach.
 
 \looseness=-1 Choosing the gait online instead raises two problems.
 First, contact decisions are discrete, so choosing them inside a model
-predictive controller (MPC) makes its optimization mixed-integer
+predictive controller (MPC) makes its optimization mixed-integer and increases the search space and compute required to find solutions
 \citep{Wensing2022Nov}, whereas learning them end to end replaces the
 model-based controller with a policy over joint or foot targets
 \citep{lee_learning_2020}. Second, a planner outside the controller only
@@ -53,8 +53,8 @@ another.
 \looseness=-1 Gait-free planners choose contact timing by kinematic
 rules or tree search \citep{bjelonic_whole-body_2021,
 amatucci_monte_2022, taouil_non-gaited_2024}, or learn it for a given
-MPC without choosing footholds \citep{patrizi_rl-augmented_2026}, and
-learned hybrids choose the parameters of a cyclic gait, per-foot contact
+MPC without choosing footholds \citep{patrizi_rl-augmented_2026}. 
+Hybrid learned approaches choose the parameters of a cyclic gait, per-foot contact
 states, or footholds under a preset timing \citep{yang_fast_2021,
 margolis_learning_2021, gangapurwala_rloc_2022,
 bratta_contactnet_2024}. At the footstep level,
@@ -63,29 +63,32 @@ targets by hindsight regression, but within a fixed gait. To our
 knowledge, no learned gait-free footstep planner has moved between
 model-based controllers.
 
-\looseness=-1 The authors previously developed GaitNet
-\citep{Sullivan2025}, a learned planner with a small action space on
-top of an unchanged model-based controller. Every
+
+This work presents CADENCE (Fig.~\ref{fig:overview}), which builds on the 
+foundation previously developed through the first author's 
+thesis work, GaitNet \citep{Sullivan2025}. CADENCE is a learned planner with a small 
+action space which works with different model-based controllers. Every
 \corlControlTickMs\,ms, a \emph{tick}, it makes one of at most
 \corlTotalCandidates{} discrete choices: the \emph{no-step option}, or
 one leg's step to one of \corlTrainCandidatesPerLeg{} safe cells near
 its hip, the \emph{candidates} (Fig.~\ref{fig:action}), plus a swing
-time. Since a step starts at the tick it is chosen, the gait is never
-specified. Its timing, order, overlap, and pairing emerge from these
-choices, with no gait schedule, phase variable, or gait reward. GaitNet
-scores each candidate on its own. This paper builds on that foundation
-and extends GaitNet to CADENCE (Fig.~\ref{fig:overview}). A small
-transformer, the \emph{candidate mixer}, compares the options with each
+time. The swing timing, order, overlap, and pairings emerge from these
+choices, with no gait schedule, phase variable, or gait reward. CADENCE
+scores each candidate on its own. A small transformer, the \emph{candidate mixer}, 
+compares the options with each
 other, a history adds the recent motion, and an \emph{inverse footstep
 model} (IFM), fitted by hindsight regression on logged steps, turns each
-chosen foothold into a command expected to land the foot there. Trained
+chosen foothold into a command accounting for controller error. Trained
 with proximal policy optimization (PPO) on the convex MPC, CADENCE runs
 frozen on OCS2's nonlinear MPC (NMPC) and whole-body controller (WBC),
 with only the IFM refitted on fewer than 20{,}000 OCS2 steps. We
 evaluate both GaitNet and CADENCE against OCS2's own cyclic gaits.
 Our contributions are:
+
+%\looseness=-1 The authors previously developed GaitNet
+% \citep{Sullivan2025}, 
 \begin{enumerate}\setlength{\itemsep}{0pt}
-  \item A learned step planner for an unchanged model-based controller.
+  \item A learned step planner for model-based controllers.
     Its network compares the choices of a small per-tick action space
     with a candidate mixer and a history
     (Secs.~\ref{subsec:method-step}--\ref{subsec:method-network}).
@@ -101,3 +104,27 @@ Our contributions are:
     short (Sec.~\ref{subsec:exp-why}). The refit uses steps logged on
     the new controller, so the transfer is not data-free.
 \end{enumerate}
+
+% owen: repeated information from the abstract, feels out of place here (repeated a second time prior to the actual results section)
+
+% \looseness=-1 Averaged over \corlNumSeedsGaitNet{} training seeds,
+% CADENCE succeeded in \corlBenchFull\% of OCS2 benchmark trials, against
+% \corlBenchTrot\% and \corlBenchStaticWalk\% for OCS2's trot and static
+% walk, and its lead over the trot grew to 30 percentage points at
+% \corlBenchVoidHigh\% voids (Sec.~\ref{sec:experiments}).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/fig_overview}
+\caption{CADENCE overview. (a)~GaitNet scores each footstep option
+  alone, from the state $\mathbf x_g$ and that option, and predicts a
+  swing time. (b)~CADENCE adds a history $\mathbf h$ and a candidate mixer
+  (orange), which compares the safe candidates $\mathbf q_i \in \mathcal C$
+  and the no-step option $\varnothing$ with each other. (c)~Each
+  controller $c$ gets its own IFM $I^c$, fitted offline on its logged
+  steps. (d)~PPO keeps the training controller's IFM frozen. (e)~On OCS2,
+  CADENCE stays frozen and only the IFM changes.}
+\vspace{-1.4em}
+\label{fig:overview}
+\end{figure*}
+
